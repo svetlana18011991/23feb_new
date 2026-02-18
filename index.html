@@ -298,14 +298,14 @@ function renderGame(G){
 
   // ---- background (no transparency)
   const gameStage = document.getElementById('gameStage');
-  const bg = normalizeBgUrl(G.bgUrl);
-  if(bg){
+  const bgUrlStage = normalizeBgUrl(G.bgUrl);
+  if(bgUrlStage){
     gameStage.classList.add('hasImg');
-    gameStage.style.setProperty('--img', `url("${bg}")`);
+    gameStage.style.setProperty('--img', `url("${bgUrlStage}")`);
     gameStage.style.background = `
       radial-gradient(900px 650px at 65% 30%, rgba(0,0,0,.20), transparent 70%),
       linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.25)),
-      url("${bg}") center/cover no-repeat
+      url("${bgUrlArena}") center/cover no-repeat
     `;
   }else{
     gameStage.style.background = `
@@ -320,9 +320,9 @@ function renderGame(G){
   const targetsEl = document.getElementById('targets');
   const arena = document.getElementById('arena');
   // arena background (opaque photo + cinematic grade) + slight parallax for 3D feel
-  const bg = (G && G.bgUrl) ? G.bgUrl : "";
-  if(bg){
-    arena.style.background = `linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.18)), url("${bg}") center/cover no-repeat`;
+  const bgUrlArena = normalizeBgUrl((G && G.bgUrl) ? G.bgUrl : "");
+  if(bgUrlArena){
+    arena.style.background = `linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.18)), url("${bgUrlArena}") center/cover no-repeat`;
     arena.style.backgroundSize = "112% 112%";
     arena.dataset.hasbg = "1";
   }else{
