@@ -244,24 +244,22 @@ function renderGame(G){
   document.body.innerHTML = `
   <div class="gameRoot" style="display:block">
     <div class="gameStage" id="gameStage">
-      <div class="gameHud">
-        <div style="flex:1; min-width:260px">
-          <div style="background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:12px 14px;box-shadow:0 10px 26px rgba(0,0,0,.35)">
-            <div style="font-weight:800;font-size:18px" id="gTitle"></div>
-            <div class="small" style="margin-top:4px">Выберите команду → наведите прицел → выстрелите → ответьте</div>
-          </div>
+      <div class="gameHud" style="position:absolute; left:18px; right:18px; top:16px; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; border-radius:18px; border:1px solid rgba(255,255,255,.12); background:rgba(0,0,0,.32); backdrop-filter: blur(10px); box-shadow:0 14px 34px rgba(0,0,0,.42)">
+        <div style="min-width:220px">
+          <div id="gTitle" style="font-weight:900; letter-spacing:.2px; font-size:18px; line-height:1.1">Математический тир</div>
+          <div class="small" style="margin-top:3px;color:rgba(255,255,255,.72);font-size:12px">Выберите команду → наведите прицел → выстрелите → ответьте</div>
         </div>
-        <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;justify-content:flex-end">
-          <span class="badge">Сейчас стреляет: <b id="gActiveTeam">—</b></span>
-          <span class="badge">Цели: <b id="gLeft">0/0</b></span>
-          <span class="badge"><button class="btn" id="gHelp" style="padding:8px 10px;border-radius:999px">Инструкция</button></span>
-          <span class="badge"><button class="btn" id="gReset" style="padding:8px 10px;border-radius:999px">Сброс</button></span>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end">
+          <div class="pill" style="padding:7px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.28);font-weight:800;font-size:12px">Сейчас стреляет: <span id="gActiveTeam">Команда 1</span></div>
+          <div class="pill" style="padding:7px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.28);font-weight:800;font-size:12px">Цели: <span id="gLeft">0/0</span></div>
+          <button id="btnHelp" class="btn" style="padding:7px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.28);color:rgba(255,255,255,.9);font-weight:800;font-size:12px;cursor:pointer">Инструкция</button>
+          <button id="btnReset" class="btn" style="padding:7px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.22);color:rgba(255,255,255,.9);font-weight:800;font-size:12px;cursor:pointer">Сброс</button>
         </div>
       </div>
 
-      <div class="teams t3" id="teams" style="position:absolute; left:18px; right:18px; top:86px; display:grid; gap:10px"></div>
+      <div class="teams t3" id="teams" style="position:absolute; left:18px; right:18px; top:86px; display:flex; gap:10px; align-items:stretch; justify-content:flex-start; flex-wrap:wrap"></div>
 
-      <div class="arena" id="arena" style="position:absolute; left:18px; right:18px; bottom:18px; top:210px; border-radius:22px; border:1px solid rgba(255,255,255,.12); overflow:hidden; background:rgba(0,0,0,.20); box-shadow:0 18px 44px rgba(0,0,0,.45)">
+      <div class="arena" id="arena" style="position:absolute; left:18px; right:18px; bottom:18px; top:156px; border-radius:22px; border:1px solid rgba(255,255,255,.12); overflow:hidden; background:transparent; box-shadow:0 18px 44px rgba(0,0,0,.45)">
         <div class="targets" id="targets" style="position:absolute; inset:0"></div>
         <div class="cross" id="cross" style="position:absolute; width:72px; height:72px; border-radius:999px; border:2px solid rgba(214,178,94,.85); box-shadow:0 0 0 4px rgba(214,178,94,.10), 0 0 22px rgba(214,178,94,.14); pointer-events:none; transform:translate(-100px,-100px)"></div>
         <div id="shotFlash" style="position:absolute; inset:0; pointer-events:none; opacity:0; background:radial-gradient(140px 140px at 50% 50%, rgba(255,154,60,.22), rgba(0,0,0,0) 70%); transition:opacity .14s ease"></div>
@@ -321,6 +319,18 @@ function renderGame(G){
   const teamsEl = document.getElementById('teams');
   const targetsEl = document.getElementById('targets');
   const arena = document.getElementById('arena');
+  // arena background (opaque photo + cinematic grade) + slight parallax for 3D feel
+  const bg = (G && G.bgUrl) ? G.bgUrl : "";
+  if(bg){
+    arena.style.background = `linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.18)), url("${bg}") center/cover no-repeat`;
+    arena.style.backgroundSize = "112% 112%";
+    arena.dataset.hasbg = "1";
+  }else{
+    arena.style.background = `radial-gradient(900px 520px at 50% 15%, rgba(255,255,255,.06), transparent 60%), linear-gradient(180deg, #0b1018, #070a10)`;
+    arena.style.backgroundSize = "auto";
+    arena.dataset.hasbg = "0";
+  }
+
   const cross = document.getElementById('cross');
   const shotFlash = document.getElementById('shotFlash');
 
@@ -500,22 +510,22 @@ function renderGame(G){
       t.className = "target";
       // upper part: 12%..48%
       const x = 8 + Math.random()*84;
-      const y = 12 + Math.random()*36;
+      const y = 14 + Math.random()*24;
       const depth = 0.7 + Math.random()*0.6; // farther -> smaller
       const size = 70 * (1/depth);
       t.style.cssText = `
         position:absolute; left:${x}%; top:${y}%;
         width:${size}px; height:${size}px;
         border-radius:999px;
-        border:2px solid rgba(214,178,94,.95);
-        background:radial-gradient(circle at 40% 35%, rgba(255,255,255,.22), rgba(255,255,255,.04) 45%, rgba(0,0,0,.35) 70%);
-        box-shadow: 0 10px 22px rgba(0,0,0,.35), 0 0 0 6px rgba(214,178,94,.10), 0 0 20px rgba(214,178,94,.12);
+        border:2px solid rgba(214,178,94,1);
+        background:radial-gradient(circle at 40% 35%, rgba(255,255,255,.30), rgba(255,255,255,.10) 45%, rgba(0,0,0,.55) 72%);
+        box-shadow: 0 14px 28px rgba(0,0,0,.50), 0 0 0 7px rgba(214,178,94,.14), 0 0 26px rgba(214,178,94,.18);
         color:rgba(255,255,255,.90);
         font-weight:800;
         cursor:pointer;
         transform:translate(-50%,-50%);
         filter:contrast(1.15) saturate(1.05);
-        backdrop-filter: blur(2px);
+        
       `;
       t.dataset.q = String(i);
       t.innerHTML = `<span style="font-size:16px; text-shadow:0 2px 10px rgba(0,0,0,.55)">${i+1}</span>`;
@@ -546,7 +556,13 @@ function renderGame(G){
     const r = arena.getBoundingClientRect();
     const x = e.clientX - r.left;
     const y = e.clientY - r.top;
-    cross.style.transform = `translate(${x-36}px,${y-36}px)`;
+    
+    if(arena.dataset.hasbg==="1"){
+      const px = 50 + ((x / r.width) - 0.5) * 6;
+      const py = 50 + ((y / r.height) - 0.5) * 6;
+      arena.style.backgroundPosition = `${px}% ${py}%`;
+    }
+cross.style.transform = `translate(${x-36}px,${y-36}px)`;
   });
   arena.addEventListener('mouseleave', ()=>{
     cross.style.transform = "translate(-120px,-120px)";
