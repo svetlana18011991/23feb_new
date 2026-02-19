@@ -703,9 +703,20 @@ body.game-cursor { cursor: none !important; }
 
 
 .cornerLogo{position:fixed;top:14px;right:14px;z-index:1000;width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 8px 18px rgba(0,0,0,.45));opacity:.95;pointer-events:none;}
+
+/* v27 tweaks */
+.topLogo{position:fixed;left:18px;top:14px;z-index:9999;pointer-events:none;opacity:.95;filter:drop-shadow(0 10px 24px rgba(0,0,0,.55));}
+.topLogo img{height:44px;width:auto;border-radius:12px;}
+/* stronger 3D/parallax background */
+.arenaBg{will-change:transform,filter;transform:translate3d(var(--bgx,0px),var(--bgy,0px),0) scale(1.10);filter:saturate(1.05) contrast(1.08);}
+.arenaBg::after{content:"";position:absolute;inset:0;background:radial-gradient(1200px 600px at 40% 35%, rgba(255,255,255,.10), rgba(0,0,0,.45) 65%, rgba(0,0,0,.70));mix-blend-mode:overlay;pointer-events:none;}
+.hudGoals{animation:goalFloat 3.8s ease-in-out infinite;}
+@keyframes goalFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+
 </style>
 </head>
 <body>
+  <div class=\"topLogo\" aria-hidden=\"true\"><img src=\"63.png\" alt=\"\"/></div>
 <div id="root"></div>
 
 <div class="toast" id="toast"></div>
@@ -807,7 +818,7 @@ const AudioKit = (() => {
     if(ctx) return;
     ctx = new (window.AudioContext || window.webkitAudioContext)();
     master = ctx.createGain();
-    master.gain.value = 0.7;
+    master.gain.value = 1.2;
     master.connect(ctx.destination);
   }
   async function unlock(){
@@ -816,7 +827,7 @@ const AudioKit = (() => {
   }
   function setVolume(v){
     ensure();
-    master.gain.value = clamp(v, 0, 1);
+    master.gain.value = clamp(v, 0, 1) * 2.2;
   }
   function noiseBuffer(){
     ensure();
@@ -831,7 +842,7 @@ const AudioKit = (() => {
     ensure();
     const t0 = ctx.currentTime;
     const out = ctx.createGain();
-    out.gain.value = 1.0;
+    out.gain.value = 1.25;
     out.connect(master);
 
     if(variant === 'snap'){ // click
@@ -968,7 +979,7 @@ function mountGame(cfg){
           </div>
           <div class="hudRight">
             <div class="hudStat" id="hudTurn">Сейчас стреляет: <b id="turnTeam">—</b></div>
-            <div class="hudStat">Цели: <b id="hudTargets">0/0</b></div>
+            <div class="hudStat hudGoals">Цели: <b id="hudTargets">0/0</b></div>
             <button class="pillBtn" id="btnHelp">Инструкция</button>
             <button class="pillBtn" id="btnReset">Сброс</button>
           </div>
@@ -1306,7 +1317,7 @@ function mountEditor(){
         <div class="panelHeader">
           <div>
             <div class="title">Редактор<br>«Математический тир»</div>
-            <div class="subtitle">Соберите игру → скопируйте iframe для Genially</div>
+            <div class="subtitle"></div>
           </div>
           <button class="btn btnGold" id="copyIframe">📋 Скопировать код</button>
         </div>
