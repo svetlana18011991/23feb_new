@@ -701,6 +701,8 @@ body.game-cursor { cursor: none !important; }
   background: rgba(255,190,90,.95);
 }
 
+
+.cornerLogo{position:fixed;top:14px;right:14px;z-index:1000;width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 8px 18px rgba(0,0,0,.45));opacity:.95;pointer-events:none;}
 </style>
 </head>
 <body>
@@ -1306,7 +1308,7 @@ function mountEditor(){
             <div class="title">Редактор<br>«Математический тир»</div>
             <div class="subtitle">Соберите игру → скопируйте iframe для Genially</div>
           </div>
-          <button class="btn btnGold" id="copyIframe">📋 Скопировать iframe</button>
+          <button class="btn btnGold" id="copyIframe">📋 Скопировать код</button>
         </div>
 
         <div class="scroll">
@@ -1391,7 +1393,7 @@ function mountEditor(){
 
           <div class="section">
             <h3>Genially</h3>
-            <div class="help">Кнопка «Скопировать iframe» создаст ссылку вида: <br><code>.../index.html?game=...</code></div>
+            <div class="help">Кнопка «Скопировать код» создаст ссылку вида: <br><code>.../index.html?game=...</code></div>
           </div>
         </div>
       </div>
