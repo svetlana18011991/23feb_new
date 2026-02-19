@@ -663,6 +663,44 @@ body[data-mode="game"] .gameRoot input,
 body[data-mode="game"] .gameRoot textarea { cursor: text; }
 body[data-mode="game"] .gameRoot a { cursor: pointer; }
 
+
+/* ==== Custom crosshair (works inside Genially overlays) ==== */
+body.game-cursor { cursor: none !important; }
+#aimCursor{
+  position: fixed;
+  left: -100px;
+  top: -100px;
+  width: 54px;
+  height: 54px;
+  transform: translate(-50%,-50%);
+  pointer-events: none;
+  z-index: 2147483647;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+#aimCursor .ring{
+  position:absolute; inset:0;
+  border: 2px solid rgba(255,190,90,.9);
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px rgba(0,0,0,.35), 0 0 16px rgba(255,170,60,.18);
+  background: radial-gradient(circle at 50% 50%, rgba(255,190,90,.08), transparent 60%);
+}
+#aimCursor .h, #aimCursor .v{
+  position:absolute;
+  left:50%; top:50%;
+  background: rgba(255,190,90,.95);
+  box-shadow: 0 0 10px rgba(255,170,60,.25);
+}
+#aimCursor .h{ width: 64px; height: 2px; transform: translate(-50%,-50%); }
+#aimCursor .v{ width: 2px; height: 64px; transform: translate(-50%,-50%); }
+#aimCursor .dot{
+  position:absolute; left:50%; top:50%;
+  width: 6px; height: 6px;
+  border-radius: 999px;
+  transform: translate(-50%,-50%);
+  background: rgba(255,190,90,.95);
+}
+
 </style>
 </head>
 <body>
@@ -867,6 +905,49 @@ const AudioKit = (() => {
 /* ---------- App mode detection ---------- */
 const params = new URLSearchParams(location.search);
 const isGame = params.has('game');
+
+// ===== Crosshair overlay (needed for Genially where CSS cursor can be ignored) =====
+function enableCrosshairOverlay(){
+  if(document.getElementById('aimCursor')) return;
+  document.body.classList.add('game-cursor');
+
+  const el = document.createElement('div');
+  el.id = 'aimCursor';
+  el.innerHTML = '<div class="ring"></div><div class="h"></div><div class="v"></div><div class="dot"></div>';
+  document.body.appendChild(el);
+
+  const arena = document.getElementById('arena') || document.body;
+
+  const show = () => { el.style.opacity = '1'; };
+  const hide = () => { el.style.opacity = '0'; };
+
+  const move = (e) => {
+    // Use clientX/Y so it works in iframes and Genially embeds
+    el.style.left = e.clientX + 'px';
+    el.style.top  = e.clientY + 'px';
+    // show on first move
+    if(el.style.opacity !== '1') el.style.opacity = '1';
+  };
+
+  // Prefer listening on arena; also listen on window as fallback
+  arena.addEventListener('mousemove', move, {passive:true});
+  window.addEventListener('mousemove', move, {passive:true});
+
+  arena.addEventListener('mouseenter', show, {passive:true});
+  arena.addEventListener('mouseleave', hide, {passive:true});
+
+  // Touch devices: keep default cursor (no-op)
+  if('ontouchstart' in window){
+    document.body.classList.remove('game-cursor');
+    el.remove();
+  }
+}
+
+if(isGame){
+  // Delay to ensure #arena exists
+  setTimeout(enableCrosshairOverlay, 0);
+}
+
 
 /* ===========================
    GAME MODE
