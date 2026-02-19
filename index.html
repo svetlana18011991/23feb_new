@@ -929,6 +929,13 @@ const AudioKit = (() => {
 const params = new URLSearchParams(location.search);
 const isGame = params.has('game');
 
+// Hide editor branding inside the GAME iframe
+if (isGame) {
+  const hb = document.getElementById('headerBrand');
+  if (hb) hb.style.display = 'none';
+}
+
+
 // ===== Crosshair overlay (needed for Genially where CSS cursor can be ignored) =====
 function enableCrosshairOverlay(){
   if(document.getElementById('aimCursor')) return;
@@ -1548,6 +1555,21 @@ function mountEditor(){
   const bgSelect = document.getElementById('bgSelect');
   const targetInput = document.getElementById('targetInput');
   const targetSelect = document.getElementById('targetSelect');
+
+// Live-update preview when background/target change
+bgSelect?.addEventListener('change', () => {
+  try { if (typeof bgInput !== 'undefined' && bgInput) bgInput.value = bgSelect.value; } catch(e) {}
+  schedulePreviewUpdate();
+});
+
+targetSelect?.addEventListener('change', () => {
+  schedulePreviewUpdate();
+});
+
+// Defaults
+if (bgSelect && !bgSelect.value) bgSelect.value = '2.png';
+if (targetSelect && !targetSelect.value) targetSelect.value = '13.png';
+
   const shotVariant = document.getElementById('shotVariant');
   const shotVol = document.getElementById('shotVol');
   const qCount = document.getElementById('qCount');
@@ -1564,7 +1586,15 @@ function mountEditor(){
     cfg.shot.volume = clamp(Number(shotVol.value||0.7),0,1);
   }
 
-  async function updatePreview(){
+  async let _pvT = null;
+function schedulePreviewUpdate() {
+  if (_pvT) clearTimeout(_pvT);
+  _pvT = setTimeout(() => {
+    try { updatePreview(); } catch (e) {}
+  }, 120);
+}
+
+function updatePreview(){
     readCfgFromUI();
     if(cfg.latex) ensureKatex();
     const gameUrl = urlOfSelf() + `?game=${encodeURIComponent(b64uEncode(cfg))}&v=${VERSION}&t=${Date.now()}`;
