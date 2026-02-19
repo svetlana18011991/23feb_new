@@ -373,14 +373,7 @@
       padding:18px;
       z-index:50;
     }
-    .modal{
-      width:min(760px, 100%);
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.14);
-      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(0,0,0,.25));
-      box-shadow:0 24px 80px rgba(0,0,0,.55);
-      overflow:hidden;
-    }
+    .modal{width:min(980px,96vw);max-height:92vh;overflow:auto;border-radius:18px;background:rgba(10,12,14,.96);border:1px solid rgba(255,255,255,.08);box-shadow:0 18px 60px rgba(0,0,0,.55)}
     .modalTop{
       padding:12px 14px;
       display:flex; align-items:center; justify-content:space-between;
@@ -645,7 +638,7 @@
 
         <div class="crosshair" id="crosshair"><div class="dot"></div></div>
 
-        <div class="ver" id="versionBadge">Версия 20 • game</div>
+        <div class="ver" id="versionBadge">Версия 21 • game</div>
 
         <div class="backdrop" id="backdrop">
           <div class="modal" role="dialog" aria-modal="true">
@@ -786,56 +779,92 @@ function ensureAudio(){
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 }
 function playShotPreview(){
-  playShot(true);
-}
-function playShot(isPreview=false){
-  ensureAudio();
-  const t = audioCtx.currentTime;
-  const vol = clamp(game.shot.volume ?? 0.7, 0, 1);
-  const out = audioCtx.createGain();
-  out.gain.setValueAtTime(0.0001, t);
-  out.gain.exponentialRampToValueAtTime(0.18*vol, t+0.01);
-  out.gain.exponentialRampToValueAtTime(0.0001, t+0.22);
-  out.connect(audioCtx.destination);
-
-  function osc(type, freq, time, dur, gain){
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = type;
-    o.frequency.setValueAtTime(freq, time);
-    g.gain.setValueAtTime(0.0001, time);
-    g.gain.exponentialRampToValueAtTime(gain*vol, time+0.01);
-    g.gain.exponentialRampToValueAtTime(0.0001, time+dur);
-    o.connect(g).connect(out);
-    o.start(time);
-    o.stop(time+dur+0.02);
-  }
-
-  // three variants
-  if (game.shot.type === "pew"){
-    osc("square", 520, t, 0.08, 0.35);
-    osc("triangle", 220, t+0.02, 0.14, 0.22);
-  } else if (game.shot.type === "snap"){
-    osc("square", 880, t, 0.05, 0.28);
-    osc("sawtooth", 180, t+0.015, 0.10, 0.18);
-  } else { // boom
-    osc("sine", 120, t, 0.12, 0.38);
-    osc("triangle", 60, t+0.02, 0.18, 0.22);
-  }
-
-  // "echo range" (вау): тихий повтор
-  const echoDelay = 0.14 + Math.random()*0.04;
-  setTimeout(()=> {
-    try{
-      const prev = game.shot.volume;
-      game.shot.volume = prev*0.35;
-      playShot(true);
-      game.shot.volume = prev;
-    }catch(e){}
-  }, Math.round(echoDelay*1000));
+  // called when user selects a variant in editor
+  playShot(cfg.shotVariant, cfg.shotVolume);
 }
 
-/* ========= GAME RENDER ========= */
+function playShot(variant="pew", volume=0.85){
+  try{
+    ensureAudio();
+    if(!audioCtx) return;
+
+    const t0 = audioCtx.currentTime;
+    const out = audioCtx.createGain();
+    out.gain.setValueAtTime(Math.max(0.0001, volume), t0);
+    out.connect(masterGain);
+
+    const stopAt = t0 + 0.55;
+
+    if(variant === "pew"){
+      const o = audioCtx.createOscillator();
+      o.type = "square";
+      o.frequency.setValueAtTime(980, t0);
+      o.frequency.exponentialRampToValueAtTime(220, t0 + 0.12);
+
+      const g = audioCtx.createGain();
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(0.9, t0 + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.18);
+
+      o.connect(g); g.connect(out);
+      o.start(t0); o.stop(stopAt);
+
+      const b = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.02, audioCtx.sampleRate);
+      const ch = b.getChannelData(0);
+      for(let i=0;i<ch.length;i++){ ch[i] = (Math.random()*2-1) * (1 - i/ch.length) * 0.55; }
+      const n = audioCtx.createBufferSource(); n.buffer = b;
+      const ng = audioCtx.createGain();
+      ng.gain.setValueAtTime(0.28, t0);
+      ng.gain.exponentialRampToValueAtTime(0.0001, t0+0.03);
+      n.connect(ng); ng.connect(out);
+      n.start(t0);
+    } else if(variant === "bang"){
+      const o = audioCtx.createOscillator();
+      o.type="triangle";
+      o.frequency.setValueAtTime(190, t0);
+      o.frequency.exponentialRampToValueAtTime(55, t0+0.18);
+
+      const g = audioCtx.createGain();
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(0.98, t0+0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0+0.22);
+
+      o.connect(g); g.connect(out);
+      o.start(t0); o.stop(stopAt);
+
+      const o2 = audioCtx.createOscillator();
+      o2.type="sawtooth";
+      o2.frequency.setValueAtTime(560, t0);
+      o2.frequency.exponentialRampToValueAtTime(140, t0+0.08);
+
+      const g2 = audioCtx.createGain();
+      g2.gain.setValueAtTime(0.0001, t0);
+      g2.gain.exponentialRampToValueAtTime(0.55, t0+0.01);
+      g2.gain.exponentialRampToValueAtTime(0.0001, t0+0.12);
+
+      o2.connect(g2); g2.connect(out);
+      o2.start(t0); o2.stop(stopAt);
+    } else {
+      const o = audioCtx.createOscillator();
+      o.type="sine";
+      o.frequency.setValueAtTime(125, t0);
+      o.frequency.exponentialRampToValueAtTime(38, t0+0.26);
+
+      const g = audioCtx.createGain();
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(0.95, t0+0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0+0.38);
+
+      o.connect(g); g.connect(out);
+      o.start(t0); o.stop(stopAt);
+    }
+
+    out.gain.exponentialRampToValueAtTime(0.0001, stopAt);
+    setTimeout(()=>{ try{ out.disconnect(); }catch(e){} }, 800);
+  }catch(e){}
+}
+
+
 function resolveBgUrl(bg){
   const val = (bg||"").trim() || DEFAULT_BG;
   // absolute url?
@@ -849,7 +878,7 @@ function applyBg(){
 }
 function renderHUD(){
   gameTitle.textContent = game.title || "Математический тир";
-  versionBadge.textContent = `Версия 20 • game`;
+  versionBadge.textContent = `Версия 21 • game`;
   activeTeamLabel.textContent = runtime.teamNames[runtime.activeTeam] || `Команда ${runtime.activeTeam+1}`;
 }
 function renderTeams(){
