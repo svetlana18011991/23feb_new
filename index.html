@@ -34,7 +34,7 @@
 
     /* ====== Layout (editor) ====== */
     .app{
-      height:100%;
+      height:100vh;
       display:grid;
       grid-template-columns: 480px 1fr;
       gap:16px;
@@ -51,6 +51,10 @@
       box-shadow: var(--shadow);
       overflow:hidden;
       position:relative;
+      height: 100%;
+      display:flex;
+      flex-direction:column;
+      min-height:0; /* важно для скролла внутри flex */
     }
     .panel::before{
       content:"";
@@ -105,7 +109,8 @@
     }
 
     .scroll{
-      height: calc(100% - 64px);
+      flex: 1;
+      min-height: 0;
       overflow:auto;
       padding: 14px 18px 18px 18px;
     }
@@ -649,7 +654,16 @@
       font-size:13px;
     }
     .toast.on{ display:block; }
-  </style>
+  
+/* --- Cursor: crosshair inside game/preview --- */
+#previewFrame { cursor: crosshair; }
+body[data-mode="game"] .gameRoot,
+body[data-mode="game"] .gameRoot * { cursor: crosshair; }
+body[data-mode="game"] .gameRoot input,
+body[data-mode="game"] .gameRoot textarea { cursor: text; }
+body[data-mode="game"] .gameRoot a { cursor: pointer; }
+
+</style>
 </head>
 <body>
 <div id="root"></div>
@@ -659,10 +673,10 @@
 <script>
 /* ===========================
    Математический тир
-   Version 22 — editor+game
+   Version 23 — editor+game
    =========================== */
 
-const VERSION = 22;
+const VERSION = 24;
 
 /* ---------- helpers ---------- */
 const $ = (sel, el=document)=> el.querySelector(sel);
