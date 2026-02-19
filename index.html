@@ -1372,11 +1372,40 @@ function mountEditor(){
                 </select>
               </div>
               <div>
-                <label>Фон игры (имя файла или ссылка)</label>
-                <input id="bgInput" type="text" value="bg_forest.jpg.png"/>
+                <label>Фон игры</label>
+                <select id="bgSelect" class="select">
+                  <option value="1.png">1</option>
+                  <option value="2.png" selected>2</option>
+                  <option value="3.png">3</option>
+                  <option value="4.png">4</option>
+                  <option value="5.png">5</option>
+                  <option value="6.png">6</option>
+                  <option value="7.png">7</option>
+                  <option value="8.png">8</option>
+                </select>
+                <input id="bgInput" type="hidden" value="2.png"/>
               </div>
             </div>
             <div class="help">Если файл лежит рядом с <b>index.html</b> — достаточно имени. Важно точное имя файла.</div>
+            <div class="row">
+              <div class="field">
+                <label>Мишени (картинка)</label>
+                <select id="targetSelect" class="select">
+                  <option value="10.png">10</option>
+                  <option value="11.png">11</option>
+                  <option value="12.png">12</option>
+                  <option value="13.png" selected>13</option>
+                  <option value="14.png">14</option>
+                </select>
+                <input id="targetInput" type="hidden" value="13.png"/>
+              </div>
+              <div class="field">
+                <label>Позиции мишеней</label>
+                <div class="hint">Мишени будут появляться в отмеченной зоне на фоне.</div>
+              </div>
+            </div>
+            <div class="help">Файлы мишеней: 10.png … 14.png (рядом с index.html).</div>
+
           </div>
 
           <div class="section">
@@ -1411,12 +1440,7 @@ function mountEditor(){
             <div style="height:10px"></div>
             <div class="qList" id="qList"></div>
           </div>
-
-          <div class="section">
-            <h3>Genially</h3>
-            <div class="help">Кнопка «Скопировать код» создаст ссылку вида: <br><code>.../index.html?game=...</code></div>
-          </div>
-        </div>
+</div>
       </div>
 
       <div class="panel previewWrap">
@@ -1521,6 +1545,9 @@ function mountEditor(){
   const autoNext = document.getElementById('autoNext');
   const latexToggle = document.getElementById('latexToggle');
   const bgInput = document.getElementById('bgInput');
+  const bgSelect = document.getElementById('bgSelect');
+  const targetInput = document.getElementById('targetInput');
+  const targetSelect = document.getElementById('targetSelect');
   const shotVariant = document.getElementById('shotVariant');
   const shotVol = document.getElementById('shotVol');
   const qCount = document.getElementById('qCount');
