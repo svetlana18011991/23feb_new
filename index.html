@@ -492,6 +492,9 @@
       box-shadow: 0 24px 95px rgba(0,0,0,.70);
       overflow:hidden;
       position:relative;
+      display:flex;
+      flex-direction:column;
+      max-height: calc(100vh - 36px);
     }
     .modalHeader{
       padding: 14px 16px;
@@ -518,6 +521,9 @@
       padding: 16px;
       display:grid;
       gap:12px;
+      overflow:auto;
+      flex:1;
+      min-height:0;
     }
     .qText{
       font-weight:900;
@@ -705,8 +711,9 @@ body.game-cursor { cursor: none !important; }
 .cornerLogo{position:fixed;top:14px;right:14px;z-index:1000;width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 8px 18px rgba(0,0,0,.45));opacity:.95;pointer-events:none;}
 
 /* v27 tweaks */
-.topLogo{position:fixed;left:18px;top:14px;z-index:9999;pointer-events:none;opacity:.95;filter:drop-shadow(0 10px 24px rgba(0,0,0,.55));}
-.topLogo img{height:44px;width:auto;border-radius:12px;}
+.topBrand{position:fixed;left:18px;top:14px;z-index:9999;pointer-events:none;opacity:.98;filter:drop-shadow(0 10px 24px rgba(0,0,0,.55));display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:14px;background:linear-gradient(180deg, rgba(18,24,33,.58), rgba(10,12,16,.35));border:1px solid rgba(255,255,255,.12);backdrop-filter: blur(8px);}
+.topBrand img{height:34px;width:auto;border-radius:10px;display:block;}
+.topBrand span{font-weight:800;font-size:13px;letter-spacing:.2px;color:rgba(255,255,255,.92);text-shadow:0 8px 22px rgba(0,0,0,.55);}
 /* stronger 3D/parallax background */
 .arenaBg{will-change:transform,filter;transform:translate3d(var(--bgx,0px),var(--bgy,0px),0) scale(1.10);filter:saturate(1.05) contrast(1.08);}
 .arenaBg::after{content:"";position:absolute;inset:0;background:radial-gradient(1200px 600px at 40% 35%, rgba(255,255,255,.10), rgba(0,0,0,.45) 65%, rgba(0,0,0,.70));mix-blend-mode:overlay;pointer-events:none;}
@@ -716,7 +723,10 @@ body.game-cursor { cursor: none !important; }
 </style>
 </head>
 <body>
-  <div class=\"topLogo\" aria-hidden=\"true\"><img src=\"63.png\" alt=\"\"/></div>
+  <div class="topBrand" aria-hidden="true">
+    <img src="63.png" alt="Логотип" onerror="this.style.display='none'"/>
+    <span>Светлана Быкова</span>
+  </div>
 <div id="root"></div>
 
 <div class="toast" id="toast"></div>
