@@ -1757,12 +1757,8 @@ function updatePreview(){
     AudioKit.setVolume(cfg.shot.volume);
     AudioKit.playVariant(cfg.shot.variant);
   }
-  shotVariant.addEventListener('change', async ()=>{ await playShotPreview(); try{ if(!isGame) updatePreview(); }catch(e){} });
-  shotVol.addEventListener('input', ()=>{
-    readCfgFromUI();
-    try{ AudioKit.setVolume(cfg.shot.volume); }catch(e){}
-    try{ if(!isGame) updatePreview(); }catch(e){}
-  });
+  shotVariant.addEventListener('change', async ()=>{ await playShotPreview(); try{ if(!isGame) schedulePreviewUpdate(); }catch(e){} });
+  shotVol.addEventListener('input', ()=>{ readCfgFromUI(); try{ AudioKit.setVolume(cfg.shot.volume); }catch(e){} try{ if(!isGame) schedulePreviewUpdate(); }catch(e){} });
 document.getElementById('copyIframe').addEventListener('click', async ()=>{
     readCfgFromUI();
     const src = urlOfSelf() + `?game=${encodeURIComponent(b64uEncode(cfg))}&v=${VERSION}`;
