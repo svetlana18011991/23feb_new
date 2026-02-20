@@ -770,6 +770,11 @@ body.game-cursor { cursor: none !important; }
   .mediaLink:hover{text-decoration:underline}
   .qImage{max-width:100%;max-height:240px;border-radius:14px;border:1px solid rgba(255,255,255,.12);box-shadow:0 10px 30px rgba(0,0,0,.35);cursor:pointer}
 
+.qImg{max-width:100%;max-height:240px;border-radius:14px;display:block;margin-top:12px;object-fit:contain;box-shadow:0 10px 30px rgba(0,0,0,.35);}
+
+.fatalOverlay{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.85);color:#fff;font:14px/1.4 system-ui,Segoe UI,Arial;padding:16px;overflow:auto;}
+.fatalOverlay h2{margin:0 0 8px;font-size:18px;}
+.fatalOverlay pre{white-space:pre-wrap;word-break:break-word;background:rgba(255,255,255,.08);padding:12px;border-radius:12px;}
 </style>
 </head>
 <body>
@@ -781,7 +786,28 @@ body.game-cursor { cursor: none !important; }
 
 <div class="toast" id="toast"></div>
 
-<script>
+<script>(function(){ 
+  const showFatal = (err) => {
+    try {
+      console.error(err);
+      const msg = (err && (err.stack || err.message)) ? (err.stack || err.message) : String(err);
+      const el = document.createElement('div');
+      el.className = 'fatalOverlay';
+      el.innerHTML = '<h2>Ошибка в скрипте (preview/editor не запустились)</h2>' +
+                     '<div>Откройте консоль браузера или пришлите этот текст:</div>' +
+                     '<pre></pre>';
+      el.querySelector('pre').textContent = msg;
+      document.body.appendChild(el);
+    } catch(e) {}
+  };
+  window.addEventListener('error', (e)=>showFatal(e.error||e.message));
+  window.addEventListener('unhandledrejection', (e)=>showFatal(e.reason||e));
+  try {
+
+// Global state for editor/game
+let cfg = defaultCfg();
+let questions = [];
+
   // Hide brand inside game iframe (keep only in editor)
   try {
     if (typeof isGameMode === 'function' && isGameMode()) {
@@ -1803,9 +1829,15 @@ function renderGame(container, opts={preview:false}){
     const count = questions.length>0 ? Math.min(questions.length, 10) : 8; // даже без вопросов показать
     const y0 = computeTargetLineY();
     const amp = computeSpreadAmp();
+    const stableRand01 = (k)=>{
+      const seed = (cfg.bg||0)*17 + (cfg.target||0)*31 + (cfg.targetHeight||0)*0.23 + (cfg.targetSpread||0)*0.41;
+      const v = Math.sin((k+1)*999.123 + seed) * 43758.5453123;
+      return v - Math.floor(v);
+    };
+
     for(let i=0;i<count;i++){
       const x = 0.12 + (i/(count-1||1))*0.76;
-      const dy = (Math.random()*2-1) * amp;
+      const dy = (stableRand01(i)*2-1) * amp;
       const t = el("div",{class:"target"});
       t.style.backgroundImage = `url('${targetUrl(cfg.target)}')`;
       t.dataset.baseX = String(x);
@@ -2188,6 +2220,10 @@ function renderEditor(container){
     renderEditor(root);
   }
 })();
-</script>
+
+  } catch (err) {
+    showFatal(err);
+  }
+})();</script>
 </body>
 </html>
