@@ -831,7 +831,7 @@ function defaultCfg(){
     latex: false,
     bg: "2.png",
     targetFile: "13.png",
-    targetLineOffset: 0,
+    targetLineOffset: 0.5,
     targetLineJitter: 4,
     shot: { variant:"pif", volume:0.7 },
     questions: []
@@ -892,7 +892,7 @@ const AudioKit = (() => {
   }
   function setVolume(v){
     ensure();
-    master.gain.value = clamp(v, 0, 1) * 2.2;
+    master.gain.value = clamp(v, 0, 1) * 3.2;
   }
   function noiseBuffer(){
     ensure();
@@ -1088,9 +1088,17 @@ function mountGame(cfg){
   const arena = document.getElementById('arena');
   const bg = document.getElementById('arenaBg');
 
+  function assetUrl(u){
+    if(!u) return u;
+    const v = cfg._assetV || 0;
+    const sep = u.includes('?') ? '&' : '?';
+    return `${u}${sep}v=${v}`;
+  }
+
   function setBg(){
     const u = cfg.bg || "";
-    bg.style.backgroundImage = u ? `url("${u}")` : 'none';
+    const uu = u ? assetUrl(u) : "";
+    bg.style.backgroundImage = uu ? `url("${uu}")` : 'none';
   }
   setBg();
 
@@ -1195,7 +1203,7 @@ function mountGame(cfg){
     targetsEl.innerHTML = '';
     const n = questions.length;
     const pts = positionTargets();
-    const targetFile = (cfg.targetFile || '13.png').trim();
+    const targetFile = assetUrl((cfg.targetFile || '13.png').trim());
     for(let i=0;i<n;i++){
       const q = questions[i];
       const el = document.createElement('div');
@@ -1217,6 +1225,7 @@ function mountGame(cfg){
       `;
       el.addEventListener('click', async ()=>{
         if(hit.has(i)) return;
+        try { AudioKit.unlock(); AudioKit.setVolume(cfg.shotVolume ?? 1); AudioKit.playVariant(cfg.shotSound ?? 'snip'); } catch(e) {}
         await openQuestion(i);
       });
       targetsEl.appendChild(el);
@@ -1488,9 +1497,7 @@ function mountEditor(){
                 <div class="hint">Мишени будут появляться в отмеченной зоне на фоне.</div>
               </div>
             </div>
-            <div class="help">Файлы мишеней: 10.png … 14.png (рядом с index.html).</div>
-
-            <div class="row" style="margin-top:10px;">
+<div class="row" style="margin-top:10px;">
               <div class="field">
                 <label>Высота мишеней</label>
                 <input id="targetLineY" class="range" type="range" min="0" max="100" step="1" value="50" />
@@ -1498,7 +1505,7 @@ function mountEditor(){
               </div>
               <div class="field">
                 <label>Разброс мишеней</label>
-                <input id="targetLineJitter" class="range" type="range" min="0" max="10" step="1" value="4" />
+                <input id="targetLineJitter" class="range" type="range" min="0" max="100" step="1" value="30" />
                 <div class="hint">Делает линию «живой»: одни мишени чуть выше, другие ниже.</div>
               </div>
             </div>
@@ -1681,7 +1688,16 @@ if (targetInput && !targetInput.value) targetInput.value = targetSelect?.value |
     cfg.latex = (latexToggle.value === 'true');
     cfg.bg = (bgInput.value || "2.png").trim();
     cfg.targetFile = (targetInput?.value || "13.png").trim();
-    cfg.targetLineOffset = Number(targetLineY?.value ?? 0);
+
+    // cache-bust for assets when selection changes
+    const _newBg = cfg.bg;
+    const _newTarget = cfg.targetFile;
+    if (cfg._prevBg !== _newBg || cfg._prevTarget !== _newTarget){
+      cfg._assetV = (cfg._assetV || 0) + 1;
+      cfg._prevBg = _newBg;
+      cfg._prevTarget = _newTarget;
+    }
+    cfg.targetLineOffset = Number(targetLineY?.value ?? 0) / 100;
     cfg.targetLineJitter = Number(targetLineJitter?.value ?? 4);
     cfg.shot.variant = shotVariant.value;
     cfg.shot.volume = clamp(Number(shotVol.value||0.7),0,1);
