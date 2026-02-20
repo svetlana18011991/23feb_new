@@ -1430,358 +1430,762 @@ function mountGame(cfg){
 /* ===========================
    EDITOR MODE
    =========================== */
-function mountEditor(){
-  const root = document.getElementById('root');
-  root.innerHTML = `
-    <div class="app">
-      <div class="panel">
-        <div class="panelHeader">
-          <div>
-            <div class="title">Редактор<br>«Математический тир»</div>
-            <div class="subtitle"></div>
-          </div>
-          <button class="btn btnGold" id="copyIframe">📋 Скопировать код</button>
-        </div>
 
-        <div class="scroll">
-          <div class="section">
-            <h3>Название</h3>
-            <div class="row1">
-              <div>
-                <label>Заголовок в игре</label>
-                <input id="inpTitle" type="text" value="Математический тир"/>
-              </div>
-            </div>
-          </div>
 
-          <div class="section">
-            <h3>Параметры</h3>
-            <div class="row">
-              <div>
-                <label>Количество команд (1–3)</label>
-                <select id="teamsCount">
-                  <option value="1">1</option>
-                  <option value="2" selected>2</option>
-                  <option value="3">3</option>
-                </select>
-              </div>
-              <div>
-                <label>Автопереход команды после вопроса</label>
-                <select id="autoNext">
-                  <option value="true" selected>Включён</option>
-                  <option value="false">Выключен</option>
-                </select>
-              </div>
-            </div>
+// [Removed legacy mountEditor block to fix template parsing]
 
-            <div class="row">
-              <div>
-                <label>LaTeX (вопросы/ответы)</label>
-                <select id="latexToggle">
-                  <option value="false" selected>Выключен</option>
-                  <option value="true">Включён</option>
-                </select>
-              </div>
-              <div>
-                <label>Выбери фон</label>
-                <select id="bgSelect" class="select">
-                  <option value="1.png">1</option>
-                  <option value="2.png" selected>2</option>
-                  <option value="3.png">3</option>
-                  <option value="4.png">4</option>
-                  <option value="5.png">5</option>
-                  <option value="6.png">6</option>
-                  <option value="7.png">7</option>
-                  <option value="8.png">8</option>
-                </select>
-                <input id="bgInput" type="hidden" value="2.png"/>
-              </div>
-            </div>
-<div class="row">
-              <div class="field">
-                <label>Выбери мишень</label>
-                <select id="targetSelect" class="select">
-                  <option value="10.png">10</option>
-                  <option value="11.png">11</option>
-                  <option value="12.png">12</option>
-                  <option value="13.png" selected>13</option>
-                  <option value="14.png">14</option>
-                </select>
-                <input id="targetInput" type="hidden" value="13.png"/>
-              </div>
-              <div class="field">
-                <label>Позиции мишеней</label>
-                <div class="hint">Мишени будут появляться в отмеченной зоне на фоне.</div>
-              </div>
-            </div>
-<div class="row" style="margin-top:10px;">
-              <div class="field">
-                <label>Высота мишеней</label>
-                <input id="targetLineY" class="range" type="range" min="0" max="100" step="1" value="50" /></div>
-              <div class="field">
-                <label>Разброс мишеней</label>
-                <input id="targetLineJitter" class="range" type="range" min="0" max="100" step="1" value="30" /></div>
-            </div>
+function defaultCfg(){
+  return {
+    version: 41,
+    title: "Математический тир",
+    teamsCount: 2,
+    autoRotate: true,
+    latex: false,
+    bg: 2,          // 1..8
+    target: 13,     // 10..14
+    targetHeight: 50, // 0..100 (0=низ, 100=верх)
+    targetSpread: 30, // 0..100
+    shotSound: "pif", // pif|snap|boom
+    volume: 1
+  };
+}
 
-          </div>
+function el(tag, attrs={}, children=[]){
+  const n=document.createElement(tag);
+  for(const [k,v] of Object.entries(attrs||{})){
+    if(k==="class") n.className=v;
+    else if(k==="html") n.innerHTML=v;
+    else if(k==="text") n.textContent=v;
+    else if(k.startsWith("on") && typeof v==="function") n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v);
+  }
+  (children||[]).forEach(c=> n.appendChild(typeof c==="string"?document.createTextNode(c):c));
+  return n;
+}
 
-          <div class="section">
-            <h3>Звук выстрела</h3>
-            <div class="soundRow">
-              <div>
-                <label>Вариант (прослушивается при выборе)</label>
-                <select id="shotVariant">
-                  <option value="pif" selected>Короткий «пиф»</option>
-                  <option value="snap">Щелчок «снап»</option>
-                  <option value="boom">Глухой «бум»</option>
-                </select>
-              </div>
-              <div>
-                <label>Громкость</label>
-                <input id="shotVol" class="range" type="range" min="0" max="1" step="0.01" value="0.7"/>
-              </div>
-            </div>
-            <div class="help">В игре звук выстрела звучит при клике по мишени.</div>
-          </div>
+function toast(msg, ms=1600){
+  const t = document.getElementById("toast");
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>t.classList.remove("show"), ms);
+}
 
-          <div class="section">
-            <div class="split">
-              <h3 style="margin:0">Вопросы</h3>
-              <span class="pill">Всего: <span id="qCount">0</span></span>
-            </div>
-            <div style="display:flex; gap:10px; margin-top:10px;">
-              <button class="btn btnGold" id="btnAdd">＋ Добавить</button>
-              <button class="btn btnDanger" id="btnClear">🧹 Очистить</button>
-            </div>
-            <div class="help">Мишеней будет столько же, сколько вопросов.</div>
-            <div style="height:10px"></div>
-            <div class="qList" id="qList"></div>
-          </div>
-</div>
+function safeParseGameParam(){
+  const p=new URLSearchParams(location.search);
+  const raw=p.get("game");
+  if(!raw) return null;
+  try{
+    const jsonStr = decodeURIComponent(escape(atob(raw)));
+    return JSON.parse(jsonStr);
+  }catch(e){
+    console.warn("game param parse failed", e);
+    return null;
+  }
+}
+function encodeGameParam(payload){
+  const jsonStr = JSON.stringify(payload);
+  return btoa(unescape(encodeURIComponent(jsonStr)));
+}
+
+function getBaseUrl(){
+  // ссылка на этот же index.html без query/hash
+  return location.origin + location.pathname.replace(/\/$/, "/");
+}
+
+function buildIframeCode(){
+  const payload = {cfg, questions};
+  const game = encodeGameParam(payload);
+  const url = getBaseUrl() + "?game=" + game;
+  return `<iframe src="${url}" style="width:100%;height:600px;border:0;" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+}
+
+/* -------------------- SOUND -------------------- */
+let audioCtx = null;
+function ensureAudio(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if(audioCtx.state==="suspended"){
+    audioCtx.resume().catch(()=>{});
+  }
+  return audioCtx;
+}
+function playShotSound(kind, vol=1){
+  const ctx = ensureAudio();
+  const t0 = ctx.currentTime;
+  const master = ctx.createGain();
+  // делаем заметно громче + запас (ограничим клиппингом)
+  master.gain.setValueAtTime(Math.min(1.5, 0.35 + 0.9*vol), t0);
+  master.connect(ctx.destination);
+
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+  filter.type = "lowpass";
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(master);
+
+  if(kind==="boom"){
+    osc.type="sine";
+    osc.frequency.setValueAtTime(120, t0);
+    osc.frequency.exponentialRampToValueAtTime(55, t0+0.12);
+    filter.frequency.setValueAtTime(600, t0);
+    filter.frequency.exponentialRampToValueAtTime(180, t0+0.14);
+    gain.gain.setValueAtTime(0.001, t0);
+    gain.gain.exponentialRampToValueAtTime(1.0, t0+0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0+0.18);
+    osc.start(t0);
+    osc.stop(t0+0.19);
+    // короткий шум "хлопок"
+    const noiseBuf = ctx.createBuffer(1, ctx.sampleRate*0.08, ctx.sampleRate);
+    const data = noiseBuf.getChannelData(0);
+    for(let i=0;i<data.length;i++) data[i]=(Math.random()*2-1) * (1 - i/data.length);
+    const noise = ctx.createBufferSource(); noise.buffer=noiseBuf;
+    const ng = ctx.createGain(); ng.gain.setValueAtTime(0.15, t0);
+    noise.connect(ng); ng.connect(master);
+    noise.start(t0); noise.stop(t0+0.08);
+    return;
+  }
+
+  if(kind==="snap"){
+    osc.type="square";
+    osc.frequency.setValueAtTime(420, t0);
+    osc.frequency.exponentialRampToValueAtTime(220, t0+0.05);
+    filter.frequency.setValueAtTime(1200, t0);
+    filter.frequency.exponentialRampToValueAtTime(450, t0+0.06);
+    gain.gain.setValueAtTime(0.001, t0);
+    gain.gain.exponentialRampToValueAtTime(1.0, t0+0.003);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0+0.08);
+    osc.start(t0);
+    osc.stop(t0+0.085);
+    return;
+  }
+
+  // pif (default)
+  osc.type="triangle";
+  osc.frequency.setValueAtTime(620, t0);
+  osc.frequency.exponentialRampToValueAtTime(260, t0+0.045);
+  filter.frequency.setValueAtTime(1600, t0);
+  filter.frequency.exponentialRampToValueAtTime(600, t0+0.06);
+  gain.gain.setValueAtTime(0.001, t0);
+  gain.gain.exponentialRampToValueAtTime(1.0, t0+0.004);
+  gain.gain.exponentialRampToValueAtTime(0.001, t0+0.09);
+  osc.start(t0);
+  osc.stop(t0+0.095);
+}
+
+/* -------------------- GAME RENDER -------------------- */
+function bgUrl(n){ return `${n}.png`; }
+function targetUrl(n){ return `${n}.png`; }
+
+function computeTargetLineY(){
+  // 0=низ, 100=верх
+  const v = Math.max(0, Math.min(100, Number(cfg.targetHeight)||0));
+  // y in 0..1 (0=top)
+  const yBottom = 0.86;
+  const yTop = 0.22;
+  return yBottom - (yBottom - yTop) * (v/100);
+}
+function computeSpreadAmp(){
+  const v = Math.max(0, Math.min(100, Number(cfg.targetSpread)||0));
+  return 0.02 + 0.18*(v/100); // 0.02..0.20
+}
+
+function renderGame(container, opts={preview:false}){
+  container.innerHTML="";
+  const state = {
+    teamNames: Array.from({length: cfg.teamsCount}, (_,i)=>`Команда ${i+1}`),
+    scores: Array.from({length: cfg.teamsCount}, ()=>0),
+    turn: 0,
+    qIndex: 0,
+    floatingT: 0,
+    raf: null
+  };
+
+  const wrap = el("div",{class:"gameWrap"});
+  const stage = el("div",{class:"gameStage"});
+  stage.style.backgroundImage = `url('${bgUrl(cfg.bg)}')`;
+
+  const hud = el("div",{class:"gameHud"});
+  const title = el("div",{class:"gameTitle"});
+  title.innerHTML = `<div class="gt1">${cfg.title||"Математический тир"}</div><div class="gt2">Выберите команду → наведите прицел → выстрелите → ответьте</div>`;
+  hud.appendChild(title);
+
+  const right = el("div",{class:"hudRight"});
+  const turnPill = el("div",{class:"pill", html:`Сейчас стреляет: <b>${state.teamNames[state.turn]}</b>`});
+  const goalsPill = el("div",{class:"pill", html:`Цели: <b>0/${Math.max(questions.length,1)}</b>`});
+  const btnInstr = el("button",{class:"pillBtn", text:"Инструкция", onclick:()=>openInfo()});
+  const btnReset = el("button",{class:"pillBtn", text:"Сброс", onclick:()=>resetGame()});
+  right.append(turnPill, goalsPill, btnInstr, btnReset);
+  hud.appendChild(right);
+
+  const teamsRow = el("div",{class:"teamsRow"});
+  function renderTeams(){
+    teamsRow.innerHTML="";
+    for(let i=0;i<cfg.teamsCount;i++){
+      const card = el("div",{class:"teamCard"+(i===state.turn?" active":"")});
+      const nameInp = el("input",{class:"teamNameInp", value: state.teamNames[i]});
+      nameInp.addEventListener("input", ()=>{
+        state.teamNames[i]=nameInp.value||`Команда ${i+1}`;
+        turnPill.innerHTML = `Сейчас стреляет: <b>${state.teamNames[state.turn]}</b>`;
+      });
+      const score = el("div",{class:"teamScore", text:String(state.scores[i])});
+      card.append(
+        el("div",{class:"teamTop"},[
+          el("div",{class:"teamLabel", text:`Команда ${i+1}`}),
+          el("div",{class:"teamNow"},[
+            el("span",{class:"dot"+(i===state.turn?" on":"")}),
+            el("span",{text: i===state.turn?"Сейчас":"Не сейчас"})
+          ])
+        ]),
+        el("div",{class:"teamMid"},[
+          nameInp,
+          el("div",{class:"scoreWrap"},[
+            el("div",{class:"scoreLabel", text:"Очки"}),
+            score
+          ])
+        ])
+      );
+      card._scoreEl = score;
+      teamsRow.appendChild(card);
+    }
+  }
+  renderTeams();
+
+  const targetsLayer = el("div",{class:"targetsLayer"});
+  stage.append(hud, teamsRow, targetsLayer);
+
+  const cross = el("div",{class:"crosshair"});
+  stage.appendChild(cross);
+
+  wrap.appendChild(stage);
+  container.appendChild(wrap);
+
+  // modal for question
+  const modal = el("div",{class:"qModal hidden"});
+  modal.innerHTML = `
+    <div class="qModalInner">
+      <div class="qModalHead">
+        <div class="qModalTitle"></div>
+        <div class="qModalTimer"></div>
+        <button class="qModalClose">Esc</button>
       </div>
-
-      <div class="panel previewWrap">
-        <div class="previewHeader">
-          <div>
-            <div class="title2">Просмотр</div>
-            <div class="muted">Живое превью (как в Genially)</div>
-          </div>
-          <div class="muted">фон + мишени + вопросы</div>
-        </div>
-        <iframe class="previewFrame" id="previewFrame" allow="autoplay; fullscreen"></iframe>
-      </div>
-    </div>
-
-    <div class="versionBadge">Версия ${VERSION} • editor+game</div>
-
-    <!-- Question editor modal -->
-    <div class="modalBackdrop" id="editBack" style="z-index:80;">
-      <div class="modal">
-        <div class="modalHeader">
-          <div class="h" id="editHdr">Вопрос</div>
-          <button class="modalClose" id="editClose">Esc</button>
-        </div>
-        <div class="modalBody">
-          <div class="row">
-            <div>
-              <label>Очки</label>
-              <input id="editPoints" type="number" min="0" step="1" value="10"/>
-            </div>
-            <div>
-              <label>Таймер</label>
-              <select id="editTimerMode">
-                <option value="off" selected>Выключен</option>
-                <option value="on">Включён</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="row">
-            <div>
-              <label>Секунды (если включён)</label>
-              <input id="editTimerSec" type="number" min="1" step="1" value="30"/>
-            </div>
-            <div>
-              <label>Тип вопроса</label>
-              <select id="editType">
-                <option value="choice" selected>Выбор ответа</option>
-                <option value="input">Ввод ответа</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="row1">
-            <div>
-              <label>Текст вопроса</label>
-              <textarea id="editText" placeholder="Напишите вопрос…"></textarea>
-            </div>
-          </div>
-
-          <div class="row">
-            <div>
-              <label>🖼️ Картинка (URL, опционально)</label>
-              <input id="editImg" type="text" placeholder="https://..."/>
-            </div>
-            <div>
-              <label>🎵 Музыка (URL, опционально)</label>
-              <input id="editAud" type="text" placeholder="https://..."/>
-            </div>
-          </div>
-
-          <div id="choiceBox">
-            <div class="split">
-              <div style="font-weight:900;">Варианты ответа</div>
-              <div class="pill">можно добавлять сколько нужно</div>
-            </div>
-            <div id="optList" class="qList" style="margin-top:10px;"></div>
-            <div style="display:flex; gap:10px;">
-              <button class="btn btnGold" id="btnAddOpt">＋ Добавить вариант</button>
-            </div>
-            <div class="help">Отметьте один вариант как «верный» (радио-кнопка).</div>
-          </div>
-
-          <div id="inputBox" style="display:none;">
-            <label>Правильный ответ (можно несколько через запятую)</label>
-            <input id="editCorrect" type="text" placeholder="например: 12, двенадцать"/>
-          </div>
-
-          <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:4px;">
-            <button class="secondary" id="btnCancelQ">Отмена</button>
-            <button class="primary" id="btnSaveQ">Сохранить вопрос</button>
-          </div>
-        </div>
+      <div class="qModalBody"></div>
+      <div class="qModalFoot">
+        <button class="qModalSkip">Пропустить</button>
       </div>
     </div>
   `;
+  stage.appendChild(modal);
+  $(".qModalClose", modal).addEventListener("click", ()=>closeQuestion());
+  $(".qModalSkip", modal).addEventListener("click", ()=>closeQuestion());
 
-  let cfg = defaultCfg();
+  let timerInt=null;
+  function closeQuestion(){
+    modal.classList.add("hidden");
+    $(".qModalBody", modal).innerHTML="";
+    $(".qModalTimer", modal).textContent="";
+    if(timerInt){ clearInterval(timerInt); timerInt=null; }
+  }
+  function openQuestion(q, idx){
+    if(!q){ toast("Добавьте вопросы в редакторе"); return; }
+    modal.classList.remove("hidden");
+    $(".qModalTitle", modal).textContent = `Вопрос #${idx+1}`;
+    const body = $(".qModalBody", modal);
+    body.innerHTML="";
+    body.appendChild(el("div",{class:"qText", text:q.text||""}));
+
+    if(q.imageUrl){
+      const img = el("img",{class:"qImg", src:q.imageUrl});
+      img.addEventListener("error", ()=>{ img.style.display="none"; toast("Картинка не загрузилась (проверьте ссылку)"); });
+      body.appendChild(img);
+    }
+
+    if(q.type==="input"){
+      const inp = el("input",{class:"qAnswerInp", placeholder:"Введите ответ..."});
+      const btn = el("button",{class:"qBtn", text:"Ответить"});
+      btn.addEventListener("click", ()=>{
+        // без проверки правильности: начисляем очки за факт ответа
+        addScore(q.points||0);
+        closeQuestion();
+      });
+      body.append(inp, btn);
+    }else{
+      const list = el("div",{class:"qOptions"});
+      const opts = (q.options||[]).filter(o=>String(o.text||"").trim().length>0);
+      const letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      opts.forEach((o,i)=>{
+        const btn = el("button",{class:"qOpt"},[
+          el("span",{class:"qOptL", text:letters[i]||String(i+1)}),
+          el("span",{class:"qOptT", text:o.text})
+        ]);
+        btn.addEventListener("click", ()=>{
+          if(o.correct){
+            addScore(q.points||0);
+            toast("Верно!");
+          }else{
+            toast("Неверно");
+          }
+          closeQuestion();
+        });
+        list.appendChild(btn);
+      });
+      body.appendChild(list);
+    }
+
+    // timer
+    if(q.timerEnabled && Number(q.timerSec)>0){
+      let left = Number(q.timerSec);
+      const lab = $(".qModalTimer", modal);
+      lab.textContent = `⏱ ${left}`;
+      timerInt = setInterval(()=>{
+        left -= 1;
+        lab.textContent = `⏱ ${left}`;
+        if(left<=0){
+          clearInterval(timerInt); timerInt=null;
+          toast("Время вышло");
+          closeQuestion();
+        }
+      }, 1000);
+    }
+  }
+
+  function addScore(pts){
+    const t = state.turn;
+    state.scores[t] = (state.scores[t]||0) + (Number(pts)||0);
+    // update UI
+    const card = teamsRow.children[t];
+    const scoreEl = card && card.querySelector(".teamScore");
+    if(scoreEl) scoreEl.textContent = String(state.scores[t]);
+  }
+
+  function resetGame(){
+    state.scores = Array.from({length: cfg.teamsCount}, ()=>0);
+    state.turn = 0;
+    state.qIndex = 0;
+    renderTeams();
+    updatePills();
+    rebuildTargets();
+    closeQuestion();
+  }
+
+  function updatePills(){
+    turnPill.innerHTML = `Сейчас стреляет: <b>${state.teamNames[state.turn]}</b>`;
+    goalsPill.innerHTML = `Цели: <b>${Math.min(state.qIndex, Math.max(questions.length,1))}/${Math.max(questions.length,1)}</b>`;
+  }
+
+  function openInfo(){
+    toast("Стреляйте по мишеням. После ответа ход (при включённом автопереходе) переходит следующей команде.");
+  }
+
+  function nextTurn(){
+    state.turn = (state.turn + 1) % cfg.teamsCount;
+    renderTeams();
+    updatePills();
+  }
+
+  function getQuestionForShot(){
+    if(questions.length===0) return null;
+    const q = questions[state.qIndex % questions.length];
+    const idx = state.qIndex % questions.length;
+    state.qIndex += 1;
+    updatePills();
+    if(cfg.autoRotate) nextTurn();
+    return {q, idx};
+  }
+
+  function rebuildTargets(){
+    targetsLayer.innerHTML="";
+    const count = questions.length>0 ? Math.min(questions.length, 10) : 8; // даже без вопросов показать
+    const y0 = computeTargetLineY();
+    const amp = computeSpreadAmp();
+    for(let i=0;i<count;i++){
+      const x = 0.12 + (i/(count-1||1))*0.76;
+      const dy = (Math.random()*2-1) * amp;
+      const t = el("div",{class:"target"});
+      t.style.backgroundImage = `url('${targetUrl(cfg.target)}')`;
+      t.dataset.baseX = String(x);
+      t.dataset.baseY = String(y0 + dy);
+      t.dataset.floatPhase = String(Math.random()*Math.PI*2);
+      t.addEventListener("click",(ev)=>{
+        ev.stopPropagation();
+        // звук выстрела (всегда по выбранному)
+        playShotSound(cfg.shotSound, cfg.volume);
+        const pack = getQuestionForShot();
+        if(!pack){ toast("Добавьте вопросы, чтобы играть"); return; }
+        openQuestion(pack.q, pack.idx);
+      });
+      targetsLayer.appendChild(t);
+    }
+  }
+
+  function tick(){
+    state.floatingT += 0.016;
+    const w = stage.clientWidth || 1000;
+    const h = stage.clientHeight || 600;
+    const targets = targetsLayer.querySelectorAll(".target");
+    targets.forEach((t)=>{
+      const bx = parseFloat(t.dataset.baseX||"0.5");
+      const by = parseFloat(t.dataset.baseY||"0.6");
+      const ph = parseFloat(t.dataset.floatPhase||"0");
+      const floatY = Math.sin(state.floatingT*1.1 + ph) * 0.012; // легкое плавание
+      const floatX = Math.cos(state.floatingT*0.9 + ph) * 0.006;
+      const px = bx + floatX;
+      const py = by + floatY;
+      t.style.left = (px*100) + "%";
+      t.style.top = (py*100) + "%";
+    });
+    state.raf = requestAnimationFrame(tick);
+  }
+
+  // click stage to move crosshair
+  stage.addEventListener("mousemove",(e)=>{
+    const rect = stage.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    cross.style.left = x+"px";
+    cross.style.top = y+"px";
+  });
+
+  rebuildTargets();
+  updatePills();
+  state.raf = requestAnimationFrame(tick);
+
+  // expose for editor live update
+  return {
+    updateFromNewCfg(newCfg, newQuestions){
+      cfg = newCfg;
+      questions = newQuestions;
+      stage.style.backgroundImage = `url('${bgUrl(cfg.bg)}')`;
+      title.querySelector(".gt1").textContent = cfg.title||"Математический тир";
+      // пересобрать команды если количество изменилось
+      state.teamNames = Array.from({length: cfg.teamsCount}, (_,i)=>state.teamNames[i]||`Команда ${i+1}`);
+      state.scores = Array.from({length: cfg.teamsCount}, (_,i)=>state.scores[i]||0);
+      renderTeams();
+      rebuildTargets();
+      updatePills();
+      closeQuestion();
+    },
+    destroy(){
+      if(state.raf) cancelAnimationFrame(state.raf);
+      closeQuestion();
+    }
+  };
+}
+
+/* -------------------- EDITOR -------------------- */
+function renderEditor(container){
+  container.innerHTML="";
+  const shell = el("div",{class:"shell"});
+  const left = el("div",{class:"panel left"});
+  const right = el("div",{class:"panel right"});
+  shell.append(left, right);
+  container.appendChild(shell);
+
+  // header
+  const brand = el("div",{class:"editorBrand"},[
+    el("div",{class:"brandRow"},[
+      el("img",{class:"brandLogo", src:"63.png", alt:"logo", onerror:()=>{}}),
+      el("div",{class:"brandName", text:"Светлана Быкова"})
+    ]),
+    el("div",{class:"editorTitle", text:"Редактор «Математический тир»"})
+  ]);
+  const copyBtn = el("button",{class:"copyBtn", text:"Скопировать код"});
+  copyBtn.addEventListener("click", async ()=>{
+    const code = buildIframeCode();
+    try{
+      await navigator.clipboard.writeText(code);
+      toast("Код скопирован");
+    }catch(e){
+      // fallback
+      const ta = el("textarea",{class:"hiddenTa"});
+      ta.value = code;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+      toast("Код скопирован");
+    }
+  });
+  left.append(brand, copyBtn);
+
+  // form
+  const form = el("div",{class:"form"});
+  left.appendChild(form);
+
+  const titleInp = el("input",{class:"inp", value: cfg.title});
+  titleInp.addEventListener("input", ()=>{ cfg.title = titleInp.value; sync(); });
+  form.append(
+    el("div",{class:"field"},[
+      el("div",{class:"label", text:"Название"}),
+      el("div",{class:"hint", text:"Заголовок в игре"}),
+      titleInp
+    ])
+  );
+
+  const teamsSel = el("select",{class:"inp"});
+  [1,2,3].forEach(n=>teamsSel.appendChild(el("option",{value:String(n), text:String(n)})));
+  teamsSel.value = String(cfg.teamsCount);
+  teamsSel.addEventListener("change", ()=>{ cfg.teamsCount = Number(teamsSel.value); sync(); });
+  const autoSel = el("select",{class:"inp"});
+  [["Включён",true],["Выключен",false]].forEach(([t,v])=>autoSel.appendChild(el("option",{value:String(v), text:t})));
+  autoSel.value = String(cfg.autoRotate);
+  autoSel.addEventListener("change", ()=>{ cfg.autoRotate = (autoSel.value==="true"); sync(); });
+
+  const latexSel = el("select",{class:"inp"});
+  [["Включён",true],["Выключен",false]].forEach(([t,v])=>latexSel.appendChild(el("option",{value:String(v), text:t})));
+  latexSel.value = String(cfg.latex);
+  latexSel.addEventListener("change", ()=>{ cfg.latex = (latexSel.value==="true"); sync(); });
+
+  const bgSel = el("select",{class:"inp"});
+  for(let i=1;i<=8;i++) bgSel.appendChild(el("option",{value:String(i), text:String(i)}));
+  bgSel.value = String(cfg.bg||2);
+  bgSel.addEventListener("change", ()=>{ cfg.bg = Number(bgSel.value); sync(); });
+
+  const targetSel = el("select",{class:"inp"});
+  for(let i=10;i<=14;i++) targetSel.appendChild(el("option",{value:String(i), text:String(i)}));
+  targetSel.value = String(cfg.target||13);
+  targetSel.addEventListener("change", ()=>{ cfg.target = Number(targetSel.value); sync(); });
+
+  const heightRange = el("input",{type:"range", min:"0", max:"100", value:String(cfg.targetHeight), class:"range"});
+  heightRange.addEventListener("input", ()=>{ cfg.targetHeight = Number(heightRange.value); sync(); });
+
+  const spreadRange = el("input",{type:"range", min:"0", max:"100", value:String(cfg.targetSpread), class:"range"});
+  spreadRange.addEventListener("input", ()=>{ cfg.targetSpread = Number(spreadRange.value); sync(); });
+
+  const soundSel = el("select",{class:"inp"});
+  [["Короткий «пиф»","pif"],["Щелчок «снап»","snap"],["Глухой «бум»","boom"]].forEach(([t,v])=>{
+    soundSel.appendChild(el("option",{value:v, text:t}));
+  });
+  soundSel.value = cfg.shotSound;
+  soundSel.addEventListener("change", ()=>{
+    cfg.shotSound = soundSel.value;
+    playShotSound(cfg.shotSound, cfg.volume);
+    sync();
+  });
+
+  const volRange = el("input",{type:"range", min:"0", max:"1", step:"0.01", value:String(cfg.volume), class:"range"});
+  volRange.addEventListener("input", ()=>{ cfg.volume = Number(volRange.value); sync(); });
+
+  form.append(
+    el("div",{class:"sectionTitle", text:"Параметры"}),
+    el("div",{class:"grid2"},[
+      el("div",{class:"field"},[el("div",{class:"label", text:"Количество команд (1–3)"}), teamsSel]),
+      el("div",{class:"field"},[el("div",{class:"label", text:"Автопереход команды после вопроса"}), autoSel]),
+      el("div",{class:"field"},[el("div",{class:"label", text:"LaTeX (вопросы/ответы)"}), latexSel]),
+      el("div",{class:"field"},[el("div",{class:"label", text:"Выбери фон"}), bgSel]),
+      el("div",{class:"field"},[el("div",{class:"label", text:"Выбери мишень"}), targetSel]),
+      el("div",{class:"field"},[
+        el("div",{class:"label", text:"Высота мишеней"}),
+        heightRange
+      ]),
+      el("div",{class:"field"},[
+        el("div",{class:"label", text:"Разброс мишеней"}),
+        spreadRange
+      ])
+    ]),
+    el("div",{class:"sectionTitle", text:"Звук выстрела"}),
+    el("div",{class:"grid2"},[
+      el("div",{class:"field"},[el("div",{class:"label", text:"Вариант"}), soundSel]),
+      el("div",{class:"field"},[el("div",{class:"label", text:"Громкость"}), volRange])
+    ])
+  );
+
+  // Questions list + controls
+  const qWrap = el("div",{class:"qWrap"});
+  const qHead = el("div",{class:"qHead"},[
+    el("div",{class:"sectionTitle", text:"Вопросы"}),
+    el("div",{class:"qCount", text:`Всего: ${questions.length}`})
+  ]);
+  const qBtns = el("div",{class:"qBtns"},[
+    el("button",{class:"btn add", text:"+ Добавить", onclick:()=>openQModal(null)}),
+    el("button",{class:"btn clear", text:"✏ Очистить", onclick:()=>{questions=[]; renderQList(); sync();}})
+  ]);
+  const qList = el("div",{class:"qList"});
+  qWrap.append(qHead, qBtns, qList);
+  left.appendChild(qWrap);
+
+  function renderQList(){
+    qHead.querySelector(".qCount").textContent = `Всего: ${questions.length}`;
+    qList.innerHTML="";
+    questions.forEach((q, i)=>{
+      const card = el("div",{class:"qCard"});
+      card.append(
+        el("div",{class:"qCardTop"},[
+          el("div",{class:"qNum", text:`${i+1}. ${q.text||"(без текста)"}`}),
+          el("div",{class:"qCardBtns"},[
+            el("button",{class:"iconBtn", text:"✎", onclick:()=>openQModal(i)}),
+            el("button",{class:"iconBtn danger", text:"🗑", onclick:()=>{questions.splice(i,1); renderQList(); sync();}})
+          ])
+        ]),
+        el("div",{class:"qMeta", text:`${q.type==="input"?"Ввод":"Выбор"} • ${q.points||0} оч. • ${q.timerEnabled? (q.timerSec||0)+" сек":"без таймера"}`})
+      );
+      qList.appendChild(card);
+    });
+  }
+
+  // Question modal editor
+  const qModal = el("div",{class:"editorModal hidden"});
+  qModal.innerHTML = `
+    <div class="editorModalInner">
+      <div class="emHead">
+        <div class="emTitle">Вопрос</div>
+        <button class="emClose">×</button>
+      </div>
+      <div class="emBody"></div>
+      <div class="emFoot">
+        <button class="btn save">Сохранить</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(qModal);
+  $(".emClose", qModal).addEventListener("click", ()=>closeQModal());
+  qModal.addEventListener("click",(e)=>{ if(e.target===qModal) closeQModal(); });
+
   let editingIndex = null;
 
-  const inpTitle = document.getElementById('inpTitle');
-  const teamsCount = document.getElementById('teamsCount');
-  const autoNext = document.getElementById('autoNext');
-  const latexToggle = document.getElementById('latexToggle');
-  const bgInput = document.getElementById('bgInput');
-  const bgSelect = document.getElementById('bgSelect');
-  const targetInput = document.getElementById('targetInput');
-  const targetSelect = document.getElementById('targetSelect');
-  const targetLineY = document.getElementById('targetLineY');
-  const targetLineJitter = document.getElementById('targetLineJitter');
+  function openQModal(index){
+    editingIndex = (index===null || index===undefined) ? null : index;
+    const q = editingIndex===null ? {
+      type:"mc",
+      text:"",
+      points:10,
+      timerEnabled:false,
+      timerSec:30,
+      imageUrl:"",
+      options:[
+        {text:"", correct:true},
+        {text:"", correct:false}
+      ]
+    } : JSON.parse(JSON.stringify(questions[editingIndex]));
+    const body = $(".emBody", qModal);
+    body.innerHTML="";
 
-// Live-update preview when background/target change
-bgSelect?.addEventListener('change', () => {
-  try { if (typeof bgInput !== 'undefined' && bgInput) bgInput.value = bgSelect.value; } catch(e) {}
-  schedulePreviewUpdate();
-});
+    const typeSel = el("select",{class:"inp"});
+    [["Выбор ответа","mc"],["Ввод ответа","input"]].forEach(([t,v])=>typeSel.appendChild(el("option",{value:v,text:t})));
+    typeSel.value = q.type;
 
-targetSelect?.addEventListener('change', () => {
-  // keep file input in sync (cfg читается из targetInput)
-  try { if (targetInput) targetInput.value = targetSelect.value; } catch(e) {}
-  schedulePreviewUpdate();
-});
+    const pointsInp = el("input",{class:"inp", type:"number", min:"0", value:String(q.points||0)});
+    const timerSel = el("select",{class:"inp"});
+    [["Выключен", "0"],["Включён","1"]].forEach(([t,v])=>timerSel.appendChild(el("option",{value:v,text:t})));
+    timerSel.value = q.timerEnabled ? "1":"0";
+    const timerInp = el("input",{class:"inp", type:"number", min:"1", value:String(q.timerSec||30)});
+    const textInp = el("textarea",{class:"ta", placeholder:"Напишите вопрос...", text:q.text||""});
+    const imgInp = el("input",{class:"inp", placeholder:"Картинка (URL, опционально)", value:q.imageUrl||""});
 
-targetLineY?.addEventListener('input', schedulePreviewUpdate);
-targetLineJitter?.addEventListener('input', schedulePreviewUpdate);
-
-// Defaults
-if (bgSelect && !bgSelect.value) bgSelect.value = '2.png';
-if (targetSelect && !targetSelect.value) targetSelect.value = '13.png';
-if (targetInput && !targetInput.value) targetInput.value = targetSelect?.value || '13.png';
-
-  const shotVariant = document.getElementById('shotVariant');
-  const shotVol = document.getElementById('shotVol');
-  const qCount = document.getElementById('qCount');
-  const qList = document.getElementById('qList');
-  const previewFrame = document.getElementById('previewFrame');
-
-  function readCfgFromUI(){
-    cfg.title = inpTitle.value || "Математический тир";
-    cfg.teamsCount = clamp(Number(teamsCount.value||2),1,3);
-    cfg.autoNextTeam = (autoNext.value === 'true');
-    cfg.latex = (latexToggle.value === 'true');
-    cfg.bg = (bgInput.value || "2.png").trim();
-    cfg.targetFile = (targetInput?.value || "13.png").trim();
-
-    // cache-bust for assets when selection changes
-    const _newBg = cfg.bg;
-    const _newTarget = cfg.targetFile;
-    if (cfg._prevBg !== _newBg || cfg._prevTarget !== _newTarget){
-      cfg._assetV = (cfg._assetV || 0) + 1;
-      cfg._prevBg = _newBg;
-      cfg._prevTarget = _newTarget;
+    const optsWrap = el("div",{class:"optsWrap"});
+    function renderOpts(){
+      optsWrap.innerHTML="";
+      if(typeSel.value!=="mc") return;
+      (q.options||[]).forEach((o, i)=>{
+        const row = el("div",{class:"optRow"});
+        const radio = el("input",{type:"radio", name:"correctOpt"});
+        radio.checked = !!o.correct;
+        radio.addEventListener("change", ()=>{
+          q.options.forEach(x=>x.correct=false);
+          o.correct=true;
+        });
+        const inp = el("input",{class:"inp", placeholder:`Вариант ${i+1}`, value:o.text||""});
+        inp.addEventListener("input", ()=>{ o.text = inp.value; });
+        const del = el("button",{class:"iconBtn danger", text:"×", onclick:()=>{ q.options.splice(i,1); if(!q.options.some(x=>x.correct)&&q.options[0]) q.options[0].correct=true; renderOpts(); }});
+        row.append(radio, inp, del);
+        optsWrap.appendChild(row);
+      });
+      const addBtn = el("button",{class:"btn addSmall", text:"+ Добавить вариант"});
+      addBtn.addEventListener("click", ()=>{
+        q.options.push({text:"", correct: q.options.length===0});
+        renderOpts();
+      });
+      optsWrap.appendChild(addBtn);
     }
-    cfg.targetLineOffset = Number(targetLineY?.value ?? 0) / 100;
-    cfg.targetLineJitter = Number(targetLineJitter?.value ?? 4);
-    cfg.shot.variant = shotVariant.value;
-    cfg.shot.volume = clamp(Number(shotVol.value||0.7),0,1);
+    renderOpts();
+    typeSel.addEventListener("change", renderOpts);
+
+    body.append(
+      el("div",{class:"grid2"},[
+        el("div",{class:"field"},[el("div",{class:"label", text:"Тип вопроса"}), typeSel]),
+        el("div",{class:"field"},[el("div",{class:"label", text:"Очки"}), pointsInp]),
+        el("div",{class:"field"},[el("div",{class:"label", text:"Таймер"}), timerSel]),
+        el("div",{class:"field"},[el("div",{class:"label", text:"Секунды (если включён)"}), timerInp])
+      ]),
+      el("div",{class:"field"},[el("div",{class:"label", text:"Текст вопроса"}), textInp]),
+      el("div",{class:"field"},[imgInp]),
+      el("div",{class:"field"},[el("div",{class:"label", text:"Варианты ответа"}), optsWrap])
+    );
+
+    $(".btn.save", qModal).onclick = ()=>{
+      q.type = typeSel.value;
+      q.points = Number(pointsInp.value)||0;
+      q.timerEnabled = (timerSel.value==="1");
+      q.timerSec = Number(timerInp.value)||30;
+      q.text = textInp.value||"";
+      q.imageUrl = imgInp.value||"";
+      if(q.type==="mc"){
+        q.options = (q.options||[]).map(o=>({text:o.text||"", correct:!!o.correct}));
+        if(!q.options.some(o=>o.correct) && q.options[0]) q.options[0].correct=true;
+      }else{
+        q.options = [];
+      }
+
+      if(editingIndex===null){
+        questions.push(q);
+      }else{
+        questions[editingIndex]=q;
+      }
+      closeQModal();
+      renderQList();
+      sync();
+      toast("Вопрос сохранён");
+    };
+
+    qModal.classList.remove("hidden");
+    // scroll safety
+    qModal.querySelector(".editorModalInner").scrollTop = 0;
   }
 
-  let _pvT = null;
-function schedulePreviewUpdate() {
-  if (_pvT) clearTimeout(_pvT);
-  _pvT = setTimeout(() => {
-    try { updatePreview(); } catch (e) {}
-  }, 120);
+  function closeQModal(){
+    qModal.classList.add("hidden");
+    $(".emBody", qModal).innerHTML="";
+    editingIndex=null;
+  }
+
+  // right preview
+  right.appendChild(el("div",{class:"previewHead", html:`<div class="ph1">Просмотр</div><div class="ph2">Живое превью (как в Genially)</div>`}));
+  const previewBox = el("div",{class:"previewBox"});
+  right.appendChild(previewBox);
+  const gameApi = renderGame(previewBox, {preview:true});
+
+  function sync(){
+    // гарантируем дефолты как вы просили
+    if(!cfg.bg) cfg.bg = 2;
+    if(!cfg.target) cfg.target = 13;
+    gameApi.updateFromNewCfg(cfg, questions);
+  }
+
+  renderQList();
+  sync();
 }
 
-function updatePreview(){
-    readCfgFromUI();
-    if(cfg.latex) ensureKatex();
-    const gameUrl = urlOfSelf() + `?game=${encodeURIComponent(b64uEncode(cfg))}&v=${VERSION}&t=${Date.now()}`;
-    previewFrame.src = gameUrl;
-  }
-
-  function makeMediaTag(icon,label,url){
-    const raw = String(url||'').trim();
-    if(!raw) return '';
-    const fixed = raw.startsWith('http://') ? ('https://' + raw.slice(7)) : raw;
-
-    // Image: show a small preview directly in the question modal
-    if(icon === '🖼️'){
-      const wrap = document.createElement('div');
-      wrap.className = 'mediaImgWrap';
-      wrap.innerHTML = `<a class="mediaLink" href="${escapeHtml(fixed)}" target="_blank" rel="noopener">🖼️ Картинка</a>`;
-      const img = document.createElement('img');
-      img.className = 'qImage';
-      img.loading = 'lazy';
-      img.referrerPolicy = 'no-referrer';
-      img.src = fixed;
-      img.alt = label || 'image';
-      img.addEventListener('click', (e)=>{ e.stopPropagation(); window.open(fixed, '_blank', 'noopener'); });
-      img.onerror = ()=>{ img.style.display='none'; };
-      wrap.appendChild(img);
-      return wrap;
-    }
-
-    // Audio: show as a link
-    const a = document.createElement('a');
-    a.className = 'mediaLink';
-    a.href = fixed;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    a.textContent = `${icon} ${label||''}`.trim();
-    return a;
-  }
-
-
-}
-
-/* ---------- Boot ---------- */
+/* -------------------- BOOT -------------------- */
 (function boot(){
-  const unlock = async ()=>{ try{ await AudioKit.unlock(); }catch(e){} };
-  window.addEventListener('pointerdown', unlock, {once:true});
-
-  if(isGame){
-    let cfg = defaultCfg();
-    try{
-      cfg = b64uDecode(params.get('game'));
-    }catch(e){}
-    cfg = Object.assign(defaultCfg(), cfg || {});
-    cfg.questions = Array.isArray(cfg.questions) ? cfg.questions : [];
-    cfg.shot = Object.assign({variant:'pif', volume:0.7}, cfg.shot || {});
-    mountGame(cfg);
-  } else {
-    mountEditor();
+  const root = document.getElementById("root");
+  const payload = safeParseGameParam();
+  if(payload && payload.cfg){
+    cfg = Object.assign(defaultCfg(), payload.cfg||{});
+    questions = Array.isArray(payload.questions)? payload.questions : [];
+    // в игре НЕ показываем бренд
+    document.body.classList.add("modeGame");
+    renderGame(root, {preview:false});
+  }else{
+    document.body.classList.add("modeEditor");
+    // дефолты как просили
+    cfg.bg = 2;
+    cfg.target = 13;
+    renderEditor(root);
   }
 })();
 </script>
