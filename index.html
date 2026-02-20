@@ -764,6 +764,12 @@ body.game-cursor { cursor: none !important; }
 .hudGoals{animation:goalFloat 3.8s ease-in-out infinite;}
 @keyframes goalFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 
+
+  .mediaImgWrap{display:flex;flex-direction:column;gap:8px}
+  .mediaLink{display:inline-flex;align-items:center;gap:6px;color:var(--gold);text-decoration:none;font-weight:700}
+  .mediaLink:hover{text-decoration:underline}
+  .qImage{max-width:100%;max-height:240px;border-radius:14px;border:1px solid rgba(255,255,255,.12);box-shadow:0 10px 30px rgba(0,0,0,.35);cursor:pointer}
+
 </style>
 </head>
 <body>
@@ -1180,8 +1186,19 @@ function mountGame(cfg){
     const scaleY = maxY > 55 ? (55-22)/(maxY-22) : 1;
 
     // User controls
-    const lineOffset = Number(cfg?.targetLineOffset ?? 0); // percent points
-    const lineJitter = Number(cfg?.targetLineJitter ?? 4); // percent points
+    const offsetNorm = Math.max(0, Math.min(1, Number(cfg?.targetLineOffset ?? 0))); // 0..1
+    const jitterNorm  = Math.max(0, Math.min(1, Number(cfg?.targetLineJitter ?? 0))); // 0..1
+
+    // Slider meaning:
+    // - Height: 0 -> targets at the very bottom of the picture, 1 -> at the very top.
+    // - Scatter: 0 -> almost on one line, 1 -> максимально хаотично вверх/вниз.
+    const TOP_Y = 18;   // % from top (safe header)
+    const BOT_Y = 72;   // % from top
+    const lineY = BOT_Y - offsetNorm * (BOT_Y - TOP_Y); // 0 bottom -> 1 top
+
+    const patternY = pts.map(p => p.y);
+    const avgY = patternY.reduce((a,b)=>a+b,0) / Math.max(1, patternY.length);
+    const jitterAmp = jitterNorm * 18; // percent points
 
     pts.forEach((p,i)=>{
       p.y = 22 + (p.y-22)*scaleY;
@@ -1718,224 +1735,37 @@ function updatePreview(){
     previewFrame.src = gameUrl;
   }
 
-  function escapeHtml(s){
-    return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-  }
+  function makeMediaTag(icon,label,url){
+    const raw = String(url||'').trim();
+    if(!raw) return '';
+    const fixed = raw.startsWith('http://') ? ('https://' + raw.slice(7)) : raw;
 
-  function renderQuestionList(){
-    qCount.textContent = String(cfg.questions.length);
-    qList.innerHTML = '';
-    cfg.questions.forEach((q, idx)=>{
-      const item = document.createElement('div');
-      item.className = 'qItem';
-      const t = (q.text || '').trim() || '(без текста)';
-      const meta = `${q.type==='input'?'Ввод':'Выбор'} • ${Number(q.points||10)} очк. • ${q.timerEnabled? (q.timerSeconds+' сек') : 'без таймера'}`;
-      item.innerHTML = `
-        <div>
-          <div class="qTitle">${idx+1}. ${escapeHtml(t)}</div>
-          <div class="qMeta">${meta}</div>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <button class="iconBtn" title="Редактировать">✏️</button>
-          <button class="iconBtn danger" title="Удалить">🗑️</button>
-        </div>
-      `;
-      item.querySelector('.iconBtn').addEventListener('click', ()=> openEdit(idx));
-      item.querySelector('.iconBtn.danger').addEventListener('click', ()=>{
-        cfg.questions.splice(idx,1);
-        renderQuestionList();
-        updatePreview();
-      });
-      qList.appendChild(item);
-    });
-  }
-
-  async function playShotPreview(){
-    readCfgFromUI();
-    await AudioKit.unlock();
-    AudioKit.setVolume(cfg.shot.volume);
-    AudioKit.playVariant(cfg.shot.variant);
-  }
-  shotVariant.addEventListener('change', playShotPreview);
-  shotVol.addEventListener('input', ()=>{
-    readCfgFromUI();
-    AudioKit.setVolume(cfg.shot.volume);
-  });
-
-  document.getElementById('copyIframe').addEventListener('click', async ()=>{
-    readCfgFromUI();
-    const src = urlOfSelf() + `?game=${encodeURIComponent(b64uEncode(cfg))}&v=${VERSION}`;
-    const code = `<iframe src="${src}" style="width:100%;height:600px;border:0;" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
-    try{
-      await navigator.clipboard.writeText(code);
-      toast("iframe скопирован");
-    }catch(e){
-      const ta = document.createElement('textarea');
-      ta.value = code;
-      document.body.appendChild(ta);
-      ta.select(); document.execCommand('copy');
-      ta.remove();
-      toast("iframe скопирован");
+    // Image: show a small preview directly in the question modal
+    if(icon === '🖼️'){
+      const wrap = document.createElement('div');
+      wrap.className = 'mediaImgWrap';
+      wrap.innerHTML = `<a class="mediaLink" href="${escapeHtml(fixed)}" target="_blank" rel="noopener">🖼️ Картинка</a>`;
+      const img = document.createElement('img');
+      img.className = 'qImage';
+      img.loading = 'lazy';
+      img.referrerPolicy = 'no-referrer';
+      img.src = fixed;
+      img.alt = label || 'image';
+      img.addEventListener('click', (e)=>{ e.stopPropagation(); window.open(fixed, '_blank', 'noopener'); });
+      img.onerror = ()=>{ img.style.display='none'; };
+      wrap.appendChild(img);
+      return wrap;
     }
-  });
 
-  [inpTitle, teamsCount, autoNext, latexToggle, bgInput].forEach(el=>{
-    el.addEventListener('change', updatePreview);
-    el.addEventListener('input', ()=>{ if(el===inpTitle || el===bgInput) updatePreview(); });
-  });
-
-  document.getElementById('btnAdd').addEventListener('click', ()=> openEdit(null));
-  document.getElementById('btnClear').addEventListener('click', ()=>{
-    cfg.questions = [];
-    renderQuestionList();
-    updatePreview();
-  });
-
-  const editBack = document.getElementById('editBack');
-  const editHdr = document.getElementById('editHdr');
-  const editClose = document.getElementById('editClose');
-  const editPoints = document.getElementById('editPoints');
-  const editTimerMode = document.getElementById('editTimerMode');
-  const editTimerSec = document.getElementById('editTimerSec');
-  const editType = document.getElementById('editType');
-  const editText = document.getElementById('editText');
-  const editImg = document.getElementById('editImg');
-  const editAud = document.getElementById('editAud');
-  const choiceBox = document.getElementById('choiceBox');
-  const inputBox = document.getElementById('inputBox');
-  const editCorrect = document.getElementById('editCorrect');
-  const optList = document.getElementById('optList');
-
-  function closeEdit(){
-    editBack.classList.remove('on');
-    editingIndex = null;
+    // Audio: show as a link
+    const a = document.createElement('a');
+    a.className = 'mediaLink';
+    a.href = fixed;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = `${icon} ${label||''}`.trim();
+    return a;
   }
-  editClose.addEventListener('click', closeEdit);
-  document.getElementById('btnCancelQ').addEventListener('click', closeEdit);
-  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && editBack.classList.contains('on')) closeEdit(); });
-
-  function newQuestion(){
-    return {
-      type: 'choice',
-      text: '',
-      points: 10,
-      timerEnabled: false,
-      timerSeconds: 30,
-      image: '',
-      audio: '',
-      options: [
-        {text:'', correct:true},
-        {text:'', correct:false},
-        {text:'', correct:false}
-      ],
-      correct: ''
-    };
-  }
-
-  function renderOptions(q){
-    optList.innerHTML = '';
-    q.options = Array.isArray(q.options) && q.options.length ? q.options : [{text:'', correct:true}];
-    q.options.forEach((o, idx)=>{
-      const row = document.createElement('div');
-      row.className = 'qItem';
-      row.style.gridTemplateColumns = "1fr auto";
-      row.innerHTML = `
-        <div style="display:flex; align-items:center; gap:10px; min-width:0;">
-          <input type="text" placeholder="Текст ответа" value="${escapeHtml(o.text||'')}" />
-          <label style="margin:0; display:flex; align-items:center; gap:8px; white-space:nowrap; color:rgba(255,255,255,.78);">
-            <input type="radio" name="correctOpt" ${o.correct?'checked':''}/>
-            верный
-          </label>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <button class="iconBtn danger" title="Удалить">✕</button>
-        </div>
-      `;
-      const inp = row.querySelector('input[type="text"]');
-      inp.addEventListener('input', ()=>{ o.text = inp.value; });
-      const radio = row.querySelector('input[type="radio"]');
-      radio.addEventListener('change', ()=>{
-        q.options.forEach(x=>x.correct=false);
-        o.correct = true;
-      });
-      row.querySelector('.iconBtn.danger').addEventListener('click', ()=>{
-        q.options.splice(idx,1);
-        if(!q.options.some(x=>x.correct) && q.options[0]) q.options[0].correct = true;
-        renderOptions(q);
-      });
-      optList.appendChild(row);
-    });
-  }
-
-  function syncTypeUI(){
-    const t = editType.value;
-    if(t === 'input'){
-      choiceBox.style.display = 'none';
-      inputBox.style.display = 'block';
-    }else{
-      choiceBox.style.display = 'block';
-      inputBox.style.display = 'none';
-    }
-  }
-  editType.addEventListener('change', syncTypeUI);
-
-  function openEdit(index){
-    editingIndex = index;
-    const q = (index===null || index===undefined) ? newQuestion() : deepClone(cfg.questions[index]);
-
-    editHdr.textContent = (index===null || index===undefined) ? "Новый вопрос" : `Вопрос #${index+1}`;
-    editPoints.value = Number(q.points||10);
-    editTimerMode.value = q.timerEnabled ? 'on' : 'off';
-    editTimerSec.value = Number(q.timerSeconds||30);
-    editType.value = q.type || 'choice';
-    editText.value = q.text || '';
-    editImg.value = q.image || '';
-    editAud.value = q.audio || '';
-    editCorrect.value = q.correct || '';
-
-    syncTypeUI();
-    renderOptions(q);
-
-    document.getElementById('btnAddOpt').onclick = ()=>{
-      q.options.push({text:'', correct: q.options.length===0});
-      renderOptions(q);
-    };
-
-    document.getElementById('btnSaveQ').onclick = ()=>{
-      q.points = Number(editPoints.value||10);
-      q.timerEnabled = (editTimerMode.value === 'on');
-      q.timerSeconds = Number(editTimerSec.value||30);
-      q.type = editType.value;
-      q.text = editText.value || '';
-      q.image = (editImg.value || '').trim();
-      q.audio = (editAud.value || '').trim();
-      q.correct = (editCorrect.value || '').trim();
-
-      if(q.type === 'choice'){
-        q.options = (q.options||[]).map(x=>({text: x.text||'', correct: !!x.correct}));
-        if(!q.options.length) q.options = [{text:'', correct:true}];
-        if(!q.options.some(x=>x.correct)) q.options[0].correct = true;
-      }else{
-        q.options = [];
-      }
-
-      if(index===null || index===undefined){
-        cfg.questions.push(q);
-      }else{
-        cfg.questions[index] = q;
-      }
-      renderQuestionList();
-      updatePreview();
-      closeEdit();
-      toast("Вопрос сохранён");
-    };
-
-    editBack.classList.add('on');
-  }
-
-  renderQuestionList();
-  updatePreview();
-}
 
 /* ---------- Boot ---------- */
 (function boot(){
