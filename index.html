@@ -1189,6 +1189,10 @@ function mountGame(cfg){
     const lineOffset = Number(cfg?.targetLineOffset ?? 0); // percent points
     const lineJitter = Number(cfg?.targetLineJitter ?? 4); // percent points
 
+    // Precompute staggers and center them so "Разброс" doesn't move the whole line up/down
+    const staggers = pts.map((_,i)=>Math.sin((i+1)*0.9) * lineJitter * 2.0);
+    const meanStagger = staggers.reduce((a,b)=>a+b,0) / (staggers.length || 1);
+
     pts.forEach((p,i)=>{
       p.y = 22 + (p.y-22)*scaleY;
 
@@ -1196,8 +1200,8 @@ function mountGame(cfg){
       const wobX = Math.sin((i+1)*1.37) * 2.2;
       const wobY = Math.cos((i+1)*1.91) * 1.2;
 
-      // stagger line (not perfectly straight)
-      const stagger = Math.sin((i+1)*0.9) * lineJitter * 2.0;
+      // centered stagger (spread around the same baseline)
+      const stagger = staggers[i] - meanStagger;
 
       p.x += wobX;
       p.y += wobY + lineOffset + stagger;
