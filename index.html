@@ -947,8 +947,6 @@ const AudioKit = (() => {
       n.start(t0);
       n.stop(t0+0.19);
     } else {
-    document.body.classList.add('modeEditor');
-    document.body.classList.remove('modeGame'); // 'pif' default
       const osc = ctx.createOscillator();
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(520, t0);
@@ -1183,7 +1181,7 @@ function mountGame(cfg){
       const wobY = Math.cos((i+1)*1.91) * 1.2;
 
       // stagger line (not perfectly straight)
-      const stagger = Math.sin((i+1)*0.9) * lineJitter;
+      const stagger = Math.sin((i+1)*0.9) * lineJitter * 2.0;
 
       p.x += wobX;
       p.y += wobY + lineOffset + stagger;
@@ -1217,6 +1215,11 @@ function mountGame(cfg){
       `;
       el.addEventListener('click', async ()=>{
         if(hit.has(i)) return;
+        try{
+          await AudioKit.unlock();
+          AudioKit.setVolume(cfg?.shot?.volume ?? 0.7);
+          AudioKit.playVariant(cfg?.shot?.variant ?? 'pif');
+        }catch(e){}
         await openQuestion(i);
       });
       targetsEl.appendChild(el);
@@ -1497,7 +1500,7 @@ function mountEditor(){
                 </div>
               <div class="field">
                 <label>Разброс</label>
-                <input id="targetLineJitter" class="range" type="range" min="0" max="10" step="1" value="4" />
+                <input id="targetLineJitter" class="range" type="range" min="0" max="40" step="1" value="8" />
                 </div>
             </div>
 
