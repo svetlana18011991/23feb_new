@@ -1492,15 +1492,13 @@ function mountEditor(){
 
             <div class="row" style="margin-top:10px;">
               <div class="field">
-                <label>Высота мишеней</label>
+                <label>Высота мишени</label>
                 <input id="targetLineY" class="range" type="range" min="0" max="100" step="1" value="50" />
-                <div class="hint">Сдвигает мишени выше/ниже (в % экрана). 0 — по умолчанию.</div>
-              </div>
+                </div>
               <div class="field">
-                <label>Разброс мишеней</label>
+                <label>Разброс</label>
                 <input id="targetLineJitter" class="range" type="range" min="0" max="10" step="1" value="4" />
-                <div class="hint">Делает линию «живой»: одни мишени чуть выше, другие ниже.</div>
-              </div>
+                </div>
             </div>
 
           </div>
@@ -1681,7 +1679,7 @@ if (targetInput && !targetInput.value) targetInput.value = targetSelect?.value |
     cfg.latex = (latexToggle.value === 'true');
     cfg.bg = (bgInput.value || "2.png").trim();
     cfg.targetFile = (targetInput?.value || "13.png").trim();
-    cfg.targetLineOffset = Number(targetLineY?.value ?? 0);
+    cfg.targetLineOffset = (50 - Number(targetLineY?.value ?? 50));
     cfg.targetLineJitter = Number(targetLineJitter?.value ?? 4);
     cfg.shot.variant = shotVariant.value;
     cfg.shot.volume = clamp(Number(shotVol.value||0.7),0,1);
