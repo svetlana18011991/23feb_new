@@ -764,7 +764,80 @@ body.game-cursor { cursor: none !important; }
 .hudGoals{animation:goalFloat 3.8s ease-in-out infinite;}
 @keyframes goalFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 
-</style>
+
+    /* Hit FX */
+    .hitFx{
+      position:absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 2px solid rgba(255,255,255,.9);
+      box-shadow: 0 0 0 2px rgba(255,255,255,.12), 0 0 18px rgba(255,255,255,.25);
+      transform: translate(-50%,-50%) scale(.6);
+      opacity: 0.95;
+      pointer-events:none;
+      animation: hitRing .32s ease-out forwards;
+      mix-blend-mode: screen;
+    }
+    @keyframes hitRing{
+      0%   { transform: translate(-50%,-50%) scale(.45); opacity:.95; }
+      100% { transform: translate(-50%,-50%) scale(2.6); opacity:0; }
+    }
+
+    .target.punch{
+      animation: punch .14s ease-out;
+    }
+    @keyframes punch{
+      0%   { transform: translate(-50%,-50%) scale(1); }
+      60%  { transform: translate(-50%,-50%) scale(1.10); }
+      100% { transform: translate(-50%,-50%) scale(1); }
+    }
+
+    /* When question is taken (hit), hide it completely */
+    .target.hit{
+      opacity: 0;
+      transform: translate(-50%,-50%) scale(.2);
+      pointer-events:none;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+
+    /* Camera shake (very subtle) */
+    .arena.shakeHit{ animation: shakeHit .12s linear; }
+    .arena.shakeMiss{ animation: shakeMiss .14s linear; }
+    @keyframes shakeHit{
+      0%{ transform: translate(0,0); }
+      25%{ transform: translate(0.8px,-0.6px); }
+      50%{ transform: translate(-0.7px,0.6px); }
+      75%{ transform: translate(0.6px,0.5px); }
+      100%{ transform: translate(0,0); }
+    }
+    @keyframes shakeMiss{
+      0%{ transform: translate(0,0); }
+      20%{ transform: translate(1.2px,0.2px); }
+      40%{ transform: translate(-1.0px,-0.3px); }
+      60%{ transform: translate(0.8px,0.3px); }
+      80%{ transform: translate(-0.6px,-0.2px); }
+      100%{ transform: translate(0,0); }
+    }
+
+    /* Modal image */
+    .qImg{
+      margin-top: 10px;
+      border-radius: 14px;
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.25);
+    }
+    .qImg img{
+      display:block;
+      width:100%;
+      height:auto;
+      max-height: 46vh;
+      object-fit: contain;
+      background: rgba(0,0,0,.15);
+    }
+
+  </style>
 </head>
 <body>
   <div class="topBrand" aria-hidden="true">
@@ -1132,7 +1205,32 @@ function mountGame(cfg){
   let countdownId = null;
   let timeLeft = 0;
 
-  const teamsEl = document.getElementById('teams');
+  
+  const arenaEl = document.getElementById('arena') || document.querySelector('.arena');
+
+  function shake(kind){
+    if(!arenaEl) return;
+    const cls = kind==='miss' ? 'shakeMiss' : 'shakeHit';
+    arenaEl.classList.remove('shakeHit','shakeMiss');
+    // restart animation
+    void arenaEl.offsetWidth;
+    arenaEl.classList.add(cls);
+    setTimeout(()=>arenaEl.classList.remove(cls), 220);
+  }
+
+  function spawnHitFx(clientX, clientY){
+    if(!arenaEl) return;
+    const r = arenaEl.getBoundingClientRect();
+    const x = clientX - r.left;
+    const y = clientY - r.top;
+    const fx = document.createElement('div');
+    fx.className = 'hitFx';
+    fx.style.left = x + 'px';
+    fx.style.top = y + 'px';
+    arenaEl.appendChild(fx);
+    fx.addEventListener('animationend', ()=>fx.remove(), {once:true});
+  }
+const teamsEl = document.getElementById('teams');
   const targetsEl = document.getElementById('targets');
   const hudTargets = document.getElementById('hudTargets');
   const turnTeamEl = document.getElementById('turnTeam');
@@ -1233,8 +1331,11 @@ function mountGame(cfg){
         <div class="tNum">${i+1}</div>
         <div class="tPts">${Number(q.points||10)} очк.</div>
       `;
-      el.addEventListener('click', async ()=>{
+      el.addEventListener('click', async (e)=>{
         if(hit.has(i)) return;
+        try{ el.classList.remove('punch'); void el.offsetWidth; el.classList.add('punch'); }catch(err){}
+        try{ if(e) spawnHitFx(e.clientX, e.clientY); }catch(err){}
+        try{ shake('hit'); }catch(err){}
         try{
           await AudioKit.unlock();
           AudioKit.setVolume(cfg?.shot?.volume ?? 0.7);
@@ -1327,6 +1428,22 @@ function mountGame(cfg){
       await ensureKatex();
       qText.innerHTML = q.text ? String(q.text) : '';
     }
+
+    // Show image inside the task (if provided)
+    const oldImg = document.getElementById('qImgWrap');
+    if(oldImg) oldImg.remove();
+    if(q.image){
+      const wrap = document.createElement('div');
+      wrap.className = 'qImg';
+      wrap.id = 'qImgWrap';
+      const img = document.createElement('img');
+      img.alt = 'Картинка к заданию';
+      img.src = q.image;
+      img.onerror = ()=>{ wrap.style.display='none'; };
+      wrap.appendChild(img);
+      qText.insertAdjacentElement('afterend', wrap);
+    }
+
 
     if(q.image){
       qMedia.appendChild(makeMediaTag('🖼️', 'картинка', q.image));
