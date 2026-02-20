@@ -1457,7 +1457,7 @@ function mountEditor(){
                 </select>
               </div>
               <div>
-                <label>Фон игры</label>
+                <label>Выбери фон</label>
                 <select id="bgSelect" class="select">
                   <option value="1.png">1</option>
                   <option value="2.png" selected>2</option>
@@ -1471,10 +1471,9 @@ function mountEditor(){
                 <input id="bgInput" type="hidden" value="2.png"/>
               </div>
             </div>
-            <div class="help">Если файл лежит рядом с <b>index.html</b> — достаточно имени. Важно точное имя файла.</div>
-            <div class="row">
+<div class="row">
               <div class="field">
-                <label>Мишени (картинка)</label>
+                <label>Выбери мишень</label>
                 <select id="targetSelect" class="select">
                   <option value="10.png">10</option>
                   <option value="11.png">11</option>
@@ -1493,12 +1492,12 @@ function mountEditor(){
 
             <div class="row" style="margin-top:10px;">
               <div class="field">
-                <label>Высота линии мишеней</label>
-                <input id="targetLineY" class="range" type="range" min="-12" max="12" step="1" value="0" />
+                <label>Высота мишеней</label>
+                <input id="targetLineY" class="range" type="range" min="0" max="100" step="1" value="50" />
                 <div class="hint">Сдвигает мишени выше/ниже (в % экрана). 0 — по умолчанию.</div>
               </div>
               <div class="field">
-                <label>Разброс по высоте</label>
+                <label>Разброс мишеней</label>
                 <input id="targetLineJitter" class="range" type="range" min="0" max="10" step="1" value="4" />
                 <div class="hint">Делает линию «живой»: одни мишени чуть выше, другие ниже.</div>
               </div>
