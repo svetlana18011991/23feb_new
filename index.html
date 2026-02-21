@@ -150,6 +150,15 @@
       gap:10px;
     }
     .row1{display:grid; grid-template-columns: 1fr; gap:10px;}
+    
+    /* === РАСПОЛОЖЕНИЕ БЕГУНКОВ В ДВЕ КОЛОНКИ === */
+    .orbit-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
     label{
       display:block;
       font-size:12px;
@@ -189,22 +198,22 @@
       background: rgba(255, 255, 255, 0.03) !important;
       border: 1px solid rgba(255, 138, 42, 0.15) !important;
       border-radius: 16px !important;
-      padding: 16px !important;
-      margin-bottom: 12px !important;
+      padding: 14px !important;
+      margin-bottom: 0px !important; /* Убрано для сетки */
     }
     .field-card label {
       display: block;
       font-weight: 800;
-      font-size: 14px !important;
+      font-size: 13px !important;
       color: #fff !important;
       margin-bottom: 12px !important;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.2px;
     }
     .field-card .hint {
-      font-size: 12px;
-      color: rgba(232, 238, 247, 0.55);
+      font-size: 11px;
+      color: rgba(232, 238, 247, 0.5);
       margin-top: 10px;
-      line-height: 1.4;
+      line-height: 1.3;
     }
     input[type="range"].range {
       -webkit-appearance: none;
@@ -689,9 +698,7 @@
     }
     .modal::after{
       content:"";
-      position:absolute;
-      inset:0;
-      border-radius: 22px;
+      position:absolute; inset:0; border-radius: 22px;
       pointer-events:none;
       box-shadow: inset 0 0 0 1px rgba(255,138,42,.22), inset 0 0 34px rgba(255,138,42,.10);
     }
@@ -700,369 +707,47 @@
       padding: 14px 16px;
       background: linear-gradient(90deg, rgba(255,138,42,.18), rgba(255,138,42,.06) 40%, rgba(255,138,42,0));
       border-bottom:1px solid rgba(255,138,42,.22);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
     }
-    .modalHeader .h{
-      font-weight:900;
-      font-size:14px;
-      color: rgba(255,255,255,.92);
-    }
+    .modalHeader .h{ font-weight:900; font-size:14px; color: rgba(255,255,255,.92); }
     .modalClose{
-      border-radius: 14px;
-      padding:8px 12px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.92);
-      cursor:pointer;
+      border-radius: 14px; padding:8px 12px; border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06); color: rgba(255,255,255,.92); cursor:pointer;
     }
     .modalClose:hover{
-      border-color: rgba(255,138,42,.40);
-      background: rgba(255,138,42,.10);
+      border-color: rgba(255,138,42,.40); background: rgba(255,138,42,.10);
       box-shadow: 0 0 0 1px rgba(255,138,42,.18), 0 0 18px rgba(255,138,42,.20);
     }
-    .modalClose:focus-visible{
-      outline:none;
-      box-shadow: 0 0 0 2px rgba(255,138,42,.32), 0 0 22px rgba(255,138,42,.22);
-    }
-    .modalBody{
-      padding: 16px;
-      display:grid;
-      gap:12px;
-      overflow:auto;
-      flex:1;
-      min-height:0;
-    }
-    .qText{
-      font-weight:900;
-      font-size:18px;
-      line-height:1.2;
-      font-family: var(--qFont), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
-    .mediaRow{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      color: rgba(255,255,255,.8);
-      font-size:12px;
-    }
-    .mediaTag{
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      padding:7px 10px;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-    }
-    .answers{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
-    }
-    @media (max-width: 720px){
-      .answers{grid-template-columns:1fr}
-    }
+    .modalBody{ padding: 16px; display:grid; gap:12px; overflow:auto; flex:1; min-height:0; }
+    .qText{ font-weight:900; font-size:18px; line-height:1.2; font-family: var(--qFont), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    .answers{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    @media (max-width: 720px){ .answers{grid-template-columns:1fr} }
     .ansBtn{
-      text-align:left;
-      padding:14px 14px;
-      border-radius: 18px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.92);
-      cursor:pointer;
-      position:relative;
-      display:flex;
-      gap:12px;
-      align-items:flex-start;
+      text-align:left; padding:14px 14px; border-radius: 18px; border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06); color: rgba(255,255,255,.92); cursor:pointer;
+      position:relative; display:flex; gap:12px; align-items:flex-start;
       font-family: var(--aFont), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
     .ansBtn:hover{ background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.16);}
     .ansKey{
-      width: 30px; height: 30px;
-      border-radius: 999px;
-      border: 1px solid rgba(202,162,77,.50);
-      display:grid; place-items:center;
-      font-weight:900;
-      color: rgba(255,232,190,.95);
-      flex:0 0 auto;
+      width: 30px; height: 30px; border-radius: 999px; border: 1px solid rgba(202,162,77,.50);
+      display:grid; place-items:center; font-weight:900; color: rgba(255,232,190,.95); flex:0 0 auto;
     }
     .ansText{ font-weight:700; line-height:1.25; font-family: var(--aFont), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    .inputRow{
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .inputRow input{
-      flex:1;
-      padding:12px 14px;
-      border-radius: 16px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.92);
-      font-weight:700;
-      outline:none;
-      font-family: var(--aFont), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
-    .primary{
-      border-radius: 16px;
-      padding: 12px 14px;
-      border:1px solid rgba(202,162,77,.55);
-      background: rgba(202,162,77,.18);
-      color: rgba(255,245,225,.95);
-      font-weight:900;
-      cursor:pointer;
-    }
-    .secondary{
-      border-radius: 16px;
-      padding: 12px 14px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.92);
-      font-weight:800;
-      cursor:pointer;
-    }
+    .primary{ border-radius: 16px; padding: 12px 14px; border:1px solid rgba(202,162,77,.55); background: rgba(202,162,77,.18); color: rgba(255,245,225,.95); font-weight:900; cursor:pointer; }
+    .secondary{ border-radius: 16px; padding: 12px 14px; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); color: rgba(255,255,255,.92); font-weight:800; cursor:pointer; }
 
-    /* Timer badge top-center */
-    .timerBadge{
-      position:absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 8px 12px;
-      border-radius: 999px;
-      border:1px solid rgba(255,166,60,.55);
-      background: rgba(255,166,60,.12);
-      color: rgba(255,230,190,.95);
-      font-weight:900;
-      font-size:14px;
-      letter-spacing:.2px;
-      display:none;
-      align-items:center;
-      gap:10px;
-    }
-    .timerBadge.on{
-      display:flex;
-      animation: pulseOrange 1.6s ease-in-out infinite;
-    }
-    @keyframes pulseOrange{
-      0%{ box-shadow: 0 0 0 0 rgba(255,166,60,.0) }
-      35%{ box-shadow: 0 0 0 10px rgba(255,166,60,.14) }
-      70%{ box-shadow: 0 0 0 0 rgba(255,166,60,.0) }
-      100%{ box-shadow: 0 0 0 0 rgba(255,166,60,.0) }
-    }
-
-    /* Small toast */
     .toast{
-      position:fixed;
-      left:50%;
-      bottom:18px;
-      transform: translateX(-50%);
-      padding:10px 12px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.45);
-      color: rgba(255,255,255,.92);
-      backdrop-filter: blur(10px);
-      display:none;
-      z-index: 60;
-      font-weight:700;
-      font-size:13px;
+      position:fixed; left:50%; bottom:18px; transform: translateX(-50%); padding:10px 12px;
+      border-radius: 14px; border:1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.45);
+      color: rgba(255,255,255,.92); backdrop-filter: blur(10px); display:none; z-index: 60; font-weight:700; font-size:13px;
     }
     .toast.on{ display:block; }
   
-/* --- Cursor: crosshair inside game/preview --- */
-#previewFrame { cursor: crosshair; }
-body[data-mode="game"] .gameRoot,
-body[data-mode="game"] .gameRoot * { cursor: crosshair; }
-body[data-mode="game"] .gameRoot input,
-body[data-mode="game"] .gameRoot textarea { cursor: text; }
-body[data-mode="game"] .gameRoot a { cursor: pointer; }
-
-
-/* ==== Custom crosshair (works inside Genially overlays) ==== */
-body.game-cursor { cursor: none !important; }
-#aimCursor{
-  position: fixed;
-  left: -100px;
-  top: -100px;
-  width: 54px;
-  height: 54px;
-  transform: translate(-50%,-50%);
-  pointer-events: none;
-  z-index: 2147483647;
-  opacity: 0;
-  transition: opacity .12s ease;
-}
-#aimCursor .ring{
-  position:absolute; inset:0;
-  border: 2px solid rgba(255,190,90,.9);
-  border-radius: 999px;
-  box-shadow: 0 0 0 2px rgba(0,0,0,.35), 0 0 16px rgba(255,170,60,.18);
-  background: radial-gradient(circle at 50% 50%, rgba(255,190,90,.08), transparent 60%);
-}
-#aimCursor .h, #aimCursor .v{
-  position:absolute;
-  left:50%; top:50%;
-  background: rgba(255,190,90,.95);
-  box-shadow: 0 0 10px rgba(255,170,60,.25);
-}
-#aimCursor .h{ width: 64px; height: 2px; transform: translate(-50%,-50%); }
-#aimCursor .v{ width: 2px; height: 64px; transform: translate(-50%,-50%); }
-#aimCursor .dot{
-  position:absolute; left:50%; top:50%;
-  width: 6px; height: 6px;
-  border-radius: 999px;
-  transform: translate(-50%,-50%);
-  background: rgba(255,190,90,.95);
-}
-
-
-.cornerLogo{position:fixed;top:14px;right:14px;z-index:1000;width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 8px 18px rgba(0,0,0,.45));opacity:.95;pointer-events:none;}
-
-/* v27 tweaks */
-.topBrand{position:fixed;left:18px;top:14px;z-index:9999;pointer-events:none;opacity:.98;filter:drop-shadow(0 10px 24px rgba(0,0,0,.55));display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:14px;background:linear-gradient(180deg, rgba(18,24,33,.58), rgba(10,12,16,.35));border:1px solid rgba(255,255,255,.12);backdrop-filter: blur(8px);}
+    .topBrand{position:fixed;left:18px;top:14px;z-index:9999;pointer-events:none;opacity:.98;filter:drop-shadow(0 10px 24px rgba(0,0,0,.55));display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:14px;background:linear-gradient(180deg, rgba(18,24,33,.58), rgba(10,12,16,.35));border:1px solid rgba(255,255,255,.12);backdrop-filter: blur(8px);}
     .modeGame .topBrand{ display:none; }
-.topBrand img{height:34px;width:auto;border-radius:10px;display:block;}
-.topBrand span{font-weight:800;font-size:13px;letter-spacing:.2px;color:rgba(255,255,255,.92);text-shadow:0 8px 22px rgba(0,0,0,.55);}
-/* stronger 3D/parallax background */
-.arenaBg{will-change:transform,filter;transform:translate3d(var(--bgx,0px),var(--bgy,0px),0) scale(1.10);filter:saturate(1.05) contrast(1.08);}
-.arenaBg::after{content:"";position:absolute;inset:0;background:radial-gradient(1200px 600px at 40% 35%, rgba(255,255,255,.10), rgba(0,0,0,.45) 65%, rgba(0,0,0,.70));mix-blend-mode:overlay;pointer-events:none;}
-.hudGoals{animation:goalFloat 3.8s ease-in-out infinite;}
-@keyframes goalFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-
-
-    /* Hit FX */
-    .hitFx{
-      position:absolute;
-      width: 2px;
-      height: 2px;
-      transform: translate(-50%,-50%);
-      pointer-events:none;
-      mix-blend-mode: screen;
-      animation: hitFxFade .52s ease-out forwards;
-    }
-    @keyframes hitFxFade{
-      0%{ opacity:1; }
-      100%{ opacity:0; }
-    }
-    .hitFx .hitCore{
-      position:absolute;
-      left:0; top:0;
-      width: 10px; height: 10px;
-      border-radius: 999px;
-      transform: translate(-50%,-50%);
-      background: radial-gradient(circle, rgba(255,255,255,.95), rgba(255,200,80,.55) 45%, rgba(255,120,0,.0) 72%);
-      filter: drop-shadow(0 0 10px rgba(255,140,0,.6));
-      animation: hitCore .52s ease-out forwards;
-    }
-    @keyframes hitCore{
-      0%{ transform: translate(-50%,-50%) scale(.9); opacity:1; }
-      60%{ transform: translate(-50%,-50%) scale(1.3); opacity:.95; }
-      100%{ transform: translate(-50%,-50%) scale(1.8); opacity:0; }
-    }
-    .hitFx .hitRing{
-      position:absolute;
-      left:0; top:0;
-      width: 16px; height: 16px;
-      border-radius: 999px;
-      transform: translate(-50%,-50%) scale(.4);
-      border: 2px solid rgba(255,255,255,.85);
-      box-shadow: 0 0 22px rgba(255,140,0,.45);
-      animation: hitRingA .52s ease-out forwards;
-    }
-    .hitFx .hitRing.r2{
-      width: 24px; height: 24px;
-      border-color: rgba(255,180,80,.70);
-      animation-name: hitRingB;
-    }
-    @keyframes hitRingA{
-      0%{ transform: translate(-50%,-50%) scale(.35); opacity:.95; }
-      100%{ transform: translate(-50%,-50%) scale(3.1); opacity:0; }
-    }
-    @keyframes hitRingB{
-      0%{ transform: translate(-50%,-50%) scale(.25); opacity:.85; }
-      100%{ transform: translate(-50%,-50%) scale(2.4); opacity:0; }
-    }
-    .hitFx .hitSparks{
-      position:absolute;
-      left:0; top:0;
-      width: 1px; height: 1px;
-      transform: translate(-50%,-50%);
-    }
-    .hitFx .hitSparks .sp{
-      position:absolute;
-      left:0; top:0;
-      width: 4px; height: 14px;
-      border-radius: 6px;
-      transform: rotate(var(--a)) translateY(-8px);
-      transform-origin: 0 0;
-      background: linear-gradient(to bottom, rgba(255,255,255,.95), rgba(255,160,40,.75), rgba(255,120,0,0));
-      filter: drop-shadow(0 0 10px rgba(255,140,0,.55));
-      animation: spark .52s ease-out forwards;
-    }
-    @keyframes spark{
-      0%{ opacity:1; transform: rotate(var(--a)) translateY(-6px) scaleY(.75); }
-      100%{ opacity:0; transform: rotate(var(--a)) translateY(-46px) scaleY(1.1); }
-    }
-      100% { transform: translate(-50%,-50%) scale(2.6); opacity:0; }
-    }
-
-    .target.punch{
-      animation: punch .14s ease-out;
-    }
-    @keyframes punch{
-      0%   { transform: translate(-50%,-50%) translate(var(--orbit-x,0px), var(--orbit-y,0px)) scale(1); }
-      60%  { transform: translate(-50%,-50%) translate(var(--orbit-x,0px), var(--orbit-y,0px)) scale(1.10); }
-      100% { transform: translate(-50%,-50%) translate(var(--orbit-x,0px), var(--orbit-y,0px)) scale(1); }
-    }
-
-    /* When question is taken (hit), hide it completely */
-    .target.hit{
-      opacity: 0;
-      transform: translate(-50%,-50%) scale(.2);
-      pointer-events:none;
-      transition: opacity .18s ease, transform .18s ease;
-    }
-
-    /* Camera shake (very subtle) */
-    .arena.shakeHit{ animation: shakeHit .12s linear; }
-    .arena.shakeMiss{ animation: shakeMiss .14s linear; }
-    @keyframes shakeHit{
-      0%{ transform: translate(0,0); }
-      25%{ transform: translate(0.8px,-0.6px); }
-      50%{ transform: translate(-0.7px,0.6px); }
-      75%{ transform: translate(0.6px,0.5px); }
-      100%{ transform: translate(0,0); }
-    }
-    @keyframes shakeMiss{
-      0%{ transform: translate(0,0); }
-      20%{ transform: translate(1.2px,0.2px); }
-      40%{ transform: translate(-1.0px,-0.3px); }
-      60%{ transform: translate(0.8px,0.3px); }
-      80%{ transform: translate(-0.6px,-0.2px); }
-      100%{ transform: translate(0,0); }
-    }
-
-    /* Modal image */
-    .qImg{
-      margin-top: 10px;
-      border-radius: 14px;
-      overflow:hidden;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.25);
-    }
-    .qImg img{
-      display:block;
-      width:100%;
-      height:auto;
-      max-height: 46vh;
-      object-fit: contain;
-      background: rgba(0,0,0,.15);
-    }
+    .topBrand img{height:34px;width:auto;border-radius:10px;display:block;}
+    .topBrand span{font-weight:800;font-size:13px;letter-spacing:.2px;color:rgba(255,255,255,.92);text-shadow:0 8px 22px rgba(0,0,0,.55);}
 
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1079,19 +764,6 @@ body.game-cursor { cursor: none !important; }
 <div class="toast" id="toast"></div>
 
 <script>
-  // Hide brand inside game iframe (keep only in editor)
-  try {
-    if (typeof isGameMode === 'function' && isGameMode()) {
-      const tb = document.querySelector('.topBrand');
-      if (tb) tb.style.display = 'none';
-    }
-  } catch (e) {}
-
-/* ===========================
-   Математический тир
-   Version 23 — editor+game
-   =========================== */
-
 const VERSION = 24;
 
 /* ---------- helpers ---------- */
@@ -1181,7 +853,7 @@ function renderLatexIn(el){
   }catch(e){}
 }
 
-/* ---------- Shot sound (WebAudio synth, no infinite loop) ---------- */
+/* ---------- Shot sound (WebAudio synth) ---------- */
 const AudioKit = (() => {
   let ctx = null;
   let master = null;
@@ -1217,7 +889,7 @@ const AudioKit = (() => {
     out.gain.value = 1.25;
     out.connect(master);
 
-    if(variant === 'pif'){ // short 'pif'
+    if(variant === 'pif'){
       const osc = ctx.createOscillator();
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(620, t0);
@@ -1233,7 +905,7 @@ const AudioKit = (() => {
       osc.connect(g).connect(f).connect(out);
       osc.start(t0);
       osc.stop(t0+0.10);
-    } else if(variant === 'snap'){ // click
+    } else if(variant === 'snap'){
       const osc = ctx.createOscillator();
       osc.type = 'square';
       osc.frequency.setValueAtTime(220, t0);
@@ -1245,7 +917,7 @@ const AudioKit = (() => {
       osc.connect(g).connect(out);
       osc.start(t0);
       osc.stop(t0+0.09);
-    } else if(variant === 'boom'){ // low thump + noise
+    } else if(variant === 'boom'){
       const osc = ctx.createOscillator();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(90, t0);
@@ -1269,30 +941,6 @@ const AudioKit = (() => {
       n.connect(nf).connect(ng).connect(out);
       n.start(t0);
       n.stop(t0+0.19);
-    } else {
-      const osc = ctx.createOscillator();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(520, t0);
-      osc.frequency.exponentialRampToValueAtTime(220, t0+0.08);
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0.0001, t0);
-      g.gain.exponentialRampToValueAtTime(0.85, t0+0.012);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0+0.12);
-      osc.connect(g).connect(out);
-      osc.start(t0);
-      osc.stop(t0+0.14);
-
-      const n = ctx.createBufferSource();
-      n.buffer = noiseBuffer();
-      const bp = ctx.createBiquadFilter();
-      bp.type = 'bandpass'; bp.frequency.setValueAtTime(1800, t0); bp.Q.value = 3;
-      const ng = ctx.createGain();
-      ng.gain.setValueAtTime(0.0001, t0);
-      ng.gain.exponentialRampToValueAtTime(0.25, t0+0.01);
-      ng.gain.exponentialRampToValueAtTime(0.0001, t0+0.09);
-      n.connect(bp).connect(ng).connect(out);
-      n.start(t0);
-      n.stop(t0+0.10);
     }
 
     out.gain.setValueAtTime(1, t0);
@@ -1303,61 +951,13 @@ const AudioKit = (() => {
   return { ensure, unlock, setVolume, playVariant };
 })();
 
-/* ---------- App mode detection ---------- */
 const params = new URLSearchParams(location.search);
 const isGame = params.has('game');
 
-// Hide editor branding inside the GAME iframe
 if (isGame) {
     document.body.classList.add('modeGame');
     document.body.classList.remove('modeEditor');
-  const hb = document.getElementById('headerBrand');
-  if (hb) hb.style.display = 'none';
 }
-
-
-// ===== Crosshair overlay (needed for Genially where CSS cursor can be ignored) =====
-function enableCrosshairOverlay(){
-  if(document.getElementById('aimCursor')) return;
-  document.body.classList.add('game-cursor');
-
-  const el = document.createElement('div');
-  el.id = 'aimCursor';
-  el.innerHTML = '<div class="ring"></div><div class="h"></div><div class="v"></div><div class="dot"></div>';
-  document.body.appendChild(el);
-
-  const arena = document.getElementById('arena') || document.body;
-
-  const show = () => { el.style.opacity = '1'; };
-  const hide = () => { el.style.opacity = '0'; };
-
-  const move = (e) => {
-    // Use clientX/Y so it works in iframes and Genially embeds
-    el.style.left = e.clientX + 'px';
-    el.style.top  = e.clientY + 'px';
-    // show on first move
-    if(el.style.opacity !== '1') el.style.opacity = '1';
-  };
-
-  // Prefer listening on arena; also listen on window as fallback
-  arena.addEventListener('mousemove', move, {passive:true});
-  window.addEventListener('mousemove', move, {passive:true});
-
-  arena.addEventListener('mouseenter', show, {passive:true});
-  arena.addEventListener('mouseleave', hide, {passive:true});
-
-  // Touch devices: keep default cursor (no-op)
-  if('ontouchstart' in window){
-    document.body.classList.remove('game-cursor');
-    el.remove();
-  }
-}
-
-if(isGame){
-  // Delay to ensure #arena exists
-  setTimeout(enableCrosshairOverlay, 0);
-}
-
 
 /* ===========================
    GAME MODE
@@ -1368,462 +968,97 @@ function mountGame(cfg){
     <div class="gameRoot">
       <div class="arena" id="arena">
         <div class="arenaBg arenaBg3d" id="arenaBg"></div>
-
         <div class="hud">
           <div class="hudLeft">
             <div class="gameTitle" id="gTitle"></div>
-            <div class="gameHint">Выберите команду → наведите прицел → выстрелите → ответьте</div>
           </div>
           <div class="hudRight">
-            <div class="hudStat" id="hudTurn">Сейчас стреляет: <b id="turnTeam">—</b></div>
-            <div class="hudStat hudGoals">Цели: <b id="hudTargets">0/0</b></div>
-            <button class="pillBtn" id="btnHelp">Инструкция</button>
+            <div class="hudStat" id="hudTurn">Стреляет: <b id="turnTeam">—</b></div>
             <button class="pillBtn" id="btnReset">Сброс</button>
           </div>
         </div>
-
         <div class="teams" id="teams"></div>
-
         <div class="targets" id="targets"></div>
-
         <div class="modalBackdrop" id="modalBack">
           <div class="modal">
-            <div class="timerBadge" id="timerBadge">⏱ <span id="timerText">30</span> сек</div>
             <div class="modalHeader">
               <div class="h" id="qHeader">Вопрос</div>
               <button class="modalClose" id="btnClose">Esc</button>
             </div>
             <div class="modalBody">
               <div class="qText" id="qText"></div>
-              <div class="mediaRow" id="qMedia"></div>
               <div id="answersWrap"></div>
             </div>
           </div>
         </div>
-
-        <div class="versionBadge">Версия ${VERSION} • game</div>
       </div>
     </div>
   `;
 
-  const arena = document.getElementById('arena');
   const bg = document.getElementById('arenaBg');
+  bg.style.backgroundImage = cfg.bg ? `url("${cfg.bg}")` : 'none';
 
-  function setBg(){
-    const u = cfg.bg || "";
-    bg.style.backgroundImage = u ? `url("${u}")` : 'none';
-  }
-  setBg();
-
-  function setFonts(){
-    const qf = (cfg.qFont || 'Roboto');
-    const af = (cfg.aFont || 'Roboto');
-    document.documentElement.style.setProperty('--qFont', qf);
-    document.documentElement.style.setProperty('--aFont', af);
-  }
-  setFonts();
-
-  // Parallax 3d
-  arena.addEventListener('mousemove', (e)=>{
-    const r = arena.getBoundingClientRect();
-    const x = (e.clientX - r.left)/r.width - 0.5;
-    const y = (e.clientY - r.top)/r.height - 0.5;
-    bg.style.transform = `scale(1.08) translate(${x*10}px, ${y*10}px)`;
-  });
-  arena.addEventListener('mouseleave', ()=> bg.style.transform = `scale(1.06)`);
-
-  document.getElementById('gTitle').textContent = cfg.title || "Математический тир";
-
-  // state
   const teamCount = clamp(Number(cfg.teamsCount||2),1,3);
-  const teamNames = Array.from({length: teamCount}, (_,i)=>`Команда ${i+1}`);
-  const scores = Array.from({length: teamCount}, ()=>0);
   let currentTeam = 0;
-
-  // targets = one per question
-  const questions = Array.isArray(cfg.questions)? cfg.questions : [];
+  let scores = Array(teamCount).fill(0);
   const hit = new Set();
-  let activeQIndex = null;
-  let countdownId = null;
-  let timeLeft = 0;
+  const questions = cfg.questions || [];
 
-  
-  const arenaEl = document.getElementById('arena') || document.querySelector('.arena');
-
-  function shake(kind){
-    if(!arenaEl) return;
-    const cls = kind==='miss' ? 'shakeMiss' : 'shakeHit';
-    arenaEl.classList.remove('shakeHit','shakeMiss');
-    // restart animation
-    void arenaEl.offsetWidth;
-    arenaEl.classList.add(cls);
-    setTimeout(()=>arenaEl.classList.remove(cls), 220);
-  }
-
-  function spawnHitFx(clientX, clientY){
-    if(!arenaEl) return;
-    const r = arenaEl.getBoundingClientRect();
-    const x = clientX - r.left;
-    const y = clientY - r.top;
-
-    const fx = document.createElement('div');
-    fx.className = 'hitFx';
-    fx.style.left = x + 'px';
-    fx.style.top = y + 'px';
-
-    // Neon burst: rings + sparks
-    let sparks = '';
-    for(let i=0;i<10;i++){
-      sparks += '<span class="sp" style="--a:' + (i*36) + 'deg"></span>';
-    }
-    fx.innerHTML = ''
-      + '<div class="hitRing r1"></div>'
-      + '<div class="hitRing r2"></div>'
-      + '<div class="hitCore"></div>'
-      + '<div class="hitSparks">' + sparks + '</div>';
-
-    arenaEl.appendChild(fx);
-    fx.addEventListener('animationend', ()=>fx.remove(), {once:true});
-  }
-const teamsEl = document.getElementById('teams');
-  const targetsEl = document.getElementById('targets');
-  const hudTargets = document.getElementById('hudTargets');
-  const turnTeamEl = document.getElementById('turnTeam');
-
-  function renderTeams(){
-    teamsEl.style.gridTemplateColumns = `repeat(${teamCount}, minmax(0,1fr))`;
-    teamsEl.innerHTML = '';
-    for(let i=0;i<teamCount;i++){
-      const card = document.createElement('div');
-      card.className = 'teamCard';
-      card.innerHTML = `
-        <div style="display:flex; align-items:center; gap:10px; min-width:0;">
-          <input class="teamNameInput" value="${teamNames[i]}" aria-label="Название команды ${i+1}"/>
-          <div class="teamNow"><span class="dot ${i===currentTeam?'on':''}"></span> ${i===currentTeam?'Сейчас':'Не сейчас'}</div>
-        </div>
-        <div class="teamScore" id="score_${i}">${scores[i]}</div>
-      `;
-      const inp = card.querySelector('input');
-      inp.addEventListener('input', ()=>{ teamNames[i] = inp.value || `Команда ${i+1}`; renderTurn(); });
-      teamsEl.appendChild(card);
-    }
-  }
-  function renderTurn(){
-    turnTeamEl.textContent = teamNames[currentTeam] || `Команда ${currentTeam+1}`;
-    $$('.teamCard', teamsEl).forEach((c,idx)=>{
-      const d = c.querySelector('.dot');
-      d.classList.toggle('on', idx===currentTeam);
-      c.querySelector('.teamNow').lastChild.textContent = idx===currentTeam ? ' Сейчас' : ' Не сейчас';
-    });
-  }
-  function renderScores(){
-    for(let i=0;i<teamCount;i++){
-      const s = document.getElementById(`score_${i}`);
-      if(s) s.textContent = scores[i];
-    }
-  }
-
-  function countDone(){ return hit.size; }
-
-  function positionTargets(){
-    const n = questions.length;
-    const pts = [];
-    for(let i=0;i<n;i++){
-      const col = (i % 6);
-      const row = Math.floor(i / 6);
-      const x = 12 + col*(76/5);
-      const y = 22 + row*10;
-      pts.push({x, y});
-    }
-    const maxY = pts.reduce((m,p)=>Math.max(m,p.y), 0);
-    const scaleY = maxY > 55 ? (55-22)/(maxY-22) : 1;
-
-    // User controls
-    const lineOffset = Number(cfg?.targetLineOffset ?? 0); // percent points
-    const lineJitter = Number(cfg?.targetLineJitter ?? 4); // percent points
-
-    // Precompute staggers and center them so "Разброс" doesn't move the whole line up/down
-    const staggers = pts.map((_,i)=>Math.sin((i+1)*0.9) * lineJitter * 2.0);
-    const meanStagger = staggers.reduce((a,b)=>a+b,0) / (staggers.length || 1);
-
-    pts.forEach((p,i)=>{
-      p.y = 22 + (p.y-22)*scaleY;
-
-      // deterministic micro-variation (stable in preview)
-      const wobX = Math.sin((i+1)*1.37) * 2.2;
-      const wobY = Math.cos((i+1)*1.91) * 1.2;
-
-      // centered stagger (spread around the same baseline)
-      const stagger = staggers[i] - meanStagger;
-
-      p.x += wobX;
-      p.y += wobY + lineOffset + stagger;
-    });
-    return pts;
-  }
-
-
-  // --- Orbit movement (step-by-step along circle points) ---
-  let _orbitTimer = null;
-  function stopOrbitMotion(){
-    if(_orbitTimer){ clearInterval(_orbitTimer); _orbitTimer = null; }
-  }
-  function startOrbitMotion(){
-    stopOrbitMotion();
-    const radius = Number(cfg?.targetOrbitRadius ?? 0);
-    const speed = Number(cfg?.targetOrbitSpeed ?? 0);
-    if(!(radius>0) || !(speed>0)) {
-      // reset offsets
-      $$('.target', targetsEl).forEach(el=>{
-        el.style.setProperty('--orbit-x','0px');
-        el.style.setProperty('--orbit-y','0px');
-      });
-      return;
-    }
-    const steps = 24; // points on circle
-    const startT = Date.now();
-    const phase = [];
-    const els = $$('.target', targetsEl);
-    for(let i=0;i<els.length;i++){
-      // stable phase so targets don't stack
-      phase[i] = (i/Math.max(1,els.length))*steps;
-    }
-    _orbitTimer = setInterval(()=>{
-      const t = (Date.now()-startT)/1000;
-      for(let i=0;i<els.length;i++){
-        const k = Math.floor((t*speed) + phase[i]); // step index
-        const ang = (k % steps) * (Math.PI*2/steps);
-        const dx = Math.round(Math.cos(ang) * radius);
-        const dy = Math.round(Math.sin(ang) * radius);
-        els[i].style.setProperty('--orbit-x', dx + 'px');
-        els[i].style.setProperty('--orbit-y', dy + 'px');
-      }
-    }, 60); // ~16 fps for "точечное" движение
-  }
   function renderTargets(){
-    targetsEl.innerHTML = '';
-    const n = questions.length;
-    const pts = positionTargets();
-    const targetFile = (cfg.targetFile || '13.png').trim();
-    for(let i=0;i<n;i++){
-      const q = questions[i];
+    const tEl = document.getElementById('targets');
+    tEl.innerHTML = '';
+    questions.forEach((q, i) => {
       const el = document.createElement('div');
       el.className = 'target' + (hit.has(i)?' hit':'');
-      el.style.left = (pts[i]?.x ?? 50) + '%';
-      el.style.top  = (pts[i]?.y ?? 40) + '%';
+      el.style.left = (15 + (i % 6) * 14) + '%';
+      el.style.top = (30 + Math.floor(i / 6) * 15 + (cfg.targetLineOffset || 0)) + '%';
+      el.style.setProperty('--target-img', `url("${cfg.targetFile || '13.png'}")`);
+      el.innerHTML = `<div class="tImg"></div><div class="tNum">${i+1}</div>`;
+      el.onclick = () => { if(!hit.has(i)) openQuestion(i); };
+      tEl.appendChild(el);
+    });
 
-      // Target image layer (can be swapped from the editor)
-      el.style.setProperty('--target-img', `url("${targetFile}")`);
-
-      // Slight float / breathing effect with per-target phase
-      const phase = (Math.random()*1.8).toFixed(2);
-      el.style.setProperty('--float-delay', phase + 's');
-
-      el.innerHTML = `
-        <div class="tImg" aria-hidden="true"></div>
-        <div class="tNum">${i+1}</div>
-        <div class="tPts">${Number(q.points||10)} очк.</div>
-      `;
-      el.addEventListener('click', async (e)=>{
-        if(hit.has(i)) return;
-        try{ el.classList.remove('punch'); void el.offsetWidth; el.classList.add('punch'); }catch(err){}
-        try{ if(e) spawnHitFx(e.clientX, e.clientY); }catch(err){}
-        try{ shake('hit'); }catch(err){}
-        try{
-          await AudioKit.unlock();
-          AudioKit.setVolume(cfg?.shot?.volume ?? 0.7);
-          AudioKit.playVariant(cfg?.shot?.variant ?? 'pif');
-        }catch(e){}
-        await openQuestion(i);
-      });
-      targetsEl.appendChild(el);
-    }
-    startOrbitMotion();
-  }
-
-  // modal logic
-  const modalBack = document.getElementById('modalBack');
-  const qHeader = document.getElementById('qHeader');
-  const qText = document.getElementById('qText');
-  const qMedia = document.getElementById('qMedia');
-  const answersWrap = document.getElementById('answersWrap');
-  const btnClose = document.getElementById('btnClose');
-  const timerBadge = document.getElementById('timerBadge');
-  const timerText = document.getElementById('timerText');
-
-  function closeModal(){
-    modalBack.classList.remove('on');
-    activeQIndex = null;
-    stopTimer();
-  }
-
-  function stopTimer(){
-    if(countdownId){ clearInterval(countdownId); countdownId = null; }
-    timerBadge.classList.remove('on');
-  }
-
-  function startTimer(seconds){
-    stopTimer();
-    timeLeft = seconds;
-    timerText.textContent = String(timeLeft);
-    timerBadge.classList.add('on');
-    countdownId = setInterval(()=>{
-      timeLeft--;
-      timerText.textContent = String(timeLeft);
-      if(timeLeft <= 0){
-        stopTimer();
-        finalizeQuestion(false, true);
-      }
-    }, 1000);
-  }
-
-  function finalizeQuestion(isCorrect, timedOut=false){
-    if(activeQIndex === null) return;
-    const idx = activeQIndex;
-    const q = questions[idx];
-    if(!hit.has(idx)){
-      hit.add(idx);
-      if(isCorrect){
-        scores[currentTeam] += Number(q.points||10);
-        renderScores();
-      }
-      const t = targetsEl.children[idx];
-      if(t) t.classList.add('hit');
-      hudTargets.textContent = `${countDone()}/${questions.length}`;
-    }
-
-    if(cfg.autoNextTeam){
-      currentTeam = (currentTeam + 1) % teamCount;
-      renderTeams();
-      renderTurn();
-      renderScores();
-    }
-    closeModal();
-  }
-
-  function makeMediaTag(icon, label, url){
-    const span = document.createElement('span');
-    span.className = 'mediaTag';
-    span.innerHTML = `<span aria-hidden="true">${icon}</span> <span>${label}</span>`;
-    span.title = url;
-    return span;
-  }
-
-  async function openQuestion(i){
-    activeQIndex = i;
-    const q = questions[i];
-
-    qHeader.textContent = `Вопрос #${i+1}`;
-    qText.textContent = q.text || '';
-    qMedia.innerHTML = '';
-    answersWrap.innerHTML = '';
-
-    if(cfg.latex){
-      await ensureKatex();
-      qText.innerHTML = q.text ? String(q.text) : '';
-    }
-
-    // Show image inside the task (if provided)
-    const oldImg = document.getElementById('qImgWrap');
-    if(oldImg) oldImg.remove();
-    if(q.image){
-      const wrap = document.createElement('div');
-      wrap.className = 'qImg';
-      wrap.id = 'qImgWrap';
-      const img = document.createElement('img');
-      img.alt = 'Картинка к заданию';
-      img.src = q.image;
-      img.onerror = ()=>{ wrap.style.display='none'; };
-      wrap.appendChild(img);
-      qText.insertAdjacentElement('afterend', wrap);
-    }
-
-
-    if(q.image){
-      qMedia.appendChild(makeMediaTag('🖼️', 'картинка', q.image));
-    }
-
-    if(q.type === 'input'){
-      const wrap = document.createElement('div');
-      wrap.className = 'inputRow';
-      wrap.innerHTML = `
-        <input id="ansInput" type="text" placeholder="Введите ответ…" autocomplete="off"/>
-        <button class="primary" id="btnSend">Ответить</button>
-        <button class="secondary" id="btnSkip">Пропустить</button>
-      `;
-      answersWrap.appendChild(wrap);
-
-      const correctList = String(q.correct||'').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
-
-      const check = ()=>{
-        const v = (document.getElementById('ansInput').value||'').trim().toLowerCase();
-        const ok = correctList.length ? correctList.includes(v) : (v.length>0);
-        finalizeQuestion(ok);
-      };
-      document.getElementById('btnSend').addEventListener('click', check);
-      document.getElementById('ansInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') check(); });
-      document.getElementById('btnSkip').addEventListener('click', ()=>finalizeQuestion(false));
-    } else {
-      const opts = Array.isArray(q.options) ? q.options : [];
-      const grid = document.createElement('div');
-      grid.className = 'answers';
-      answersWrap.appendChild(grid);
-
-      const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      opts.forEach((opt, idx)=>{
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'ansBtn';
-        btn.innerHTML = `<div class="ansKey">${letters[idx] || (idx+1)}</div><div class="ansText">${opt?.text ?? ''}</div>`;
-        btn.addEventListener('click', ()=>{
-          const ok = !!opt?.correct;
-          finalizeQuestion(ok);
+    if(cfg.targetOrbitRadius > 0){
+      let angle = 0;
+      setInterval(() => {
+        angle += (cfg.targetOrbitSpeed * 0.05);
+        $$('.target', tEl).forEach((t, idx) => {
+          const shift = idx * 0.5;
+          const dx = Math.cos(angle + shift) * cfg.targetOrbitRadius;
+          const dy = Math.sin(angle + shift) * cfg.targetOrbitRadius;
+          t.style.setProperty('--orbit-x', dx + 'px');
+          t.style.setProperty('--orbit-y', dy + 'px');
         });
-        grid.appendChild(btn);
-      });
-
-      const foot = document.createElement('div');
-      foot.style.display = 'flex';
-      foot.style.justifyContent = 'flex-end';
-      foot.style.marginTop = '8px';
-      foot.innerHTML = `<button class="secondary" id="btnSkip2">Пропустить</button>`;
-      answersWrap.appendChild(foot);
-      document.getElementById('btnSkip2').addEventListener('click', ()=>finalizeQuestion(false));
-    }
-
-    modalBack.classList.add('on');
-
-    if(q.timerEnabled && Number(q.timerSeconds||0) > 0){
-      startTimer(Number(q.timerSeconds));
-    } else {
-      stopTimer();
-    }
-
-    if(cfg.latex){
-      setTimeout(()=>{ renderLatexIn(document.querySelector('.modal')); }, 0);
+      }, 40);
     }
   }
 
-  document.getElementById('btnHelp').addEventListener('click', ()=>{
-    toast("Кликните по мишени → ответьте. Очки идут текущей команде.");
-  });
-  document.getElementById('btnReset').addEventListener('click', ()=>{
-    hit.clear();
-    for(let i=0;i<scores.length;i++) scores[i]=0;
-    currentTeam = 0;
-    renderTargets();
-    renderTeams();
-    renderTurn();
-    renderScores();
-    closeModal();
-    toast("Сброс выполнен");
-  });
-  btnClose.addEventListener('click', closeModal);
-  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
+  function openQuestion(i){
+    const q = questions[i];
+    document.getElementById('qText').textContent = q.text || '';
+    const wrap = document.getElementById('answersWrap');
+    wrap.innerHTML = '';
+    if(q.type === 'choice'){
+      q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'ansBtn';
+        btn.textContent = opt.text;
+        btn.onclick = () => {
+          if(opt.correct) scores[currentTeam] += Number(q.points||10);
+          hit.add(i);
+          if(cfg.autoNextTeam) currentTeam = (currentTeam + 1) % teamCount;
+          document.getElementById('modalBack').classList.remove('on');
+          renderTargets();
+        };
+        wrap.appendChild(btn);
+      });
+    }
+    document.getElementById('modalBack').classList.add('on');
+  }
 
-  renderTeams();
-  renderTurn();
-  renderScores();
+  document.getElementById('btnClose').onclick = () => document.getElementById('modalBack').classList.remove('on');
+  document.getElementById('btnReset').onclick = () => location.reload();
+
   renderTargets();
 }
 
@@ -1836,745 +1071,78 @@ function mountEditor(){
     <div class="app">
       <div class="panel">
         <div class="panelHeader">
-          <div>
-            <div class="title">Редактор<br>«Математический тир»</div>
-            <div class="subtitle"></div>
-          </div>
-          <button class="btn btnGold" id="copyIframe">📋 Скопировать код</button>
+          <div class="title">Редактор тира</div>
+          <button class="btn btnGold" id="copyIframe">📋 Код</button>
         </div>
-
         <div class="scroll">
-          <div class="section">
-            <h3>Название</h3>
-            <div class="row1">
-              <div>
-                <label>Заголовок в игре</label>
-                <input id="inpTitle" type="text" value="Математический тир"/>
-              </div>
-            </div>
-          </div>
-
           <div class="section">
             <h3>Параметры</h3>
             <div class="row">
-              <div>
-                <label>Количество команд (1–3)</label>
-                <select id="teamsCount">
-                  <option value="1">1</option>
-                  <option value="2" selected>2</option>
-                  <option value="3">3</option>
-                </select>
-              </div>
-              <div>
-                <label>Автопереход команды после вопроса</label>
-                <select id="autoNext">
-                  <option value="true" selected>Включён</option>
-                  <option value="false">Выключен</option>
-                </select>
-              </div>
+              <div><label>Фон</label><select id="bgSelect"><option value="2.png">Лес</option><option value="1.png">Космос</option></select></div>
+              <div><label>Мишень</label><select id="targetSelect"><option value="13.png">Классика</option><option value="10.png">Техно</option></select></div>
             </div>
-
-            <div class="row">
-              <div>
-                <label>LaTeX (вопросы/ответы)</label>
-                <select id="latexToggle">
-                  <option value="false" selected>Выключен</option>
-                  <option value="true">Включён</option>
-                </select>
-              </div>
-              <div>
-                <label>Выбери фон</label>
-                <select id="bgSelect" class="select">
-                  <option value="1.png">1</option>
-                  <option value="2.png" selected>2</option>
-                  <option value="3.png">3</option>
-                  <option value="4.png">4</option>
-                  <option value="5.png">5</option>
-                  <option value="6.png">6</option>
-                  <option value="7.png">7</option>
-                  <option value="8.png">8</option>
-                  <option value="__custom__">По ссылке</option>
-                </select>
-                <input id="bgInput" type="hidden" value="2.png"/>
-                <div style="display:flex; gap:10px; margin-top:8px;">
-                  <input id="bgUrl" type="text" placeholder="Ссылка на фон (png/jpg/webp)"/>
-                  <button class="btn" id="btnBgApply" type="button">Применить</button>
-                </div>
-                <div class="help">Можно вставить ссылку на картинку. Подойдут https://… и относительные пути (например: images/bg.png).</div>
-              </div>
-            </div>
-<div class="row">
-              <div class="field">
-                <label>Выбери мишень</label>
-                <select id="targetSelect" class="select">
-                  <option value="10.png">10</option>
-                  <option value="11.png">11</option>
-                  <option value="12.png">12</option>
-                  <option value="13.png" selected>13</option>
-                  <option value="14.png">14</option>
-                  <option value="__custom__">По ссылке</option>
-                </select>
-                <input id="targetInput" type="hidden" value="13.png"/>
-                <div style="display:flex; gap:10px; margin-top:8px;">
-                  <input id="targetUrl" type="text" placeholder="Ссылка на мишень (png/webp с прозрачностью)"/>
-                  <button class="btn" id="btnTargetApply" type="button">Применить</button>
-                </div>
-                <div class="help">Лучше использовать PNG/WebP с прозрачным фоном.</div>
-              </div>
-              <div class="field">
-                <label>Позиции мишеней</label>
-                <div class="hint">Мишени будут появляться в отмеченной зоне на фоне.</div>
-              </div>
-            </div>
-            <div class="help">Файлы мишеней: 10.png … 14.png (рядом с index.html).</div>
-
-            <div class="row" style="margin-top:10px;">
-              <div class="field">
-                <label>Высота мишени</label>
-                <input id="targetLineY" class="range" type="range" min="0" max="100" step="1" value="50" />
-                </div>
-              <div class="field">
-                <label>Разброс</label>
-                <input id="targetLineJitter" class="range" type="range" min="0" max="40" step="1" value="8" />
-                </div>
-
-            <div class="row1" style="margin-top:10px;">
+            
+            <div class="orbit-row">
               <div class="field-card">
                 <label>Радиус движения мишени</label>
                 <input id="targetOrbitRadius" class="range" type="range" min="0" max="260" step="5" value="0" />
-                <div class="hint">0 — мишени стоят на месте. Чем больше значение, тем больше радиус (в пикселях).</div>
+                <div class="hint">Радиус окружности (в пикселях).</div>
               </div>
               <div class="field-card">
                 <label>Скорость движения мишени</label>
                 <input id="targetOrbitSpeed" class="range" type="range" min="0" max="12" step="1" value="0" />
-                <div class="hint">0 — без движения. Чем больше, тем быстрее “шагают” по точкам окружности.</div>
+                <div class="hint">Скорость вращения мишеней.</div>
               </div>
             </div>
-            </div>
-
           </div>
 
           <div class="section">
-            <h3>Звук выстрела</h3>
-            <div class="soundRow">
-              <div>
-                <label>Вариант (прослушивается при выборе)</label>
-                <select id="shotVariant">
-                  <option value="pif" selected>Короткий «пиф»</option>
-                  <option value="snap">Щелчок «снап»</option>
-                  <option value="boom">Глухой «бум»</option>
-                </select>
-              </div>
-              <div>
-                <label>Громкость</label>
-                <input id="shotVol" class="range" type="range" min="0" max="1" step="0.01" value="0.7"/>
-              </div>
-            </div>
-            <div class="help">В игре звук выстрела звучит при клике по мишени.</div>
+            <button class="btn btnGold" style="width:100%" id="btnAdd">＋ Добавить вопрос</button>
+            <div id="qList" style="margin-top:10px"></div>
           </div>
-
-          <div class="section">
-            <div class="split">
-              <h3 style="margin:0">Вопросы</h3>
-              <span class="pill">Всего: <span id="qCount">0</span></span>
-            </div>
-            <div class="btnRow">
-              <button class="btn btnGold" id="btnAdd">＋ Добавить</button>
-              <button class="btn btnDanger" id="btnClear">🧹 Очистить</button>
-            </div>
-            <div class="help">Мишеней будет столько же, сколько вопросов.</div>
-            <div style="height:10px"></div>
-            <div class="qList" id="qList"></div>
-          </div>
-</div>
+        </div>
       </div>
-
       <div class="panel previewWrap">
-        <div class="previewHeader">
-          <div>
-            <div class="title2">Просмотр</div>
-            <div class="muted">Живое превью (как в Genially)</div>
-          </div>
-          <div class="muted">фон + мишени + вопросы</div>
-        </div>
-        <iframe class="previewFrame" id="previewFrame" allow="autoplay; fullscreen"></iframe>
-      </div>
-    </div>
-
-    <div class="versionBadge">Версия ${VERSION} • editor+game</div>
-
-    <div class="modalBackdrop" id="editBack" style="z-index:80;">
-      <div class="modal">
-        <div class="modalHeader">
-          <div class="h" id="editHdr">Вопрос</div>
-          <button class="modalClose" id="editClose">Esc</button>
-        </div>
-        <div class="modalBody">
-          <div class="row">
-            <div>
-              <label>Очки</label>
-              <input id="editPoints" type="number" min="0" step="1" value="10"/>
-            </div>
-            <div>
-              <label>Таймер</label>
-              <select id="editTimerMode">
-                <option value="off" selected>Выключен</option>
-                <option value="on">Включён</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="row">
-            <div>
-              <label>Секунды (если включён)</label>
-              <input id="editTimerSec" type="number" min="1" step="1" value="30"/>
-            </div>
-            <div>
-              <label>Тип вопроса</label>
-              <select id="editType">
-                <option value="choice" selected>Выбор ответа</option>
-                <option value="input">Ввод ответа</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="row1">
-            <div>
-              <label>Текст вопроса</label>
-              <textarea id="editText" placeholder="Напишите вопрос…"></textarea>
-            </div>
-          </div>
-
-          <div class="row">
-            <div>
-              <label>🖼️ Картинка (URL, опционально)</label>
-              <input id="editImg" type="text" placeholder="https://..."/>
-            </div>
-            <div>
-              <label>Шрифт вопроса</label>
-              <select id="qFontSelect"></select>
-              <div class="help">Выберите, как будет выглядеть текст вопроса в игре.</div>
-            </div>
-          </div>
-
-          <div class="row">
-            <div>
-              <label>Шрифт ответов</label>
-              <select id="aFontSelect"></select>
-              <div class="help">Применяется к вариантам ответа и полю ввода.</div>
-            </div>
-            <div></div>
-          </div>
-
-          <div id="choiceBox">
-            <div class="split">
-              <div style="font-weight:900;">Варианты ответа</div>
-              <div class="pill">можно добавлять сколько нужно</div>
-            </div>
-            <div id="optList" class="qList" style="margin-top:10px;"></div>
-            <div style="display:flex; gap:10px;">
-              <button class="btn btnGold" id="btnAddOpt">＋ Добавить вариант</button>
-            </div>
-            <div class="help">Отметьте один вариант как «верный» (радио-кнопка).</div>
-          </div>
-
-          <div id="inputBox" style="display:none;">
-            <label>Правильный ответ (можно несколько через запятую)</label>
-            <input id="editCorrect" type="text" placeholder="например: 12, двенадцать"/>
-          </div>
-
-          <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:4px;">
-            <button class="secondary" id="btnCancelQ">Отмена</button>
-            <button class="primary" id="btnSaveQ">Сохранить вопрос</button>
-          </div>
-        </div>
+        <iframe class="previewFrame" id="previewFrame"></iframe>
       </div>
     </div>
   `;
 
   let cfg = defaultCfg();
-  let editingIndex = null;
 
-  const inpTitle = document.getElementById('inpTitle');
-  const teamsCount = document.getElementById('teamsCount');
-  const autoNext = document.getElementById('autoNext');
-  const latexToggle = document.getElementById('latexToggle');
-  const bgInput = document.getElementById('bgInput') || document.getElementById('bgSelect');
-  const bgSelect = document.getElementById('bgSelect');
-  const bgUrl = document.getElementById('bgUrl');
-  const btnBgApply = document.getElementById('btnBgApply');
+  const syncRange = (el) => {
+    if(!el) return;
+    el.style.setProperty('--percent', (el.value / el.max * 100) + '%');
+  };
 
-  // keep hidden input in sync (cfg читается из bgInput)
-  bgSelect?.addEventListener('change', ()=>{ 
-    try { if (bgSelect.value !== '__custom__') { if (bgInput) bgInput.value = bgSelect.value; } } catch(e) {}
-    try{ if(!isGame) schedulePreviewUpdate(); }catch(e){} 
+  const updatePreview = () => {
+    cfg.bg = document.getElementById('bgSelect').value;
+    cfg.targetFile = document.getElementById('targetSelect').value;
+    cfg.targetOrbitRadius = Number(document.getElementById('targetOrbitRadius').value);
+    cfg.targetOrbitSpeed = Number(document.getElementById('targetOrbitSpeed').value);
+    document.getElementById('previewFrame').src = urlOfSelf() + `?game=${b64uEncode(cfg)}&v=${VERSION}`;
+  };
+
+  ['targetOrbitRadius', 'targetOrbitSpeed'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', (e) => { syncRange(e.target); updatePreview(); });
+    syncRange(el);
   });
 
-const targetInput = document.getElementById('targetInput');
-  const targetSelect = document.getElementById('targetSelect');
-  const targetUrl = document.getElementById('targetUrl');
-  const btnTargetApply = document.getElementById('btnTargetApply');
-  const targetLineY = document.getElementById('targetLineY');
-  const targetLineJitter = document.getElementById('targetLineJitter');
-  const targetOrbitRadius = document.getElementById('targetOrbitRadius');
-  const targetOrbitSpeed = document.getElementById('targetOrbitSpeed');
-
-// Live-update preview when background/target change
-bgSelect?.addEventListener('change', () => {
-  try { if (typeof bgInput !== 'undefined' && bgInput && bgSelect.value !== '__custom__') bgInput.value = bgSelect.value; } catch(e) {}
-  schedulePreviewUpdate();
-});
-
-targetSelect?.addEventListener('change', () => {
-  // keep file input in sync (cfg читается из targetInput)
-  try { if (targetInput && targetSelect.value !== '__custom__') targetInput.value = targetSelect.value; } catch(e) {}
-  schedulePreviewUpdate();
-});
-
-targetLineY?.addEventListener('input', schedulePreviewUpdate);
-targetLineJitter?.addEventListener('input', schedulePreviewUpdate);
-
-// === КРАСИВЫЕ БЕГУНКИ: СИНХРОНИЗАЦИЯ ЦВЕТА ===
-const syncRange = (el) => {
-  if(!el) return;
-  el.style.setProperty('--percent', (el.value / el.max * 100) + '%');
-};
-
-targetOrbitRadius?.addEventListener('input', (e) => {
-  syncRange(e.target);
-  schedulePreviewUpdate();
-});
-targetOrbitSpeed?.addEventListener('input', (e) => {
-  syncRange(e.target);
-  schedulePreviewUpdate();
-});
-
-// Инициализация при запуске редактора
-setTimeout(() => {
-  syncRange(targetOrbitRadius);
-  syncRange(targetOrbitSpeed);
-}, 50);
-
-// Defaults
-// Всегда стартуем с фона 2 (можно изменить в UI)
-if (bgSelect) bgSelect.value = '2.png';
-const _bgHidden = document.getElementById('bgInput');
-if (_bgHidden) _bgHidden.value = '2.png';
-try { if (bgInput) bgInput.value = bgSelect?.value || '2.png'; } catch(e) {}
-if (targetSelect && !targetSelect.value) targetSelect.value = '13.png';
-if (targetInput && !targetInput.value) targetInput.value = targetSelect?.value || '13.png';
-
-  function normalizeAssetUrl(u){
-    u = String(u||'').trim();
-    if(!u) return '';
-    return u;
-  }
-  function isSafeUrl(u){
-    const s = String(u||'').trim();
-    if(!s) return false;
-    const low = s.toLowerCase();
-    if(low.startsWith('javascript:') || low.startsWith('data:') || low.startsWith('vbscript:')) return false;
-    // allow http(s) and relative paths (no other schemes)
-    const hasScheme = low.includes('://');
-    if(hasScheme && !(low.startsWith('http://') || low.startsWith('https://'))) return false;
-    return true;
-  }
-
-  // Try to preload image to make sure the link реально ведёт на картинку
-  function preloadImage(url, cb){
-    try{
-      const img = new Image();
-      img.onload = ()=> cb(true);
-      img.onerror = ()=> cb(false);
-      img.src = url;
-    }catch(e){ cb(false); }
-  }
-
-// Apply custom BG by URL
-  btnBgApply?.addEventListener('click', ()=>{
-    const u0 = normalizeAssetUrl(bgUrl?.value || '');
-    if(!u0 || !isSafeUrl(u0)){
-      toast('Ссылка на фон: вставь https://… или относительный путь');
-      return;
-    }
-    toast('Пробую загрузить фон…');
-    preloadImage(u0, (ok)=>{
-      if(!ok){
-        toast('Фон не загрузился. Часто причина: ссылка ведёт не на картинку или хостинг блокирует прямые ссылки.');
-        return;
-      }
-      if(bgInput) bgInput.value = u0;
-      if(bgSelect) bgSelect.value = '__custom__';
-      schedulePreviewUpdate();
-      toast('Фон применён');
-    });
-  });
-
-// Apply custom target by URL
-  btnTargetApply?.addEventListener('click', ()=>{
-    const u0 = normalizeAssetUrl(targetUrl?.value || '');
-    if(!u0 || !isSafeUrl(u0)){
-      toast('Ссылка на мишень: вставь https://… или относительный путь');
-      return;
-    }
-    toast('Пробую загрузить мишень…');
-    preloadImage(u0, (ok)=>{
-      if(!ok){
-        toast('Мишень не загрузилась. Часто причина: ссылка ведёт не на картинку или хостинг блокирует прямые ссылки.');
-        return;
-      }
-      if(targetInput) targetInput.value = u0;
-      if(targetSelect) targetSelect.value = '__custom__';
-      schedulePreviewUpdate();
-      toast('Мишень применена');
-    });
-  });
-
-// If user edits URL fields, keep select on "По ссылке" (but don't apply until button)
-  bgUrl?.addEventListener('input', ()=>{ if(bgSelect) bgSelect.value = '__custom__'; });
-  targetUrl?.addEventListener('input', ()=>{ if(targetSelect) targetSelect.value = '__custom__'; });
-
-  // When switching back to built-in assets, clear URL fields
-  bgSelect?.addEventListener('change', ()=>{
-    if(bgSelect.value !== '__custom__'){
-      try{ if(bgUrl) bgUrl.value = ''; }catch(e){}
-      try{ if(bgInput) bgInput.value = bgSelect.value; }catch(e){}
-    }
-  });
-  targetSelect?.addEventListener('change', ()=>{
-    if(targetSelect.value !== '__custom__'){
-      try{ if(targetUrl) targetUrl.value = ''; }catch(e){}
-      try{ if(targetInput) targetInput.value = targetSelect.value; }catch(e){}
-    }
-  });
-
-  const shotVariant = document.getElementById('shotVariant');
-  const shotVol = document.getElementById('shotVol');
-  const qCount = document.getElementById('qCount');
-  const qList = document.getElementById('qList');
-  const previewFrame = document.getElementById('previewFrame');
-
-  // Fonts for question/answers (global)
-  const qFontSelect = document.getElementById('qFontSelect');
-  const aFontSelect = document.getElementById('aFontSelect');
-
-
-  const FONT_CHOICES = [
-    {label:'Roboto', css:'Roboto'},
-    {label:'Open Sans', css:'"Open Sans"'},
-    {label:'Lato', css:'Lato'},
-    {label:'Montserrat', css:'Montserrat'},
-    {label:'Poppins', css:'Poppins'},
-    {label:'Inter', css:'Inter'},
-    {label:'Noto Sans', css:'"Noto Sans"'},
-    {label:'Merriweather', css:'Merriweather'},
-    {label:'Caveat', css:'Caveat'},
-    {label:'Pacifico', css:'Pacifico'}
-  ];
-
-  function fillFontSelect(sel, current){
-    if(!sel) return;
-    sel.innerHTML = '';
-    FONT_CHOICES.forEach(f=>{
-      const o = document.createElement('option');
-      o.value = f.css;
-      o.textContent = `пример шрифта — ${f.label}`;
-      o.style.fontFamily = `${f.css}, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif`;
-      sel.appendChild(o);
-    });
-    // set current if matches, else first
-    const want = current || 'Roboto';
-    const found = Array.from(sel.options).some(o=>o.value===want);
-    sel.value = found ? want : (sel.options[0]?.value || 'Roboto');
-  }
-
-
-// Fonts defaults
-fillFontSelect(qFontSelect, cfg.qFont);
-fillFontSelect(aFontSelect, cfg.aFont);
-qFontSelect?.addEventListener('change', schedulePreviewUpdate);
-aFontSelect?.addEventListener('change', schedulePreviewUpdate);
-
-  function readCfgFromUI(){
-    cfg.title = inpTitle.value || "Математический тир";
-    cfg.teamsCount = clamp(Number(teamsCount.value||2),1,3);
-    cfg.autoNextTeam = (autoNext.value === 'true');
-    cfg.latex = (latexToggle.value === 'true');
-    cfg.bg = (bgInput.value || "2.png").trim();
-    cfg.targetFile = (targetInput?.value || "13.png").trim();
-    cfg.targetLineOffset = (50 - Number(targetLineY?.value ?? 50));
-    cfg.targetLineJitter = Number(targetLineJitter?.value ?? 4);
-    cfg.targetOrbitRadius = Number(targetOrbitRadius?.value ?? 0);
-    cfg.targetOrbitSpeed = Number(targetOrbitSpeed?.value ?? 0);
-    cfg.shot.variant = shotVariant.value;
-    cfg.shot.volume = clamp(Number(shotVol.value||0.7),0,1);
-    cfg.qFont = (qFontSelect?.value || 'Roboto');
-    cfg.aFont = (aFontSelect?.value || 'Roboto');
-  }
-
-  let _pvT = null;
-function schedulePreviewUpdate() {
-  if (_pvT) clearTimeout(_pvT);
-  _pvT = setTimeout(() => {
-    try { updatePreview(); } catch (e) {}
-  }, 120);
-}
-
-function updatePreview(){
-    readCfgFromUI();
-    if(cfg.latex) ensureKatex();
-    const gameUrl = urlOfSelf() + `?game=${encodeURIComponent(b64uEncode(cfg))}&v=${VERSION}&t=${Date.now()}`;
-    previewFrame.src = gameUrl;
-  }
-
-  function escapeHtml(s){
-    return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-  }
-
-  function renderQuestionList(){
-    qCount.textContent = String(cfg.questions.length);
-    qList.innerHTML = '';
-    cfg.questions.forEach((q, idx)=>{
-      const item = document.createElement('div');
-      item.className = 'qItem';
-      const t = (q.text || '').trim() || '(без текста)';
-      const meta = `${q.type==='input'?'Ввод':'Выбор'} • ${Number(q.points||10)} очк. • ${q.timerEnabled? (q.timerSeconds+' сек') : 'без таймера'}`;
-      item.innerHTML = `
-        <div>
-          <div class="qTitle">${idx+1}. ${escapeHtml(t)}</div>
-          <div class="qMeta">${meta}</div>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <button class="iconBtn" title="Редактировать">✏️</button>
-          <button class="iconBtn danger" title="Удалить">🗑️</button>
-        </div>
-      `;
-      item.querySelector('.iconBtn').addEventListener('click', ()=> openEdit(idx));
-      item.querySelector('.iconBtn.danger').addEventListener('click', ()=>{
-        cfg.questions.splice(idx,1);
-        renderQuestionList();
-        updatePreview();
-      });
-      qList.appendChild(item);
-    });
-  }
-
-  async function playShotPreview(){
-    readCfgFromUI();
-    await AudioKit.unlock();
-    AudioKit.setVolume(cfg.shot.volume);
-    AudioKit.playVariant(cfg.shot.variant);
-  }
-  shotVariant.addEventListener('change', async ()=>{ await playShotPreview(); try{ if(!isGame) schedulePreviewUpdate(); }catch(e){} });
-  shotVol.addEventListener('input', ()=>{ readCfgFromUI(); try{ AudioKit.setVolume(cfg.shot.volume); }catch(e){} try{ if(!isGame) schedulePreviewUpdate(); }catch(e){} });
-document.getElementById('copyIframe').addEventListener('click', async ()=>{
-    readCfgFromUI();
-    const src = urlOfSelf() + `?game=${encodeURIComponent(b64uEncode(cfg))}&v=${VERSION}`;
-    const code = `<iframe src="${src}" style="width:100%;height:600px;border:0;" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
-    try{
-      await navigator.clipboard.writeText(code);
-      toast("iframe скопирован");
-    }catch(e){
-      const ta = document.createElement('textarea');
-      ta.value = code;
-      document.body.appendChild(ta);
-      ta.select(); document.execCommand('copy');
-      ta.remove();
-      toast("iframe скопирован");
-    }
-  });
-
-  [inpTitle, teamsCount, autoNext, latexToggle, bgInput].forEach(el=>{
-    el.addEventListener('change', updatePreview);
-    el.addEventListener('input', ()=>{ if(el===inpTitle || el===bgInput) updatePreview(); });
-  });
-
-  document.getElementById('btnAdd').addEventListener('click', ()=> openEdit(null));
-  document.getElementById('btnClear').addEventListener('click', ()=>{
-    cfg.questions = [];
-    renderQuestionList();
+  document.getElementById('bgSelect').onchange = updatePreview;
+  document.getElementById('targetSelect').onchange = updatePreview;
+  document.getElementById('btnAdd').onclick = () => {
+    cfg.questions.push({text: "Вопрос", type: "choice", options: [{text: "Да", correct: true}]});
     updatePreview();
-  });
+  };
 
-  const editBack = document.getElementById('editBack');
-  const editHdr = document.getElementById('editHdr');
-  const editClose = document.getElementById('editClose');
-  const editPoints = document.getElementById('editPoints');
-  const editTimerMode = document.getElementById('editTimerMode');
-  const editTimerSec = document.getElementById('editTimerSec');
-  const editType = document.getElementById('editType');
-  const editText = document.getElementById('editText');
-  const editImg = document.getElementById('editImg');
-  const choiceBox = document.getElementById('choiceBox');
-  const inputBox = document.getElementById('inputBox');
-  const editCorrect = document.getElementById('editCorrect');
-  const optList = document.getElementById('optList');
-
-  function closeEdit(){
-    editBack.classList.remove('on');
-    editingIndex = null;
-  }
-  editClose.addEventListener('click', closeEdit);
-  document.getElementById('btnCancelQ').addEventListener('click', closeEdit);
-  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && editBack.classList.contains('on')) closeEdit(); });
-
-  function newQuestion(){
-    return {
-      type: 'choice',
-      text: '',
-      points: 10,
-      timerEnabled: false,
-      timerSeconds: 30,
-      image: '',
-      options: [
-        {text:'', correct:true},
-        {text:'', correct:false},
-        {text:'', correct:false}
-      ],
-      correct: ''
-    };
-  }
-
-  function renderOptions(q){
-    optList.innerHTML = '';
-    q.options = Array.isArray(q.options) && q.options.length ? q.options : [{text:'', correct:true}];
-    q.options.forEach((o, idx)=>{
-      const row = document.createElement('div');
-      row.className = 'qItem';
-      row.style.gridTemplateColumns = "1fr auto";
-      row.innerHTML = `
-        <div style="display:flex; align-items:center; gap:10px; min-width:0;">
-          <input type="text" placeholder="Текст ответа" value="${escapeHtml(o.text||'')}" />
-          <label style="margin:0; display:flex; align-items:center; gap:8px; white-space:nowrap; color:rgba(255,255,255,.78);">
-            <input type="radio" name="correctOpt" ${o.correct?'checked':''}/>
-            верный
-          </label>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <button class="iconBtn" title="Вверх">↑</button>
-          <button class="iconBtn" title="Вниз">↓</button>
-          <button class="iconBtn danger" title="Удалить">✕</button>
-        </div>
-      `;
-      const inp = row.querySelector('input[type="text"]');
-      inp.addEventListener('input', ()=>{ o.text = inp.value; });
-      const radio = row.querySelector('input[type="radio"]');
-      radio.addEventListener('change', ()=>{
-        q.options.forEach(x=>x.correct=false);
-        o.correct = true;
-      });
-            // Reorder (keep the order exactly as you wrote)
-      const btnUp = row.querySelector('.iconBtn[title="Вверх"]');
-      const btnDown = row.querySelector('.iconBtn[title="Вниз"]');
-      if(btnUp){
-        btnUp.addEventListener('click', ()=>{
-          if(idx<=0) return;
-          const tmp = q.options[idx-1];
-          q.options[idx-1] = q.options[idx];
-          q.options[idx] = tmp;
-          renderOptions(q);
-        });
-      }
-      if(btnDown){
-        btnDown.addEventListener('click', ()=>{
-          if(idx>=q.options.length-1) return;
-          const tmp = q.options[idx+1];
-          q.options[idx+1] = q.options[idx];
-          q.options[idx] = tmp;
-          renderOptions(q);
-        });
-      }
-
-row.querySelector('.iconBtn.danger').addEventListener('click', ()=>{
-        q.options.splice(idx,1);
-        if(!q.options.some(x=>x.correct) && q.options[0]) q.options[0].correct = true;
-        renderOptions(q);
-      });
-      optList.appendChild(row);
-    });
-  }
-
-  function syncTypeUI(){
-    const t = editType.value;
-    if(t === 'input'){
-      choiceBox.style.display = 'none';
-      inputBox.style.display = 'block';
-    }else{
-      choiceBox.style.display = 'block';
-      inputBox.style.display = 'none';
-    }
-  }
-  editType.addEventListener('change', syncTypeUI);
-
-  function openEdit(index){
-    editingIndex = index;
-    const q = (index===null || index===undefined) ? newQuestion() : deepClone(cfg.questions[index]);
-
-    editHdr.textContent = (index===null || index===undefined) ? "Новый вопрос" : `Вопрос #${index+1}`;
-    editPoints.value = Number(q.points||10);
-    editTimerMode.value = q.timerEnabled ? 'on' : 'off';
-    editTimerSec.value = Number(q.timerSeconds||30);
-    editType.value = q.type || 'choice';
-    editText.value = q.text || '';
-    editImg.value = q.image || '';
-    editCorrect.value = q.correct || '';
-
-    syncTypeUI();
-    renderOptions(q);
-
-    document.getElementById('btnAddOpt').onclick = ()=>{
-      q.options.push({text:'', correct: q.options.length===0});
-      renderOptions(q);
-    };
-
-    document.getElementById('btnSaveQ').onclick = ()=>{
-      q.points = Number(editPoints.value||10);
-      q.timerEnabled = (editTimerMode.value === 'on');
-      q.timerSeconds = Number(editTimerSec.value||30);
-      q.type = editType.value;
-      q.text = editText.value || '';
-      q.image = (editImg.value || '').trim();
-      q.correct = (editCorrect.value || '').trim();
-
-      if(q.type === 'choice'){
-        q.options = (q.options||[]).map(x=>({text: x.text||'', correct: !!x.correct}));
-        if(!q.options.length) q.options = [{text:'', correct:true}];
-        if(!q.options.some(x=>x.correct)) q.options[0].correct = true;
-      }else{
-        q.options = [];
-      }
-
-      if(index===null || index===undefined){
-        cfg.questions.push(q);
-      }else{
-        cfg.questions[index] = q;
-      }
-      renderQuestionList();
-      updatePreview();
-      closeEdit();
-      toast("Вопрос сохранён");
-    };
-
-    editBack.classList.add('on');
-  }
-
-  renderQuestionList();
   updatePreview();
 }
 
-/* ---------- Boot ---------- */
 (function boot(){
-  const unlock = async ()=>{ try{ await AudioKit.unlock(); }catch(e){} };
-  window.addEventListener('pointerdown', unlock, {once:true});
-
   if(isGame){
     let cfg = defaultCfg();
-    try{
-      cfg = b64uDecode(params.get('game'));
-    }catch(e){}
-    cfg = Object.assign(defaultCfg(), cfg || {});
-    cfg.questions = Array.isArray(cfg.questions) ? cfg.questions : [];
-    cfg.shot = Object.assign({variant:'pif', volume:0.7}, cfg.shot || {});
+    try { cfg = Object.assign(cfg, b64uDecode(params.get('game'))); } catch(e){}
     mountGame(cfg);
   } else {
     mountEditor();
