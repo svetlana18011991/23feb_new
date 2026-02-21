@@ -4,11 +4,6 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Математический тир — editor+game</title>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
-
   <style>
     :root{
       --bg0:#0b0f14;
@@ -154,12 +149,30 @@
       color: var(--text);
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
     }
-    /* Добавляем поддержку шрифтов в селекте */
-    select#editFont option {
-      font-size: 16px;
-      padding: 4px;
-    }
     textarea{min-height: 84px; resize: vertical;}
+
+    .fontSample{
+      padding:11px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(10,14,18,.55);
+      color: var(--text);
+      min-height: 42px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
+    }
+
+    /* ====== QA font (questions & answers) ====== */
+    .modal{ --qa-font: inherit; }
+    .modal .qText,
+    .modal .ansBtn,
+    .modal .ansBtn .ansText,
+    .modal .inputRow input{
+      font-family: var(--qa-font, inherit);
+    }
+
     input[type="number"]{appearance:textfield}
     .help{
       margin-top:8px;
@@ -299,6 +312,7 @@
       filter: saturate(1.05) contrast(1.03) brightness(1.02);
     }
     .arenaBg::after{
+      /* cinematic + depth */
       content:"";
       position:absolute; inset:0;
       background:
@@ -309,6 +323,7 @@
       pointer-events:none;
     }
     .arenaBg3d{
+      /* subtle parallax */
       will-change: transform;
       transition: transform .08s linear;
     }
@@ -442,6 +457,7 @@
       cursor:pointer;
       user-select:none;
       transform: translate(-50%, -50%);
+      /* fallback if image missing */
       background:
         radial-gradient(circle at 30% 30%, rgba(255,255,255,.14), transparent 55%),
         radial-gradient(circle at 50% 50%, rgba(240,200,120,.18), transparent 65%),
@@ -538,7 +554,7 @@
       width: min(980px, 96vw);
       border-radius: 22px;
       border:1px solid rgba(255,255,255,.14);
-      background: rgba(6,8,10,.88);
+      background: rgba(6,8,10,.88);  /* NOT transparent */
       box-shadow: 0 24px 95px rgba(0,0,0,.70);
       overflow:hidden;
       position:relative;
@@ -575,16 +591,10 @@
       flex:1;
       min-height:0;
     }
-    
-    /* Обеспечиваем наследование шрифтов внутри модалки вопросов */
-    .qText, .ansBtn, .inputRow input, .primary, .secondary, .ansText {
-      font-family: inherit;
-    }
-    
     .qText{
       font-weight:900;
-      font-size:20px;
-      line-height:1.3;
+      font-size:18px;
+      line-height:1.2;
     }
     .mediaRow{
       display:flex;
@@ -623,7 +633,6 @@
       display:flex;
       gap:12px;
       align-items:flex-start;
-      font-size: 16px;
     }
     .ansBtn:hover{ background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.16);}
     .ansKey{
@@ -634,7 +643,6 @@
       font-weight:900;
       color: rgba(255,232,190,.95);
       flex:0 0 auto;
-      font-family: system-ui, sans-serif; /* Оставляем буквы A B C D системным шрифтом */
     }
     .ansText{ font-weight:700; line-height:1.25; }
     .inputRow{
@@ -651,7 +659,6 @@
       color: rgba(255,255,255,.92);
       font-weight:700;
       outline:none;
-      font-size: 16px;
     }
     .primary{
       border-radius: 16px;
@@ -720,63 +727,65 @@
     }
     .toast.on{ display:block; }
   
-    /* --- Cursor: crosshair inside game/preview --- */
-    #previewFrame { cursor: crosshair; }
-    body[data-mode="game"] .gameRoot,
-    body[data-mode="game"] .gameRoot * { cursor: crosshair; }
-    body[data-mode="game"] .gameRoot input,
-    body[data-mode="game"] .gameRoot textarea { cursor: text; }
-    body[data-mode="game"] .gameRoot a { cursor: pointer; }
+/* --- Cursor: crosshair inside game/preview --- */
+#previewFrame { cursor: crosshair; }
+body[data-mode="game"] .gameRoot,
+body[data-mode="game"] .gameRoot * { cursor: crosshair; }
+body[data-mode="game"] .gameRoot input,
+body[data-mode="game"] .gameRoot textarea { cursor: text; }
+body[data-mode="game"] .gameRoot a { cursor: pointer; }
 
 
-    /* ==== Custom crosshair (works inside Genially overlays) ==== */
-    body.game-cursor { cursor: none !important; }
-    #aimCursor{
-      position: fixed;
-      left: -100px;
-      top: -100px;
-      width: 54px;
-      height: 54px;
-      transform: translate(-50%,-50%);
-      pointer-events: none;
-      z-index: 2147483647;
-      opacity: 0;
-      transition: opacity .12s ease;
-    }
-    #aimCursor .ring{
-      position:absolute; inset:0;
-      border: 2px solid rgba(255,190,90,.9);
-      border-radius: 999px;
-      box-shadow: 0 0 0 2px rgba(0,0,0,.35), 0 0 16px rgba(255,170,60,.18);
-      background: radial-gradient(circle at 50% 50%, rgba(255,190,90,.08), transparent 60%);
-    }
-    #aimCursor .h, #aimCursor .v{
-      position:absolute;
-      left:50%; top:50%;
-      background: rgba(255,190,90,.95);
-      box-shadow: 0 0 10px rgba(255,170,60,.25);
-    }
-    #aimCursor .h{ width: 64px; height: 2px; transform: translate(-50%,-50%); }
-    #aimCursor .v{ width: 2px; height: 64px; transform: translate(-50%,-50%); }
-    #aimCursor .dot{
-      position:absolute; left:50%; top:50%;
-      width: 6px; height: 6px;
-      border-radius: 999px;
-      transform: translate(-50%,-50%);
-      background: rgba(255,190,90,.95);
-    }
+/* ==== Custom crosshair (works inside Genially overlays) ==== */
+body.game-cursor { cursor: none !important; }
+#aimCursor{
+  position: fixed;
+  left: -100px;
+  top: -100px;
+  width: 54px;
+  height: 54px;
+  transform: translate(-50%,-50%);
+  pointer-events: none;
+  z-index: 2147483647;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+#aimCursor .ring{
+  position:absolute; inset:0;
+  border: 2px solid rgba(255,190,90,.9);
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px rgba(0,0,0,.35), 0 0 16px rgba(255,170,60,.18);
+  background: radial-gradient(circle at 50% 50%, rgba(255,190,90,.08), transparent 60%);
+}
+#aimCursor .h, #aimCursor .v{
+  position:absolute;
+  left:50%; top:50%;
+  background: rgba(255,190,90,.95);
+  box-shadow: 0 0 10px rgba(255,170,60,.25);
+}
+#aimCursor .h{ width: 64px; height: 2px; transform: translate(-50%,-50%); }
+#aimCursor .v{ width: 2px; height: 64px; transform: translate(-50%,-50%); }
+#aimCursor .dot{
+  position:absolute; left:50%; top:50%;
+  width: 6px; height: 6px;
+  border-radius: 999px;
+  transform: translate(-50%,-50%);
+  background: rgba(255,190,90,.95);
+}
 
-    .cornerLogo{position:fixed;top:14px;right:14px;z-index:1000;width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 8px 18px rgba(0,0,0,.45));opacity:.95;pointer-events:none;}
 
-    .topBrand{position:fixed;left:18px;top:14px;z-index:9999;pointer-events:none;opacity:.98;filter:drop-shadow(0 10px 24px rgba(0,0,0,.55));display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:14px;background:linear-gradient(180deg, rgba(18,24,33,.58), rgba(10,12,16,.35));border:1px solid rgba(255,255,255,.12);backdrop-filter: blur(8px);}
+.cornerLogo{position:fixed;top:14px;right:14px;z-index:1000;width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 8px 18px rgba(0,0,0,.45));opacity:.95;pointer-events:none;}
+
+/* v27 tweaks */
+.topBrand{position:fixed;left:18px;top:14px;z-index:9999;pointer-events:none;opacity:.98;filter:drop-shadow(0 10px 24px rgba(0,0,0,.55));display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:14px;background:linear-gradient(180deg, rgba(18,24,33,.58), rgba(10,12,16,.35));border:1px solid rgba(255,255,255,.12);backdrop-filter: blur(8px);}
     .modeGame .topBrand{ display:none; }
-    .topBrand img{height:34px;width:auto;border-radius:10px;display:block;}
-    .topBrand span{font-weight:800;font-size:13px;letter-spacing:.2px;color:rgba(255,255,255,.92);text-shadow:0 8px 22px rgba(0,0,0,.55);}
-    /* stronger 3D/parallax background */
-    .arenaBg{will-change:transform,filter;transform:translate3d(var(--bgx,0px),var(--bgy,0px),0) scale(1.10);filter:saturate(1.05) contrast(1.08);}
-    .arenaBg::after{content:"";position:absolute;inset:0;background:radial-gradient(1200px 600px at 40% 35%, rgba(255,255,255,.10), rgba(0,0,0,.45) 65%, rgba(0,0,0,.70));mix-blend-mode:overlay;pointer-events:none;}
-    .hudGoals{animation:goalFloat 3.8s ease-in-out infinite;}
-    @keyframes goalFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.topBrand img{height:34px;width:auto;border-radius:10px;display:block;}
+.topBrand span{font-weight:800;font-size:13px;letter-spacing:.2px;color:rgba(255,255,255,.92);text-shadow:0 8px 22px rgba(0,0,0,.55);}
+/* stronger 3D/parallax background */
+.arenaBg{will-change:transform,filter;transform:translate3d(var(--bgx,0px),var(--bgy,0px),0) scale(1.10);filter:saturate(1.05) contrast(1.08);}
+.arenaBg::after{content:"";position:absolute;inset:0;background:radial-gradient(1200px 600px at 40% 35%, rgba(255,255,255,.10), rgba(0,0,0,.45) 65%, rgba(0,0,0,.70));mix-blend-mode:overlay;pointer-events:none;}
+.hudGoals{animation:goalFloat 3.8s ease-in-out infinite;}
+@keyframes goalFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 
 
     /* Hit FX */
@@ -863,6 +872,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
+  // Hide brand inside game iframe (keep only in editor)
   try {
     if (typeof isGameMode === 'function' && isGameMode()) {
       const tb = document.querySelector('.topBrand');
@@ -872,7 +882,7 @@
 
 /* ===========================
    Математический тир
-   Version 25 — editor+game
+   Version 23 — editor+game
    =========================== */
 
 const VERSION = 25;
@@ -915,6 +925,7 @@ function defaultCfg(){
     teamsCount: 2,
     autoNextTeam: true,
     latex: false,
+    qaFont: "system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif",
     bg: "2.png",
     targetFile: "13.png",
     targetLineOffset: 0,
@@ -960,7 +971,7 @@ function renderLatexIn(el){
   }catch(e){}
 }
 
-/* ---------- Shot sound ---------- */
+/* ---------- Shot sound (WebAudio synth, no infinite loop) ---------- */
 const AudioKit = (() => {
   let ctx = null;
   let master = null;
@@ -996,7 +1007,7 @@ const AudioKit = (() => {
     out.gain.value = 1.25;
     out.connect(master);
 
-    if(variant === 'pif'){
+    if(variant === 'pif'){ // short 'pif'
       const osc = ctx.createOscillator();
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(620, t0);
@@ -1012,7 +1023,7 @@ const AudioKit = (() => {
       osc.connect(g).connect(f).connect(out);
       osc.start(t0);
       osc.stop(t0+0.10);
-    } else if(variant === 'snap'){
+    } else if(variant === 'snap'){ // click
       const osc = ctx.createOscillator();
       osc.type = 'square';
       osc.frequency.setValueAtTime(220, t0);
@@ -1024,7 +1035,7 @@ const AudioKit = (() => {
       osc.connect(g).connect(out);
       osc.start(t0);
       osc.stop(t0+0.09);
-    } else if(variant === 'boom'){
+    } else if(variant === 'boom'){ // low thump + noise
       const osc = ctx.createOscillator();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(90, t0);
@@ -1082,9 +1093,11 @@ const AudioKit = (() => {
   return { ensure, unlock, setVolume, playVariant };
 })();
 
+/* ---------- App mode detection ---------- */
 const params = new URLSearchParams(location.search);
 const isGame = params.has('game');
 
+// Hide editor branding inside the GAME iframe
 if (isGame) {
     document.body.classList.add('modeGame');
     document.body.classList.remove('modeEditor');
@@ -1092,6 +1105,8 @@ if (isGame) {
   if (hb) hb.style.display = 'none';
 }
 
+
+// ===== Crosshair overlay (needed for Genially where CSS cursor can be ignored) =====
 function enableCrosshairOverlay(){
   if(document.getElementById('aimCursor')) return;
   document.body.classList.add('game-cursor');
@@ -1107,17 +1122,21 @@ function enableCrosshairOverlay(){
   const hide = () => { el.style.opacity = '0'; };
 
   const move = (e) => {
+    // Use clientX/Y so it works in iframes and Genially embeds
     el.style.left = e.clientX + 'px';
     el.style.top  = e.clientY + 'px';
+    // show on first move
     if(el.style.opacity !== '1') el.style.opacity = '1';
   };
 
+  // Prefer listening on arena; also listen on window as fallback
   arena.addEventListener('mousemove', move, {passive:true});
   window.addEventListener('mousemove', move, {passive:true});
 
   arena.addEventListener('mouseenter', show, {passive:true});
   arena.addEventListener('mouseleave', hide, {passive:true});
 
+  // Touch devices: keep default cursor (no-op)
   if('ontouchstart' in window){
     document.body.classList.remove('game-cursor');
     el.remove();
@@ -1125,6 +1144,7 @@ function enableCrosshairOverlay(){
 }
 
 if(isGame){
+  // Delay to ensure #arena exists
   setTimeout(enableCrosshairOverlay, 0);
 }
 
@@ -1176,6 +1196,12 @@ function mountGame(cfg){
     </div>
   `;
 
+  // Apply chosen font to questions/answers
+  try{
+    const mEl = document.querySelector('.modal');
+    if(mEl) mEl.style.setProperty('--qa-font', (cfg.qaFont || 'system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif'));
+  }catch(e){}
+
   const arena = document.getElementById('arena');
   const bg = document.getElementById('arenaBg');
 
@@ -1185,6 +1211,7 @@ function mountGame(cfg){
   }
   setBg();
 
+  // Parallax 3d
   arena.addEventListener('mousemove', (e)=>{
     const r = arena.getBoundingClientRect();
     const x = (e.clientX - r.left)/r.width - 0.5;
@@ -1195,16 +1222,19 @@ function mountGame(cfg){
 
   document.getElementById('gTitle').textContent = cfg.title || "Математический тир";
 
+  // state
   const teamCount = clamp(Number(cfg.teamsCount||2),1,3);
   const teamNames = Array.from({length: teamCount}, (_,i)=>`Команда ${i+1}`);
   const scores = Array.from({length: teamCount}, ()=>0);
   let currentTeam = 0;
 
+  // targets = one per question
   const questions = Array.isArray(cfg.questions)? cfg.questions : [];
   const hit = new Set();
   let activeQIndex = null;
   let countdownId = null;
   let timeLeft = 0;
+
   
   const arenaEl = document.getElementById('arena') || document.querySelector('.arena');
 
@@ -1212,6 +1242,7 @@ function mountGame(cfg){
     if(!arenaEl) return;
     const cls = kind==='miss' ? 'shakeMiss' : 'shakeHit';
     arenaEl.classList.remove('shakeHit','shakeMiss');
+    // restart animation
     void arenaEl.offsetWidth;
     arenaEl.classList.add(cls);
     setTimeout(()=>arenaEl.classList.remove(cls), 220);
@@ -1229,8 +1260,7 @@ function mountGame(cfg){
     arenaEl.appendChild(fx);
     fx.addEventListener('animationend', ()=>fx.remove(), {once:true});
   }
-
-  const teamsEl = document.getElementById('teams');
+const teamsEl = document.getElementById('teams');
   const targetsEl = document.getElementById('targets');
   const hudTargets = document.getElementById('hudTargets');
   const turnTeamEl = document.getElementById('turnTeam');
@@ -1283,17 +1313,24 @@ function mountGame(cfg){
     const maxY = pts.reduce((m,p)=>Math.max(m,p.y), 0);
     const scaleY = maxY > 55 ? (55-22)/(maxY-22) : 1;
 
-    const lineOffset = Number(cfg?.targetLineOffset ?? 0); 
-    const lineJitter = Number(cfg?.targetLineJitter ?? 4); 
+    // User controls
+    const lineOffset = Number(cfg?.targetLineOffset ?? 0); // percent points
+    const lineJitter = Number(cfg?.targetLineJitter ?? 4); // percent points
 
+    // Precompute staggers and center them so "Разброс" doesn't move the whole line up/down
     const staggers = pts.map((_,i)=>Math.sin((i+1)*0.9) * lineJitter * 2.0);
     const meanStagger = staggers.reduce((a,b)=>a+b,0) / (staggers.length || 1);
 
     pts.forEach((p,i)=>{
       p.y = 22 + (p.y-22)*scaleY;
+
+      // deterministic micro-variation (stable in preview)
       const wobX = Math.sin((i+1)*1.37) * 2.2;
       const wobY = Math.cos((i+1)*1.91) * 1.2;
+
+      // centered stagger (spread around the same baseline)
       const stagger = staggers[i] - meanStagger;
+
       p.x += wobX;
       p.y += wobY + lineOffset + stagger;
     });
@@ -1312,8 +1349,10 @@ function mountGame(cfg){
       el.style.left = (pts[i]?.x ?? 50) + '%';
       el.style.top  = (pts[i]?.y ?? 40) + '%';
 
+      // Target image layer (can be swapped from the editor)
       el.style.setProperty('--target-img', `url("${targetFile}")`);
 
+      // Slight float / breathing effect with per-target phase
       const phase = (Math.random()*1.8).toFixed(2);
       el.style.setProperty('--float-delay', phase + 's');
 
@@ -1338,6 +1377,7 @@ function mountGame(cfg){
     }
   }
 
+  // modal logic
   const modalBack = document.getElementById('modalBack');
   const qHeader = document.getElementById('qHeader');
   const qText = document.getElementById('qText');
@@ -1411,11 +1451,6 @@ function mountGame(cfg){
 
     qHeader.textContent = `Вопрос #${i+1}`;
     qText.textContent = q.text || '';
-    
-    // Применяем выбранный шрифт к тексту вопроса и контейнеру ответов
-    qText.style.fontFamily = q.font || 'inherit';
-    answersWrap.style.fontFamily = q.font || 'inherit';
-
     qMedia.innerHTML = '';
     answersWrap.innerHTML = '';
 
@@ -1424,6 +1459,7 @@ function mountGame(cfg){
       qText.innerHTML = q.text ? String(q.text) : '';
     }
 
+    // Show image inside the task (if provided)
     const oldImg = document.getElementById('qImgWrap');
     if(oldImg) oldImg.remove();
     if(q.image){
@@ -1437,6 +1473,7 @@ function mountGame(cfg){
       wrap.appendChild(img);
       qText.insertAdjacentElement('afterend', wrap);
     }
+
 
     if(q.image){
       qMedia.appendChild(makeMediaTag('🖼️', 'картинка', q.image));
@@ -1596,7 +1633,22 @@ function mountEditor(){
                 <input id="bgInput" type="hidden" value="2.png"/>
               </div>
             </div>
+
+            <div class="row" style="margin-top:10px;">
+              <div>
+                <label>Шрифт (вопросы и ответы)</label>
+                <select id="qaFontSelect"></select>
+                <div class="help">В выпадающем списке показывается «пример шрифта», чтобы было видно начертание.</div>
+              </div>
+              <div>
+                <label>Пример</label>
+                <div id="qaFontSample" class="fontSample">пример шрифта</div>
+              </div>
+            </div>
+
             <div class="row">
+              <div class="field">
+
               <div class="field">
                 <label>Выбери мишень</label>
                 <select id="targetSelect" class="select">
@@ -1660,7 +1712,7 @@ function mountEditor(){
             <div style="height:10px"></div>
             <div class="qList" id="qList"></div>
           </div>
-        </div>
+</div>
       </div>
 
       <div class="panel previewWrap">
@@ -1677,6 +1729,7 @@ function mountEditor(){
 
     <div class="versionBadge">Версия ${VERSION} • editor+game</div>
 
+    <!-- Question editor modal -->
     <div class="modalBackdrop" id="editBack" style="z-index:80;">
       <div class="modal">
         <div class="modalHeader">
@@ -1719,25 +1772,10 @@ function mountEditor(){
             </div>
           </div>
 
-          <div class="row">
+          <div class="row1">
             <div>
               <label>🖼️ Картинка (URL, опционально)</label>
               <input id="editImg" type="text" placeholder="https://..."/>
-            </div>
-            <div>
-              <label>Т Шрифт текста</label>
-              <select id="editFont">
-                <option value="Arial, sans-serif" style="font-family: Arial, sans-serif;">Пример шрифта (Arial)</option>
-                <option value="Verdana, sans-serif" style="font-family: Verdana, sans-serif;">Пример шрифта (Verdana)</option>
-                <option value="Tahoma, sans-serif" style="font-family: Tahoma, sans-serif;">Пример шрифта (Tahoma)</option>
-                <option value="'Trebuchet MS', sans-serif" style="font-family: 'Trebuchet MS', sans-serif;">Пример шрифта (Trebuchet MS)</option>
-                <option value="'Times New Roman', serif" style="font-family: 'Times New Roman', serif;">Пример шрифта (Times New Roman)</option>
-                <option value="Georgia, serif" style="font-family: Georgia, serif;">Пример шрифта (Georgia)</option>
-                <option value="'Courier New', monospace" style="font-family: 'Courier New', monospace;">Пример шрифта (Courier New)</option>
-                <option value="Impact, sans-serif" style="font-family: Impact, sans-serif;">Пример шрифта (Impact)</option>
-                <option value="'Comic Sans MS', cursive, sans-serif" style="font-family: 'Comic Sans MS', cursive, sans-serif;">Пример шрифта (Comic Sans - Рукописный)</option>
-                <option value="'Caveat', cursive" style="font-family: 'Caveat', cursive;">Пример шрифта (Caveat - Рукописный)</option>
-              </select>
             </div>
           </div>
 
@@ -1776,29 +1814,34 @@ function mountEditor(){
   const latexToggle = document.getElementById('latexToggle');
   const bgInput = document.getElementById('bgSelect') || document.getElementById('bgInput');
   const bgSelect = document.getElementById('bgSelect');
+  const qaFontSelect = document.getElementById('qaFontSelect');
+  const qaFontSample = document.getElementById('qaFontSample');
   
   bgSelect?.addEventListener('change', ()=>{ readCfgFromUI(); try{ if(!isGame) schedulePreviewUpdate(); }catch(e){} });
-  const targetInput = document.getElementById('targetInput');
+const targetInput = document.getElementById('targetInput');
   const targetSelect = document.getElementById('targetSelect');
   const targetLineY = document.getElementById('targetLineY');
   const targetLineJitter = document.getElementById('targetLineJitter');
 
-  bgSelect?.addEventListener('change', () => {
-    try { if (typeof bgInput !== 'undefined' && bgInput) bgInput.value = bgSelect.value; } catch(e) {}
-    schedulePreviewUpdate();
-  });
+// Live-update preview when background/target change
+bgSelect?.addEventListener('change', () => {
+  try { if (typeof bgInput !== 'undefined' && bgInput) bgInput.value = bgSelect.value; } catch(e) {}
+  schedulePreviewUpdate();
+});
 
-  targetSelect?.addEventListener('change', () => {
-    try { if (targetInput) targetInput.value = targetSelect.value; } catch(e) {}
-    schedulePreviewUpdate();
-  });
+targetSelect?.addEventListener('change', () => {
+  // keep file input in sync (cfg читается из targetInput)
+  try { if (targetInput) targetInput.value = targetSelect.value; } catch(e) {}
+  schedulePreviewUpdate();
+});
 
-  targetLineY?.addEventListener('input', schedulePreviewUpdate);
-  targetLineJitter?.addEventListener('input', schedulePreviewUpdate);
+targetLineY?.addEventListener('input', schedulePreviewUpdate);
+targetLineJitter?.addEventListener('input', schedulePreviewUpdate);
 
-  if (bgSelect && !bgSelect.value) bgSelect.value = '2.png';
-  if (targetSelect && !targetSelect.value) targetSelect.value = '13.png';
-  if (targetInput && !targetInput.value) targetInput.value = targetSelect?.value || '13.png';
+// Defaults
+if (bgSelect && !bgSelect.value) bgSelect.value = '2.png';
+if (targetSelect && !targetSelect.value) targetSelect.value = '13.png';
+if (targetInput && !targetInput.value) targetInput.value = targetSelect?.value || '13.png';
 
   const shotVariant = document.getElementById('shotVariant');
   const shotVol = document.getElementById('shotVol');
@@ -1806,11 +1849,64 @@ function mountEditor(){
   const qList = document.getElementById('qList');
   const previewFrame = document.getElementById('previewFrame');
 
+  // Fonts for questions/answers (10 common, incl. 2 handwriting)
+  const QA_FONTS = [
+    {label: 'System UI', family: "system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif"},
+    {label: 'Segoe UI', family: "'Segoe UI', Arial, sans-serif"},
+    {label: 'Arial', family: "Arial, Helvetica, sans-serif"},
+    {label: 'Verdana', family: "Verdana, Geneva, sans-serif"},
+    {label: 'Trebuchet MS', family: "'Trebuchet MS', Arial, sans-serif"},
+    {label: 'Georgia', family: "Georgia, 'Times New Roman', serif"},
+    {label: 'Times New Roman', family: "'Times New Roman', Times, serif"},
+    {label: 'Courier New', family: "'Courier New', Courier, monospace"},
+    {label: 'Comic Sans MS (рукописный)', family: "'Comic Sans MS', 'Comic Sans', cursive"},
+    {label: 'Brush Script MT (рукописный)', family: "'Brush Script MT', 'Segoe Script', cursive"}
+  ];
+
+  function uiLang(){
+    return (document.documentElement.lang || navigator.language || 'ru').toLowerCase();
+  }
+  function fontSampleText(){
+    const l = uiLang();
+    if(l.startsWith('ru')) return 'пример шрифта';
+    if(l.startsWith('uk')) return 'приклад шрифту';
+    if(l.startsWith('de')) return 'Schriftbeispiel';
+    if(l.startsWith('fr')) return 'exemple de police';
+    return 'font sample';
+  }
+
+  function initFontSelector(){
+    if(!qaFontSelect) return;
+    const sample = fontSampleText();
+    qaFontSelect.innerHTML = '';
+    QA_FONTS.forEach((f)=>{
+      const opt = document.createElement('option');
+      opt.value = f.family;
+      opt.textContent = `${sample} — ${f.label}`;
+      opt.style.fontFamily = f.family;
+      qaFontSelect.appendChild(opt);
+    });
+    // default
+    if(!cfg.qaFont) cfg.qaFont = QA_FONTS[0].family;
+    qaFontSelect.value = cfg.qaFont;
+    const apply = ()=>{
+      const fam = qaFontSelect.value || QA_FONTS[0].family;
+      if(qaFontSample){
+        qaFontSample.textContent = sample;
+        qaFontSample.style.fontFamily = fam;
+      }
+    };
+    apply();
+    qaFontSelect.addEventListener('change', ()=>{ apply(); schedulePreviewUpdate(); });
+  }
+
+
   function readCfgFromUI(){
     cfg.title = inpTitle.value || "Математический тир";
     cfg.teamsCount = clamp(Number(teamsCount.value||2),1,3);
     cfg.autoNextTeam = (autoNext.value === 'true');
     cfg.latex = (latexToggle.value === 'true');
+    if(qaFontSelect) cfg.qaFont = (qaFontSelect.value || cfg.qaFont || '').trim();
     cfg.bg = (bgInput.value || "2.png").trim();
     cfg.targetFile = (targetInput?.value || "13.png").trim();
     cfg.targetLineOffset = (50 - Number(targetLineY?.value ?? 50));
@@ -1820,14 +1916,14 @@ function mountEditor(){
   }
 
   let _pvT = null;
-  function schedulePreviewUpdate() {
-    if (_pvT) clearTimeout(_pvT);
-    _pvT = setTimeout(() => {
-      try { updatePreview(); } catch (e) {}
-    }, 120);
-  }
+function schedulePreviewUpdate() {
+  if (_pvT) clearTimeout(_pvT);
+  _pvT = setTimeout(() => {
+    try { updatePreview(); } catch (e) {}
+  }, 120);
+}
 
-  function updatePreview(){
+function updatePreview(){
     readCfgFromUI();
     if(cfg.latex) ensureKatex();
     const gameUrl = urlOfSelf() + `?game=${encodeURIComponent(b64uEncode(cfg))}&v=${VERSION}&t=${Date.now()}`;
@@ -1874,7 +1970,7 @@ function mountEditor(){
   }
   shotVariant.addEventListener('change', async ()=>{ await playShotPreview(); try{ if(!isGame) schedulePreviewUpdate(); }catch(e){} });
   shotVol.addEventListener('input', ()=>{ readCfgFromUI(); try{ AudioKit.setVolume(cfg.shot.volume); }catch(e){} try{ if(!isGame) schedulePreviewUpdate(); }catch(e){} });
-  document.getElementById('copyIframe').addEventListener('click', async ()=>{
+document.getElementById('copyIframe').addEventListener('click', async ()=>{
     readCfgFromUI();
     const src = urlOfSelf() + `?game=${encodeURIComponent(b64uEncode(cfg))}&v=${VERSION}`;
     const code = `<iframe src="${src}" style="width:100%;height:600px;border:0;" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
@@ -1912,7 +2008,6 @@ function mountEditor(){
   const editType = document.getElementById('editType');
   const editText = document.getElementById('editText');
   const editImg = document.getElementById('editImg');
-  const editFont = document.getElementById('editFont');
   const choiceBox = document.getElementById('choiceBox');
   const inputBox = document.getElementById('inputBox');
   const editCorrect = document.getElementById('editCorrect');
@@ -1934,7 +2029,6 @@ function mountEditor(){
       timerEnabled: false,
       timerSeconds: 30,
       image: '',
-      font: 'Arial, sans-serif',
       options: [
         {text:'', correct:true},
         {text:'', correct:false},
@@ -2002,7 +2096,6 @@ function mountEditor(){
     editType.value = q.type || 'choice';
     editText.value = q.text || '';
     editImg.value = q.image || '';
-    editFont.value = q.font || 'Arial, sans-serif';
     editCorrect.value = q.correct || '';
 
     syncTypeUI();
@@ -2020,7 +2113,6 @@ function mountEditor(){
       q.type = editType.value;
       q.text = editText.value || '';
       q.image = (editImg.value || '').trim();
-      q.font = editFont.value;
       q.correct = (editCorrect.value || '').trim();
 
       if(q.type === 'choice'){
@@ -2045,6 +2137,7 @@ function mountEditor(){
     editBack.classList.add('on');
   }
 
+  initFontSelector();
   renderQuestionList();
   updatePreview();
 }
