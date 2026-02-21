@@ -287,137 +287,74 @@
     }
     .range{
       width:100%;
-      accent-color: #ff8c00;
-    }
-    /* ---------- Neon orange slider + orbit panel ---------- */
-    .orbitPanel{
-      border: 1px solid rgba(255,140,0,.35);
-      border-radius: 16px;
-      padding: 12px;
-      background: rgba(8,8,10,.55);
-      box-shadow:
-        0 0 18px rgba(255,140,0,.18),
-        inset 0 0 22px rgba(255,140,0,.08);
-      backdrop-filter: blur(6px);
-    }
-    .orbitHeader{
-      display:flex;
-      align-items:baseline;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:10px;
-    }
-    .orbitTitle{
-      font-weight:800;
-      letter-spacing:.3px;
-    }
-    .orbitSub{
-      opacity:.75;
-      font-size:12px;
-      text-align:right;
-    }
-    .orbitGrid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
-    }
-    @media (max-width: 860px){
-      .orbitGrid{ grid-template-columns: 1fr; }
-      .orbitSub{ text-align:left; }
-      .orbitHeader{ flex-direction:column; align-items:flex-start; }
-    }
-    .sliderCard{
-      border-radius: 14px;
-      padding: 10px 10px 12px;
-      background: rgba(12,12,16,.62);
-      border: 1px solid rgba(255,140,0,.22);
-      box-shadow: 0 0 14px rgba(255,140,0,.12);
-    }
-    .sliderTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:8px;
-    }
-    .sliderLabel{
-      font-weight:700;
-      font-size:13px;
-      opacity:.95;
-    }
-    .sliderBadge{
-      font-variant-numeric: tabular-nums;
-      font-size:12px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,140,0,.45);
-      background: rgba(255,140,0,.08);
-      box-shadow: 0 0 14px rgba(255,140,0,.25);
-      color: rgba(255,196,120,.98);
-      white-space:nowrap;
-    }
-    .sliderHint{
-      margin-top:8px;
-      font-size:12px;
-      opacity:.78;
-      line-height:1.35;
+      accent-color: #2aa6ff;
     }
 
-    /* Range styling (WebKit/Blink) */
-    input[type="range"].neonRange{
-      width:100%;
-      -webkit-appearance:none;
-      appearance:none;
-      height: 34px;
-      background: transparent;
-      outline:none;
-    }
-    input[type="range"].neonRange::-webkit-slider-runnable-track{
-      height: 10px;
-      border-radius: 999px;
-      background: linear-gradient(90deg, rgba(255,140,0,.15), rgba(255,140,0,.45));
-      border: 1px solid rgba(255,140,0,.35);
-      box-shadow: 0 0 14px rgba(255,140,0,.18), inset 0 0 10px rgba(255,140,0,.12);
-    }
-    input[type="range"].neonRange::-webkit-slider-thumb{
-      -webkit-appearance:none;
-      appearance:none;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      margin-top: -6px;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.95), rgba(255,140,0,.95));
-      border: 1px solid rgba(255,140,0,.7);
-      box-shadow: 0 0 18px rgba(255,140,0,.45), 0 0 34px rgba(255,140,0,.20);
-      cursor:pointer;
-    }
-    input[type="range"].neonRange:focus-visible::-webkit-slider-thumb{
-      box-shadow: 0 0 22px rgba(255,140,0,.55), 0 0 40px rgba(255,140,0,.25);
-    }
-
-    /* Firefox */
-    input[type="range"].neonRange::-moz-range-track{
-      height: 10px;
-      border-radius: 999px;
-      background: linear-gradient(90deg, rgba(255,140,0,.15), rgba(255,140,0,.45));
-      border: 1px solid rgba(255,140,0,.35);
-      box-shadow: 0 0 14px rgba(255,140,0,.18), inset 0 0 10px rgba(255,140,0,.12);
-    }
-    input[type="range"].neonRange::-moz-range-thumb{
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.95), rgba(255,140,0,.95));
-      border: 1px solid rgba(255,140,0,.7);
-      box-shadow: 0 0 18px rgba(255,140,0,.45), 0 0 34px rgba(255,140,0,.20);
-      cursor:pointer;
-    }
-    input[type="range"].neonRange::-moz-range-progress{
-      height: 10px;
-      border-radius: 999px;
-      background: rgba(255,140,0,.55);
-    }
-    
+    /* ====== Orbit sliders (left menu only) ====== */
+.app > .panel:first-child .orbitPanel{
+  display:grid;
+  gap:12px;
+  margin-top:10px;
+}
+.app > .panel:first-child .orbitPanel .field{
+  padding:12px 12px 10px;
+  border-radius:16px;
+  border:1px solid var(--neonLine);
+  background: linear-gradient(180deg, rgba(255,138,42,.10), rgba(10,14,18,.45));
+  box-shadow: 0 0 0 1px rgba(255,138,42,.12), 0 0 18px rgba(255,138,42,.10);
+}
+.app > .panel:first-child .orbitPanel label{
+  margin-bottom:8px;
+  font-weight:700;
+  color: rgba(255,220,190,.92);
+  text-shadow: 0 0 14px rgba(255,138,42,.22);
+}
+.app > .panel:first-child .orbitPanel .hint{
+  margin-top:8px;
+  font-size:12px;
+  line-height:1.35;
+  color: rgba(232,238,247,.72);
+}
+.app > .panel:first-child .orbitPanel input.range{
+  width:100%;
+  accent-color: var(--neon);
+  height:28px;
+  padding:0;
+  background: transparent;
+}
+.app > .panel:first-child .orbitPanel input.range::-webkit-slider-runnable-track{
+  height:6px;
+  border-radius:999px;
+  background: rgba(255,255,255,.14);
+  box-shadow: 0 0 14px rgba(255,138,42,.14), inset 0 0 0 1px rgba(0,0,0,.22);
+}
+.app > .panel:first-child .orbitPanel input.range::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background: rgba(10,14,18,.95);
+  border:2px solid rgba(255,178,77,.95);
+  box-shadow: 0 0 18px rgba(255,138,42,.55), 0 0 0 4px rgba(255,138,42,.10);
+  margin-top:-6px;
+}
+.app > .panel:first-child .orbitPanel input.range:focus::-webkit-slider-thumb{
+  box-shadow: 0 0 22px rgba(255,138,42,.70), 0 0 0 5px rgba(255,138,42,.14);
+}
+.app > .panel:first-child .orbitPanel input.range::-moz-range-track{
+  height:6px;
+  border-radius:999px;
+  background: rgba(255,255,255,.14);
+  box-shadow: 0 0 14px rgba(255,138,42,.14), inset 0 0 0 1px rgba(0,0,0,.22);
+}
+.app > .panel:first-child .orbitPanel input.range::-moz-range-thumb{
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background: rgba(10,14,18,.95);
+  border:2px solid rgba(255,178,77,.95);
+  box-shadow: 0 0 18px rgba(255,138,42,.55), 0 0 0 4px rgba(255,138,42,.10);
+}
 
     /* ====== Preview ====== */
     .previewWrap{
@@ -2010,33 +1947,27 @@ function mountEditor(){
             </div>
             <div class="help">Файлы мишеней: 10.png … 14.png (рядом с index.html).</div>
 
-            
-            <div class="orbitPanel" style="margin-top:12px;">
-              <div class="orbitHeader">
-                <div class="orbitTitle">Движение мишеней</div>
-                <div class="orbitSub">Движение дискретно — мишени “шагают” по точкам окружности.</div>
-              </div>
-
-              <div class="orbitGrid">
-                <div class="sliderCard">
-                  <div class="sliderTop">
-                    <div class="sliderLabel">Радиус</div>
-                    <div class="sliderBadge" id="targetOrbitRadiusVal">0</div>
-                  </div>
-                  <input id="targetOrbitRadius" class="range neonRange" type="range" min="0" max="260" step="5" value="0" />
-                  <div class="sliderHint">0 — мишени стоят на месте. Чем больше значение, тем больше радиус окружности (в пикселях).</div>
+            <div class="row" style="margin-top:10px;">
+              <div class="field">
+                <label>Высота мишени</label>
+                <input id="targetLineY" class="range" type="range" min="0" max="100" step="1" value="50" />
+                </div>
+              <div class="field">
+                <label>Разброс</label>
+                <input id="targetLineJitter" class="range" type="range" min="0" max="40" step="1" value="8" />
                 </div>
 
-                <div class="sliderCard">
-                  <div class="sliderTop">
-                    <div class="sliderLabel">Скорость</div>
-                    <div class="sliderBadge" id="targetOrbitSpeedVal">0</div>
-                  </div>
-                  <input id="targetOrbitSpeed" class="range neonRange" type="range" min="0" max="12" step="1" value="0" />
-                  <div class="sliderHint">0 — без движения. Чем больше, тем быстрее “шагают” по точкам окружности.</div>
-                </div>
+            <div class="row" style="margin-top:10px;">
+              <div class="field">
+                <label>Движение мишеней — радиус</label>
+                <input id="targetOrbitRadius" class="range" type="range" min="0" max="260" step="5" value="0" />
+                <div class="hint">0 — мишени стоят на месте. Чем больше значение, тем больше радиус окружности (в пикселях).</div>
               </div>
-            </div>
+              <div class="field">
+                <label>Движение мишеней — скорость</label>
+                <input id="targetOrbitSpeed" class="range" type="range" min="0" max="12" step="1" value="0" />
+                <div class="hint">0 — без движения. Чем больше, тем быстрее “шагают” по точкам окружности.</div>
+              </div>
             </div>
             </div>
 
@@ -2207,26 +2138,6 @@ const targetInput = document.getElementById('targetInput');
   const targetLineJitter = document.getElementById('targetLineJitter');
   const targetOrbitRadius = document.getElementById('targetOrbitRadius');
   const targetOrbitSpeed = document.getElementById('targetOrbitSpeed');
-  const targetOrbitRadiusVal = document.getElementById('targetOrbitRadiusVal');
-  const targetOrbitSpeedVal  = document.getElementById('targetOrbitSpeedVal');
-
-  function syncOrbitUI(){
-    try{
-      if(targetOrbitRadiusVal && targetOrbitRadius){
-        const r = Number(targetOrbitRadius.value||0);
-        targetOrbitRadiusVal.textContent = (r<=0) ? '0 (статично)' : (r + ' px');
-      }
-      if(targetOrbitSpeedVal && targetOrbitSpeed){
-        const s = Number(targetOrbitSpeed.value||0);
-        targetOrbitSpeedVal.textContent = (s<=0) ? '0' : ('× ' + s);
-      }
-    }catch(e){}
-  }
-  syncOrbitUI();
-
-  targetOrbitRadius?.addEventListener('input', syncOrbitUI);
-  targetOrbitSpeed?.addEventListener('input', syncOrbitUI);
-
 
 // Live-update preview when background/target change
 bgSelect?.addEventListener('change', () => {
