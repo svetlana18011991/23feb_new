@@ -1799,7 +1799,7 @@ function mountEditor(){
   const teamsCount = document.getElementById('teamsCount');
   const autoNext = document.getElementById('autoNext');
   const latexToggle = document.getElementById('latexToggle');
-  const bgInput = document.getElementById('bgSelect') || document.getElementById('bgInput');
+  const bgInput = document.getElementById('bgInput') || document.getElementById('bgSelect');
   const bgSelect = document.getElementById('bgSelect');
   
   bgSelect?.addEventListener('change', ()=>{ readCfgFromUI(); try{ if(!isGame) schedulePreviewUpdate(); }catch(e){} });
@@ -1824,7 +1824,11 @@ targetLineY?.addEventListener('input', schedulePreviewUpdate);
 targetLineJitter?.addEventListener('input', schedulePreviewUpdate);
 
 // Defaults
-if (bgSelect && !bgSelect.value) bgSelect.value = '2.png';
+// Всегда стартуем с фона 2 (можно изменить в UI)
+if (bgSelect) bgSelect.value = '2.png';
+const _bgHidden = document.getElementById('bgInput');
+if (_bgHidden) _bgHidden.value = '2.png';
+try { if (bgInput) bgInput.value = bgSelect?.value || '2.png'; } catch(e) {}
 if (targetSelect && !targetSelect.value) targetSelect.value = '13.png';
 if (targetInput && !targetInput.value) targetInput.value = targetSelect?.value || '13.png';
 
