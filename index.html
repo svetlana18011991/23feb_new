@@ -4,6 +4,10 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Математический тир — editor+game</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Pacifico&display=swap" rel="stylesheet">
   <script type="text/javascript" src="https://me.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=vAQSnmqvoU-az3uCUc5dGt1sVy4idcF5Sf6b_2pIWTrOZFbOdb1x03qCvkjdGE6-GYqCoRxkzSIsximsveC936ky_P3oUGlC2LwIrmK7cmRUXRTf7xBUziu9rTbRBYuMeF2_YEihzxw7WFYYru6tuC-o9RMU_cPFszq9NJj1_otMYtU4jBkwtWN2Pm4Sf9mZOK3ytdkHMLVHGgBMqFbw8ohY8mifQ0t6jf-ylsXj7kse4fsJFTEzPbhXczYZTgq6sQLte1SXq9HZ_bmHy4OJxg" charset="UTF-8"></script><style>
     :root{
       --bg0:#0b0f14;
@@ -25,6 +29,7 @@
       --r:18px;
       --qFont:'Roboto';
       --aFont:'Roboto';
+      --qaSize:18px;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -690,7 +695,7 @@
     }
     .qText{
       font-weight:900;
-      font-size:18px;
+      font-size: var(--qaSize);
       line-height:1.2;
       font-family: var(--qFont), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
@@ -731,6 +736,7 @@
       display:flex;
       gap:12px;
       align-items:flex-start;
+      font-size: var(--qaSize);
       font-family: var(--aFont), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
     .ansBtn:hover{ background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.16);}
@@ -1514,8 +1520,10 @@ function mountGame(cfg){
   function setFonts(){
     const qf = (cfg.qFont || 'Roboto');
     const af = (cfg.aFont || 'Roboto');
+    const fs = Number(cfg.fontSize || 18);
     document.documentElement.style.setProperty('--qFont', qf);
     document.documentElement.style.setProperty('--aFont', af);
+    document.documentElement.style.setProperty('--qaSize', `${fs}px`);
   }
   setFonts();
 
@@ -1978,10 +1986,17 @@ const teamsEl = document.getElementById('teams');
     renderScores();
     closeModal();
     toast("Сброс выполнен");
+  });
 
   // Start screen controls
-  btnStart.addEventListener('click', hideStartScreen);
-  btnStartClose.addEventListener('click', hideStartScreen);
+  btnStart.addEventListener('click', async ()=>{
+    try{ await AudioKit.unlock(); }catch(e){}
+    hideStartScreen();
+  });
+  btnStartClose.addEventListener('click', async ()=>{
+    try{ await AudioKit.unlock(); }catch(e){}
+    hideStartScreen();
+  });
   // Close start screen on Escape (without affecting question modal)
   document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && startBack.classList.contains('on')) hideStartScreen(); });
 
@@ -2000,7 +2015,7 @@ const teamsEl = document.getElementById('teams');
     hudTargets.textContent = `${countDone()}/${questions.length}`;
     if(cfg.startScreen && cfg.startScreen.enabled) showStartScreen();
   });
-  });
+
   btnClose.addEventListener('click', closeModal);
   document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
 
@@ -2285,15 +2300,16 @@ function mountEditor(){
               <input id="editImg" type="text" placeholder="https://..."/>
             </div>
             <div>
-              <label>Шрифт вопроса</label>
-              <select id="qFontSelect"></select>
+              <label>Шрифт (для вопроса и ответов)</label>
+              <select id="qaFontSelect"></select>
             </div>
           </div>
 
           <div class="row">
             <div>
-              <label>Шрифт ответов</label>
-              <select id="aFontSelect"></select>
+              <label>Размер шрифта (для вопроса и ответов)</label>
+              <input id="qaFontSize" type="range" min="12" max="44" step="1" value="18"/>
+              <div class="muted" style="margin-top:6px;">Текущий: <span id="qaFontSizeVal">18</span> px</div>
             </div>
           </div>
 
@@ -2350,6 +2366,14 @@ function mountEditor(){
   const feedEnabled = document.getElementById('feedEnabled');
   const feedExtraInp = document.getElementById('feedExtraInp');
 
+  const shotVariantEl = document.getElementById('shotVariant');
+  const shotVolEl = document.getElementById('shotVol');
+
+  // font settings (apply to both question + answers)
+  const qaFontSelect = document.getElementById('qaFontSelect');
+  const qaFontSize = document.getElementById('qaFontSize');
+  const qaFontSizeVal = document.getElementById('qaFontSizeVal');
+
 
   // init start/feedback inputs from defaults
   try{
@@ -2374,8 +2398,10 @@ function mountEditor(){
     cfg.targetOrbitSpeed = Number(targetOrbitSpeed?.value ?? 0);
     cfg.shot.variant = document.getElementById('shotVariant').value;
     cfg.shot.volume = clamp(Number(document.getElementById('shotVol').value||0.7),0,1);
-    cfg.qFont = (document.getElementById('qFontSelect')?.value || 'Roboto');
-    cfg.aFont = (document.getElementById('aFontSelect')?.value || 'Roboto');
+    cfg.qFont = (document.getElementById('qaFontSelect')?.value || 'Roboto');
+    cfg.aFont = (document.getElementById('qaFontSelect')?.value || 'Roboto');
+    cfg.fontSize = clamp(Number(document.getElementById('qaFontSize')?.value || 18), 12, 44);
+
 
 
     // start screen
@@ -2395,9 +2421,69 @@ function mountEditor(){
     document.getElementById('previewFrame').src = gameUrl;
   }
 
-  [inpTitle, teamsCount, autoNext, latexToggle, bgSelect, targetSelect, targetLineY, targetLineJitter, targetOrbitRadius, targetOrbitSpeed, startEnabled, startColor, startNeon, startTextInp, feedEnabled, feedExtraInp].forEach(el=>{
+  [inpTitle, teamsCount, autoNext, latexToggle, bgSelect, targetSelect, targetLineY, targetLineJitter, targetOrbitRadius, targetOrbitSpeed, shotVariantEl, shotVolEl, startEnabled, startColor, startNeon, startTextInp, feedEnabled, feedExtraInp].forEach(el=>{
     el.addEventListener('change', updatePreview);
     if(el.type === 'range' || el.type === 'text') el.addEventListener('input', updatePreview);
+  });
+
+
+  // font controls (one font for question + answers) + size for both
+  (function initFontControls(){
+    const fonts = [
+      {label:"Roboto (sans)", value:"Roboto"},
+      {label:"Arial", value:"Arial"},
+      {label:"Helvetica", value:"Helvetica"},
+      {label:"Verdana", value:"Verdana"},
+      {label:"Tahoma", value:"Tahoma"},
+      {label:"Trebuchet MS", value:"'Trebuchet MS'"},
+      {label:"Georgia", value:"Georgia"},
+      {label:"Times New Roman", value:"'Times New Roman'"},
+      {label:"Courier New (mono)", value:"'Courier New'"},
+      {label:"Impact", value:"Impact"},
+      {label:"Caveat (рукописный)", value:"Caveat"},
+      {label:"Pacifico (рукописный)", value:"Pacifico"}
+    ];
+    if(qaFontSelect && qaFontSelect.options.length === 0){
+      fonts.forEach(f=>{
+        const o = document.createElement('option');
+        o.value = f.value;
+        o.textContent = f.label;
+        qaFontSelect.appendChild(o);
+      });
+    }
+
+    // set initial from cfg
+    if(qaFontSelect){
+      const current = (cfg.qFont || cfg.aFont || 'Roboto');
+      qaFontSelect.value = current;
+    }
+    if(qaFontSize){
+      const s = clamp(Number(cfg.fontSize || 18), 12, 44);
+      qaFontSize.value = String(s);
+      if(qaFontSizeVal) qaFontSizeVal.textContent = String(s);
+    }
+
+    // live label
+    qaFontSize?.addEventListener('input', ()=>{
+      if(qaFontSizeVal) qaFontSizeVal.textContent = String(qaFontSize.value);
+    });
+  })();
+
+  // preview shot sound when selecting in editor
+  shotVariantEl.addEventListener('change', async ()=>{
+    try{
+      await AudioKit.unlock();
+      const vol = clamp(Number(shotVolEl.value||0.7),0,1);
+      AudioKit.setVolume(vol);
+      AudioKit.playVariant(shotVariantEl.value || 'pif');
+    }catch(e){}
+  });
+  shotVolEl.addEventListener('input', async ()=>{
+    try{
+      await AudioKit.unlock();
+      const vol = clamp(Number(shotVolEl.value||0.7),0,1);
+      AudioKit.setVolume(vol);
+    }catch(e){}
   });
 
   const qCount = document.getElementById('qCount');
@@ -2409,11 +2495,15 @@ function mountEditor(){
     cfg.questions.forEach((q, idx)=>{
       const item = document.createElement('div');
       item.className = 'qItem';
+      const typeLabel = (q.type === 'input') ? 'Ввод ответа' : 'Выбор ответа';
+      const pts = Number(q.points || 10);
       item.innerHTML = `
-        <div>
+        <div style="flex:1; cursor:pointer;" onclick="openEditQ(${idx})">
           <div class="qTitle">${idx+1}. ${q.text || '(без текста)'}</div>
+          <div class="muted" style="font-size:12px; margin-top:2px;">${typeLabel} • ${pts} очк.</div>
         </div>
         <div style="display:flex; gap:8px;">
+          <button class="iconBtn" onclick="openEditQ(${idx})">⚙️</button>
           <button class="iconBtn danger" onclick="removeQ(${idx})">🗑️</button>
         </div>
       `;
@@ -2422,11 +2512,159 @@ function mountEditor(){
   }
 
   window.removeQ = (idx) => { cfg.questions.splice(idx,1); renderQuestionList(); updatePreview(); };
+  // -------- Question editor modal (for "Добавить" and settings) --------
+  const editBack = document.getElementById('editBack');
+  const editClose = document.getElementById('editClose');
+  const editHdr = document.getElementById('editHdr');
+  const editPoints = document.getElementById('editPoints');
+  const editTimerMode = document.getElementById('editTimerMode');
+  const editTimerSec = document.getElementById('editTimerSec');
+  const editType = document.getElementById('editType');
+  const editText = document.getElementById('editText');
+  const editImg = document.getElementById('editImg');
+  const choiceBox = document.getElementById('choiceBox');
+  const inputBox = document.getElementById('inputBox');
+  const optList = document.getElementById('optList');
+  const btnAddOpt = document.getElementById('btnAddOpt');
+  const editCorrect = document.getElementById('editCorrect');
+  const btnCancelQ = document.getElementById('btnCancelQ');
+  const btnSaveQ = document.getElementById('btnSaveQ');
 
-  document.getElementById('btnAdd').onclick = () => {
-    cfg.questions.push({type:'choice', text:'Новый вопрос', options:[{text:'Да', correct:true}]});
+  function openEditQ(idx){
+    editingIndex = idx;
+    const q = cfg.questions[idx] || {};
+    editHdr.textContent = `Вопрос #${idx+1}`;
+    editPoints.value = Number(q.points ?? 10);
+    editTimerMode.value = (q.timerEnabled ? 'on' : 'off');
+    editTimerSec.value = Number(q.timerSeconds ?? 30);
+    editType.value = (q.type === 'input') ? 'input' : 'choice';
+    editText.value = q.text ?? '';
+    editImg.value = q.image ?? '';
+    editCorrect.value = q.correct ?? '';
+    renderOptEditor();
+    syncTypeVisibility();
+    // global font settings (apply to both question + answers)
+    if(qaFontSelect) qaFontSelect.value = (cfg.qFont || cfg.aFont || 'Roboto');
+    if(qaFontSize){
+      const s = clamp(Number(cfg.fontSize || qaFontSize.value || 18), 12, 44);
+      qaFontSize.value = String(s);
+      if(qaFontSizeVal) qaFontSizeVal.textContent = String(s);
+    }
+    editBack.classList.add('on');
+  }
+  window.openEditQ = openEditQ;
+
+  function closeEditQ(){
+    editBack.classList.remove('on');
+    editingIndex = null;
+  }
+
+  function syncTypeVisibility(){
+    const isInput = (editType.value === 'input');
+    inputBox.style.display = isInput ? '' : 'none';
+    choiceBox.style.display = isInput ? 'none' : '';
+  }
+
+  function renderOptEditor(){
+    optList.innerHTML = '';
+    const q = cfg.questions[editingIndex] || {};
+    const opts = Array.isArray(q.options) ? q.options : [];
+    opts.forEach((opt, i)=>{
+      const row = document.createElement('div');
+      row.className = 'qItem';
+      row.style.gap = '10px';
+      row.innerHTML = `
+        <div style="flex:1;">
+          <label style="display:block; font-size:12px; opacity:.8; margin-bottom:4px;">Вариант ${i+1}</label>
+          <input type="text" value="${String(opt?.text ?? '').replaceAll('"','&quot;')}" data-opt-text="${i}" />
+        </div>
+        <div style="display:flex; align-items:flex-end; gap:10px;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:12px; opacity:.9;">
+            <input type="checkbox" ${opt?.correct ? 'checked' : ''} data-opt-correct="${i}"/> верный
+          </label>
+          <button class="iconBtn danger" data-opt-del="${i}">🗑️</button>
+        </div>
+      `;
+      optList.appendChild(row);
+    });
+
+    // Bind inputs
+    optList.querySelectorAll('[data-opt-text]').forEach(inp=>{
+      inp.addEventListener('input', (e)=>{
+        const idx = Number(e.target.getAttribute('data-opt-text'));
+        const q = cfg.questions[editingIndex];
+        if(q && q.options && q.options[idx]) q.options[idx].text = e.target.value;
+      });
+    });
+    optList.querySelectorAll('[data-opt-correct]').forEach(chk=>{
+      chk.addEventListener('change', (e)=>{
+        const idx = Number(e.target.getAttribute('data-opt-correct'));
+        const q = cfg.questions[editingIndex];
+        if(q && q.options && q.options[idx]) q.options[idx].correct = e.target.checked;
+      });
+    });
+    optList.querySelectorAll('[data-opt-del]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const idx = Number(e.target.getAttribute('data-opt-del'));
+        const q = cfg.questions[editingIndex];
+        if(q && Array.isArray(q.options)){
+          q.options.splice(idx,1);
+          renderOptEditor();
+        }
+      });
+    });
+  }
+
+  editType.addEventListener('change', syncTypeVisibility);
+
+  btnAddOpt.addEventListener('click', ()=>{
+    if(editingIndex == null) return;
+    const q = cfg.questions[editingIndex];
+    q.options = Array.isArray(q.options) ? q.options : [];
+    q.options.push({text:`Вариант ${q.options.length+1}`, correct:false});
+    renderOptEditor();
+  });
+
+  btnCancelQ.addEventListener('click', ()=>{ closeEditQ(); });
+  editClose.addEventListener('click', ()=>{ closeEditQ(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && editBack.classList.contains('on')) closeEditQ(); });
+
+  btnSaveQ.addEventListener('click', ()=>{
+    if(editingIndex == null) return;
+    const q = cfg.questions[editingIndex];
+    q.points = clamp(Number(editPoints.value||10), 0, 9999);
+    q.timerEnabled = (editTimerMode.value === 'on');
+    q.timerSeconds = clamp(Number(editTimerSec.value||30), 1, 9999);
+    q.type = (editType.value === 'input') ? 'input' : 'choice';
+    q.text = editText.value || '';
+    q.image = (editImg.value || '').trim();
+    if(q.type === 'input'){
+      q.correct = (editCorrect.value || '').trim();
+      q.options = [];
+    } else {
+      q.correct = '';
+      q.options = Array.isArray(q.options) ? q.options : [];
+      if(q.options.length === 0) q.options = [{text:'Вариант 1', correct:true}];
+    }
     renderQuestionList();
     updatePreview();
+    closeEditQ();
+  });
+
+
+  document.getElementById('btnAdd').onclick = () => {
+    cfg.questions.push({
+      type:'choice',
+      text:'Новый вопрос',
+      points: 10,
+      timerEnabled: false,
+      timerSeconds: 30,
+      image: '',
+      options:[{text:'Вариант 1', correct:true},{text:'Вариант 2', correct:false}]
+    });
+    renderQuestionList();
+    updatePreview();
+    openEditQ(cfg.questions.length - 1);
   };
 
   document.getElementById('copyIframe').onclick = () => {
