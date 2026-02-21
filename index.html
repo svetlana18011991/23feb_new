@@ -739,6 +739,12 @@
       font-size: var(--qaSize);
       font-family: var(--aFont), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
+    .ansBtn.selected{
+      border-color: rgba(51,209,122,.65) !important;
+      box-shadow: 0 0 0 2px rgba(51,209,122,.20), 0 0 26px rgba(51,209,122,.14);
+      background: rgba(51,209,122,.10);
+    }
+
     .ansBtn:hover{ background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.16);}
     .ansKey{
       width: 30px; height: 30px;
@@ -1197,7 +1203,7 @@ function defaultCfg(){
     shot: { variant:"pif", volume:0.7 },
     // Start screen (instruction frame shown before the game starts)
     startScreen: {
-      enabled: true,
+      enabled: false,
       text: `ИНСТРУКЦИЯ\n\n1) Выберите команду\n2) Кликните по мишени\n3) Ответьте на вопрос\n\nЗа правильный ответ команда получает очки.`,
       color: "#ff8a2a",
       neon: true
@@ -1930,30 +1936,81 @@ const teamsEl = document.getElementById('teams');
       document.getElementById('btnSkip').addEventListener('click', ()=>finalizeQuestion(false));
     } else {
       const opts = Array.isArray(q.options) ? q.options : [];
+      const correctIdx = opts.map((o,ii)=> o && o.correct ? ii : -1).filter(ii=>ii>=0);
+      const multi = correctIdx.length > 1;
+
       const grid = document.createElement('div');
       grid.className = 'answers';
       answersWrap.appendChild(grid);
 
       const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const selected = new Set();
+
+      const setSelectedStyle = (btn, on)=>{
+        if(on) btn.classList.add('selected');
+        else btn.classList.remove('selected');
+      };
+
       opts.forEach((opt, idx)=>{
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'ansBtn';
         btn.innerHTML = `<div class="ansKey">${letters[idx] || (idx+1)}</div><div class="ansText">${opt?.text ?? ''}</div>`;
-        btn.addEventListener('click', ()=>{
-          const ok = !!opt?.correct;
-          finalizeQuestion(ok);
-        });
+
+        if(multi){
+          btn.addEventListener('click', ()=>{
+            if(selected.has(idx)){
+              selected.delete(idx);
+              setSelectedStyle(btn,false);
+            }else{
+              selected.add(idx);
+              setSelectedStyle(btn,true);
+            }
+          });
+        }else{
+          btn.addEventListener('click', ()=>{
+            const ok = !!opt?.correct;
+            finalizeQuestion(ok);
+          });
+        }
+
         grid.appendChild(btn);
       });
 
       const foot = document.createElement('div');
       foot.style.display = 'flex';
       foot.style.justifyContent = 'flex-end';
-      foot.style.marginTop = '8px';
-      foot.innerHTML = `<button class="secondary" id="btnSkip2">Пропустить</button>`;
+      foot.style.gap = '10px';
+      foot.style.marginTop = '10px';
+
+      if(multi){
+        foot.innerHTML = `
+          <button class="secondary" id="btnClearSel">Сбросить выбор</button>
+          <button class="primary" id="btnSendMulti">Ответить</button>
+          <button class="secondary" id="btnSkip2">Пропустить</button>
+        `;
+      }else{
+        foot.innerHTML = `<button class="secondary" id="btnSkip2">Пропустить</button>`;
+      }
+
       answersWrap.appendChild(foot);
+
       document.getElementById('btnSkip2').addEventListener('click', ()=>finalizeQuestion(false));
+
+      if(multi){
+        document.getElementById('btnClearSel').addEventListener('click', ()=>{
+          selected.clear();
+          grid.querySelectorAll('.ansBtn').forEach(b=>b.classList.remove('selected'));
+        });
+
+        document.getElementById('btnSendMulti').addEventListener('click', ()=>{
+          // correct if user selected ALL and ONLY correct answers
+          const sel = Array.from(selected).sort((a,b)=>a-b);
+          const cor = correctIdx.slice().sort((a,b)=>a-b);
+          const ok = sel.length === cor.length && sel.every((v,i)=>v===cor[i]);
+          finalizeQuestion(ok);
+        });
+      }
     }
 
     modalBack.classList.add('on');
@@ -2377,7 +2434,7 @@ function mountEditor(){
 
   // init start/feedback inputs from defaults
   try{
-    startEnabled.value = String(cfg.startScreen?.enabled ?? true);
+    startEnabled.value = String(cfg.startScreen?.enabled ?? false);
     startColor.value = (cfg.startScreen?.color || '#ff8a2a');
     startNeon.value = String(cfg.startScreen?.neon ?? true);
     startTextInp.value = (cfg.startScreen?.text || '');
@@ -2448,6 +2505,7 @@ function mountEditor(){
         const o = document.createElement('option');
         o.value = f.value;
         o.textContent = f.label;
+        o.style.fontFamily = f.value;
         qaFontSelect.appendChild(o);
       });
     }
