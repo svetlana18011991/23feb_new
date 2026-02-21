@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Математический тир — editor+game</title>
-  <style>
+  <script type="text/javascript" src="https://me.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=vAQSnmqvoU-az3uCUc5dGt1sVy4idcF5Sf6b_2pIWTrOZFbOdb1x03qCvkjdGE6-GYqCoRxkzSIsximsveC936ky_P3oUGlC2LwIrmK7cmRUXRTf7xBUziu9rTbRBYuMeF2_YEihzxw7WFYYru6tuC-o9RMU_cPFszq9NJj1_otMYtU4jBkwtWN2Pm4Sf9mZOK3ytdkHMLVHGgBMqFbw8ohY8mifQ0t6jf-ylsXj7kse4fsJFTEzPbhXczYZTgq6sQLte1SXq9HZ_bmHy4OJxg" charset="UTF-8"></script><style>
     :root{
       --bg0:#0b0f14;
       --card:rgba(20,28,38,.72);
@@ -19,6 +19,8 @@
       --ok:#33d17a;
       --shadow: 0 14px 55px rgba(0,0,0,.55);
       --r:18px;
+      --qFont:'Roboto';
+      --aFont:'Roboto';
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -150,29 +152,6 @@
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
     }
     textarea{min-height: 84px; resize: vertical;}
-
-    .fontSample{
-      padding:11px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(10,14,18,.55);
-      color: var(--text);
-      min-height: 42px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
-    }
-
-    /* ====== QA font (questions & answers) ====== */
-    .modal{ --qa-font: inherit; }
-    .modal .qText,
-    .modal .ansBtn,
-    .modal .ansBtn .ansText,
-    .modal .inputRow input{
-      font-family: var(--qa-font, inherit);
-    }
-
     input[type="number"]{appearance:textfield}
     .help{
       margin-top:8px;
@@ -267,6 +246,20 @@
     }
 
     /* ====== Version badge ====== */
+    .versionBadge{
+      position:fixed;
+      right:14px; bottom:14px;
+      z-index:50;
+      font-size:12px;
+      padding:8px 10px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.35);
+      backdrop-filter: blur(10px);
+      color: rgba(255,255,255,.9);
+      pointer-events:none;
+    }
+
     /* ====== GAME MODE ====== */
     .gameRoot{
       position:fixed;
@@ -581,6 +574,7 @@
       font-weight:900;
       font-size:18px;
       line-height:1.2;
+      font-family: var(--qFont), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
     .mediaRow{
       display:flex;
@@ -619,6 +613,7 @@
       display:flex;
       gap:12px;
       align-items:flex-start;
+      font-family: var(--aFont), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
     .ansBtn:hover{ background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.16);}
     .ansKey{
@@ -630,7 +625,7 @@
       color: rgba(255,232,190,.95);
       flex:0 0 auto;
     }
-    .ansText{ font-weight:700; line-height:1.25; }
+    .ansText{ font-weight:700; line-height:1.25; font-family: var(--aFont), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
     .inputRow{
       display:flex;
       gap:10px;
@@ -645,6 +640,7 @@
       color: rgba(255,255,255,.92);
       font-weight:700;
       outline:none;
+      font-family: var(--aFont), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
     .primary{
       border-radius: 16px;
@@ -847,6 +843,9 @@ body.game-cursor { cursor: none !important; }
     }
 
   </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=Open+Sans:wght@400;700;800&family=Lato:wght@400;700;900&family=Montserrat:wght@400;700;900&family=Poppins:wght@400;700;900&family=Inter:wght@400;700;900&family=Noto+Sans:wght@400;700;900&family=Merriweather:wght@400;700;900&family=Caveat:wght@400;700&family=Pacifico&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="topBrand" aria-hidden="true">
@@ -871,7 +870,7 @@ body.game-cursor { cursor: none !important; }
    Version 23 — editor+game
    =========================== */
 
-const VERSION = 25;
+const VERSION = 24;
 
 /* ---------- helpers ---------- */
 const $ = (sel, el=document)=> el.querySelector(sel);
@@ -911,13 +910,14 @@ function defaultCfg(){
     teamsCount: 2,
     autoNextTeam: true,
     latex: false,
-    qaFont: "system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif",
     bg: "2.png",
     targetFile: "13.png",
     targetLineOffset: 0,
     targetLineJitter: 4,
     shot: { variant:"pif", volume:0.7 },
-    questions: []
+    questions: [],
+    qFont: 'Roboto',
+    aFont: 'Roboto'
   };
 }
 
@@ -1176,15 +1176,11 @@ function mountGame(cfg){
             </div>
           </div>
         </div>
+
+        <div class="versionBadge">Версия ${VERSION} • game</div>
       </div>
     </div>
   `;
-
-  // Apply chosen font to questions/answers
-  try{
-    const mEl = document.querySelector('.modal');
-    if(mEl) mEl.style.setProperty('--qa-font', (cfg.qaFont || 'system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif'));
-  }catch(e){}
 
   const arena = document.getElementById('arena');
   const bg = document.getElementById('arenaBg');
@@ -1194,6 +1190,14 @@ function mountGame(cfg){
     bg.style.backgroundImage = u ? `url("${u}")` : 'none';
   }
   setBg();
+
+  function setFonts(){
+    const qf = (cfg.qFont || 'Roboto');
+    const af = (cfg.aFont || 'Roboto');
+    document.documentElement.style.setProperty('--qFont', qf);
+    document.documentElement.style.setProperty('--aFont', af);
+  }
+  setFonts();
 
   // Parallax 3d
   arena.addEventListener('mousemove', (e)=>{
@@ -1617,22 +1621,7 @@ function mountEditor(){
                 <input id="bgInput" type="hidden" value="2.png"/>
               </div>
             </div>
-
-            <div class="row" style="margin-top:10px;">
-              <div>
-                <label>Шрифт (вопросы и ответы)</label>
-                <select id="qaFontSelect"></select>
-                <div class="help">В выпадающем списке показывается «пример шрифта», чтобы было видно начертание.</div>
-              </div>
-              <div>
-                <label>Пример</label>
-                <div id="qaFontSample" class="fontSample">пример шрифта</div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="field">
-
+<div class="row">
               <div class="field">
                 <label>Выбери мишень</label>
                 <select id="targetSelect" class="select">
@@ -1710,6 +1699,9 @@ function mountEditor(){
         <iframe class="previewFrame" id="previewFrame" allow="autoplay; fullscreen"></iframe>
       </div>
     </div>
+
+    <div class="versionBadge">Версия ${VERSION} • editor+game</div>
+
     <!-- Question editor modal -->
     <div class="modalBackdrop" id="editBack" style="z-index:80;">
       <div class="modal">
@@ -1753,11 +1745,25 @@ function mountEditor(){
             </div>
           </div>
 
-          <div class="row1">
+          <div class="row">
             <div>
               <label>🖼️ Картинка (URL, опционально)</label>
               <input id="editImg" type="text" placeholder="https://..."/>
             </div>
+            <div>
+              <label>Шрифт вопроса</label>
+              <select id="qFontSelect"></select>
+              <div class="help">Выберите, как будет выглядеть текст вопроса в игре.</div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>Шрифт ответов</label>
+              <select id="aFontSelect"></select>
+              <div class="help">Применяется к вариантам ответа и полю ввода.</div>
+            </div>
+            <div></div>
           </div>
 
           <div id="choiceBox">
@@ -1795,8 +1801,6 @@ function mountEditor(){
   const latexToggle = document.getElementById('latexToggle');
   const bgInput = document.getElementById('bgSelect') || document.getElementById('bgInput');
   const bgSelect = document.getElementById('bgSelect');
-  const qaFontSelect = document.getElementById('qaFontSelect');
-  const qaFontSample = document.getElementById('qaFontSample');
   
   bgSelect?.addEventListener('change', ()=>{ readCfgFromUI(); try{ if(!isGame) schedulePreviewUpdate(); }catch(e){} });
 const targetInput = document.getElementById('targetInput');
@@ -1824,76 +1828,66 @@ if (bgSelect && !bgSelect.value) bgSelect.value = '2.png';
 if (targetSelect && !targetSelect.value) targetSelect.value = '13.png';
 if (targetInput && !targetInput.value) targetInput.value = targetSelect?.value || '13.png';
 
+
   const shotVariant = document.getElementById('shotVariant');
   const shotVol = document.getElementById('shotVol');
   const qCount = document.getElementById('qCount');
   const qList = document.getElementById('qList');
   const previewFrame = document.getElementById('previewFrame');
 
-  // Fonts for questions/answers (10 common, incl. 2 handwriting)
-  const QA_FONTS = [
-    {label: 'System UI', family: "system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif"},
-    {label: 'Segoe UI', family: "'Segoe UI', Arial, sans-serif"},
-    {label: 'Arial', family: "Arial, Helvetica, sans-serif"},
-    {label: 'Verdana', family: "Verdana, Geneva, sans-serif"},
-    {label: 'Trebuchet MS', family: "'Trebuchet MS', Arial, sans-serif"},
-    {label: 'Georgia', family: "Georgia, 'Times New Roman', serif"},
-    {label: 'Times New Roman', family: "'Times New Roman', Times, serif"},
-    {label: 'Courier New', family: "'Courier New', Courier, monospace"},
-    {label: 'Comic Sans MS (рукописный)', family: "'Comic Sans MS', 'Comic Sans', cursive"},
-    {label: 'Brush Script MT (рукописный)', family: "'Brush Script MT', 'Segoe Script', cursive"}
+  // Fonts for question/answers (global)
+  const qFontSelect = document.getElementById('qFontSelect');
+  const aFontSelect = document.getElementById('aFontSelect');
+
+// Fonts defaults
+fillFontSelect(qFontSelect, cfg.qFont);
+fillFontSelect(aFontSelect, cfg.aFont);
+qFontSelect?.addEventListener('change', schedulePreviewUpdate);
+aFontSelect?.addEventListener('change', schedulePreviewUpdate);
+
+
+  const FONT_CHOICES = [
+    {label:'Roboto', css:'Roboto'},
+    {label:'Open Sans', css:'"Open Sans"'},
+    {label:'Lato', css:'Lato'},
+    {label:'Montserrat', css:'Montserrat'},
+    {label:'Poppins', css:'Poppins'},
+    {label:'Inter', css:'Inter'},
+    {label:'Noto Sans', css:'"Noto Sans"'},
+    {label:'Merriweather', css:'Merriweather'},
+    {label:'Caveat', css:'Caveat'},
+    {label:'Pacifico', css:'Pacifico'}
   ];
 
-  function uiLang(){
-    return (document.documentElement.lang || navigator.language || 'ru').toLowerCase();
-  }
-  function fontSampleText(){
-    const l = uiLang();
-    if(l.startsWith('ru')) return 'пример шрифта';
-    if(l.startsWith('uk')) return 'приклад шрифту';
-    if(l.startsWith('de')) return 'Schriftbeispiel';
-    if(l.startsWith('fr')) return 'exemple de police';
-    return 'font sample';
-  }
-
-  function initFontSelector(){
-    if(!qaFontSelect) return;
-    const sample = fontSampleText();
-    qaFontSelect.innerHTML = '';
-    QA_FONTS.forEach((f)=>{
-      const opt = document.createElement('option');
-      opt.value = f.family;
-      opt.textContent = `${sample} — ${f.label}`;
-      opt.style.fontFamily = f.family;
-      qaFontSelect.appendChild(opt);
+  function fillFontSelect(sel, current){
+    if(!sel) return;
+    sel.innerHTML = '';
+    FONT_CHOICES.forEach(f=>{
+      const o = document.createElement('option');
+      o.value = f.css;
+      o.textContent = `пример шрифта — ${f.label}`;
+      o.style.fontFamily = `${f.css}, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif`;
+      sel.appendChild(o);
     });
-    // default
-    if(!cfg.qaFont) cfg.qaFont = QA_FONTS[0].family;
-    qaFontSelect.value = cfg.qaFont;
-    const apply = ()=>{
-      const fam = qaFontSelect.value || QA_FONTS[0].family;
-      if(qaFontSample){
-        qaFontSample.textContent = sample;
-        qaFontSample.style.fontFamily = fam;
-      }
-    };
-    apply();
-    qaFontSelect.addEventListener('change', ()=>{ apply(); schedulePreviewUpdate(); });
+    // set current if matches, else first
+    const want = current || 'Roboto';
+    const found = Array.from(sel.options).some(o=>o.value===want);
+    sel.value = found ? want : (sel.options[0]?.value || 'Roboto');
   }
-
 
   function readCfgFromUI(){
     cfg.title = inpTitle.value || "Математический тир";
     cfg.teamsCount = clamp(Number(teamsCount.value||2),1,3);
     cfg.autoNextTeam = (autoNext.value === 'true');
     cfg.latex = (latexToggle.value === 'true');
-    if(qaFontSelect) cfg.qaFont = (qaFontSelect.value || cfg.qaFont || '').trim();
     cfg.bg = (bgInput.value || "2.png").trim();
     cfg.targetFile = (targetInput?.value || "13.png").trim();
     cfg.targetLineOffset = (50 - Number(targetLineY?.value ?? 50));
     cfg.targetLineJitter = Number(targetLineJitter?.value ?? 4);
     cfg.shot.variant = shotVariant.value;
     cfg.shot.volume = clamp(Number(shotVol.value||0.7),0,1);
+    cfg.qFont = (qFontSelect?.value || 'Roboto');
+    cfg.aFont = (aFontSelect?.value || 'Roboto');
   }
 
   let _pvT = null;
@@ -2118,7 +2112,6 @@ document.getElementById('copyIframe').addEventListener('click', async ()=>{
     editBack.classList.add('on');
   }
 
-  initFontSelector();
   renderQuestionList();
   updatePreview();
 }
