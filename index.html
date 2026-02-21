@@ -167,6 +167,64 @@
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
     }
     textarea{min-height: 84px; resize: vertical;}
+    /* ====== Beautify form layout ====== */
+    .section .row, .section .row1{ margin-top: 10px; }
+    .section .row > div,
+    .section .row1 > div{
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,0));
+      border:1px solid rgba(255,138,42,.22);
+      border-radius: 16px;
+      padding: 12px 12px 10px 12px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03), 0 0 14px rgba(255,138,42,.08);
+      min-width: 0;
+    }
+    .section .row > div:hover,
+    .section .row1 > div:hover{
+      border-color: rgba(255,138,42,.35);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 0 18px rgba(255,138,42,.12);
+    }
+    .section label{ margin-bottom: 7px; font-size: 12.5px; letter-spacing: .15px; }
+    input[type="text"], input[type="number"], select, textarea{
+      transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+    input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus{
+      border-color: rgba(255,138,42,.55);
+      box-shadow: 0 0 0 3px rgba(255,138,42,.16);
+      background: rgba(10,14,18,.68);
+    }
+    select{
+      appearance:none;
+      padding-right: 38px;
+      background-image:
+        linear-gradient(45deg, transparent 50%, rgba(232,238,247,.75) 50%),
+        linear-gradient(135deg, rgba(232,238,247,.75) 50%, transparent 50%);
+      background-position:
+        calc(100% - 18px) 55%,
+        calc(100% - 12px) 55%;
+      background-size: 6px 6px, 6px 6px;
+      background-repeat:no-repeat;
+    }
+    .help{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(10,14,18,.35);
+    }
+    .btnRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .qItem{
+      border-color: rgba(255,138,42,.18);
+    }
+    .qItem:hover{
+      border-color: rgba(255,138,42,.36);
+      box-shadow: 0 0 0 1px rgba(255,138,42,.12), 0 0 16px rgba(255,138,42,.10);
+    }
+
     input[type="number"]{appearance:textfield}
     .help{
       margin-top:8px;
@@ -1749,7 +1807,7 @@ function mountEditor(){
               <h3 style="margin:0">Вопросы</h3>
               <span class="pill">Всего: <span id="qCount">0</span></span>
             </div>
-            <div style="display:flex; gap:10px; margin-top:10px;">
+            <div class="btnRow">
               <button class="btn btnGold" id="btnAdd">＋ Добавить</button>
               <button class="btn btnDanger" id="btnClear">🧹 Очистить</button>
             </div>
