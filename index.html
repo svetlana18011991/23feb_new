@@ -6,11 +6,7 @@
   <title>Математический тир — editor+game</title>
   <style>
     :root{
-      
-      --neon:#ff7a00;
-      --neonGlow: rgba(255,122,0,.45);
-      --neonGlow2: rgba(255,122,0,.22);
---bg0:#0b0f14;
+      --bg0:#0b0f14;
       --card:rgba(20,28,38,.72);
       --card2:rgba(15,22,30,.62);
       --stroke:rgba(255,255,255,.10);
@@ -850,71 +846,6 @@ body.game-cursor { cursor: none !important; }
       background: rgba(0,0,0,.15);
     }
 
-  
-    /* ===== Neon orange focus for settings / inputs ===== */
-    .section, .modal{
-      --focusBorder: rgba(255,122,0,.78);
-      --focusRing: rgba(255,122,0,.28);
-      --focusGlow: rgba(255,122,0,.20);
-    }
-    .section{
-      border: 1px solid rgba(255,122,0,.10);
-      box-shadow: 0 0 0 1px rgba(255,122,0,.06), 0 0 26px rgba(255,122,0,.06);
-    }
-    .section:hover{
-      border-color: rgba(255,122,0,.16);
-      box-shadow: 0 0 0 1px rgba(255,122,0,.10), 0 0 30px rgba(255,122,0,.10);
-    }
-
-    .section input[type="text"],
-    .section input[type="number"],
-    .section input[type="url"],
-    .section textarea,
-    .section select,
-    .modal input[type="text"],
-    .modal input[type="number"],
-    .modal input[type="url"],
-    .modal textarea,
-    .modal select{
-      transition: box-shadow .18s ease, border-color .18s ease, background .18s ease, transform .12s ease;
-    }
-    .section input[type="text"]:hover,
-    .section input[type="number"]:hover,
-    .section input[type="url"]:hover,
-    .section textarea:hover,
-    .section select:hover,
-    .modal input[type="text"]:hover,
-    .modal input[type="number"]:hover,
-    .modal input[type="url"]:hover,
-    .modal textarea:hover,
-    .modal select:hover{
-      border-color: rgba(255,122,0,.26);
-      box-shadow: 0 0 0 1px rgba(255,122,0,.12), 0 0 14px rgba(255,122,0,.10);
-    }
-
-    .section input[type="text"]:focus,
-    .section input[type="number"]:focus,
-    .section input[type="url"]:focus,
-    .section textarea:focus,
-    .section select:focus,
-    .modal input[type="text"]:focus,
-    .modal input[type="number"]:focus,
-    .modal input[type="url"]:focus,
-    .modal textarea:focus,
-    .modal select:focus{
-      outline: none;
-      border-color: var(--focusBorder);
-      box-shadow:
-        0 0 0 2px var(--focusRing),
-        0 0 22px var(--focusGlow);
-      background: rgba(25,35,46,.62);
-    }
-
-    /* Slightly brighter primary buttons in settings for cohesion */
-    .section .btn.btnGold{
-      box-shadow: 0 0 0 1px rgba(255,122,0,.18), 0 0 22px rgba(255,122,0,.14);
-    }
-
   </style>
 </head>
 <body>
@@ -937,10 +868,10 @@ body.game-cursor { cursor: none !important; }
 
 /* ===========================
    Математический тир
-
+   Version 23 — editor+game
    =========================== */
 
-const VERSION = 0;
+const VERSION = 25;
 
 /* ---------- helpers ---------- */
 const $ = (sel, el=document)=> el.querySelector(sel);
@@ -1976,7 +1907,7 @@ function schedulePreviewUpdate() {
 function updatePreview(){
     readCfgFromUI();
     if(cfg.latex) ensureKatex();
-    const gameUrl = urlOfSelf() + `?game=${encodeURIComponent(b64uEncode(cfg))}&t=${Date.now()}`;
+    const gameUrl = urlOfSelf() + `?game=${encodeURIComponent(b64uEncode(cfg))}&v=${VERSION}&t=${Date.now()}`;
     previewFrame.src = gameUrl;
   }
 
@@ -2022,7 +1953,7 @@ function updatePreview(){
   shotVol.addEventListener('input', ()=>{ readCfgFromUI(); try{ AudioKit.setVolume(cfg.shot.volume); }catch(e){} try{ if(!isGame) schedulePreviewUpdate(); }catch(e){} });
 document.getElementById('copyIframe').addEventListener('click', async ()=>{
     readCfgFromUI();
-    const src = urlOfSelf() + `?game=${encodeURIComponent(b64uEncode(cfg))}`;
+    const src = urlOfSelf() + `?game=${encodeURIComponent(b64uEncode(cfg))}&v=${VERSION}`;
     const code = `<iframe src="${src}" style="width:100%;height:600px;border:0;" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
     try{
       await navigator.clipboard.writeText(code);
