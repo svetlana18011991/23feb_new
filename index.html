@@ -267,20 +267,6 @@
     }
 
     /* ====== Version badge ====== */
-    .versionBadge{
-      position:fixed;
-      right:14px; bottom:14px;
-      z-index:50;
-      font-size:12px;
-      padding:8px 10px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.35);
-      backdrop-filter: blur(10px);
-      color: rgba(255,255,255,.9);
-      pointer-events:none;
-    }
-
     /* ====== GAME MODE ====== */
     .gameRoot{
       position:fixed;
@@ -1190,8 +1176,6 @@ function mountGame(cfg){
             </div>
           </div>
         </div>
-
-        <div class="versionBadge">Версия ${VERSION} • game</div>
       </div>
     </div>
   `;
@@ -1726,9 +1710,6 @@ function mountEditor(){
         <iframe class="previewFrame" id="previewFrame" allow="autoplay; fullscreen"></iframe>
       </div>
     </div>
-
-    <div class="versionBadge">Версия ${VERSION} • editor+game</div>
-
     <!-- Question editor modal -->
     <div class="modalBackdrop" id="editBack" style="z-index:80;">
       <div class="modal">
