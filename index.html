@@ -15,6 +15,10 @@
       --muted:rgba(232,238,247,.70);
       --gold: #caa24d;
       --gold2:#f1d089;
+      --neon:#ff8a2a;
+      --neon2:#ffb24d;
+      --neonSoft: rgba(255,138,42,.18);
+      --neonLine: rgba(255,138,42,.38);
       --danger:#ff5b6b;
       --ok:#33d17a;
       --shadow: 0 14px 55px rgba(0,0,0,.55);
@@ -48,9 +52,9 @@
     }
     .panel{
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border:1px solid var(--stroke);
+      border:1px solid var(--neonLine);
       border-radius: 22px;
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow), 0 0 0 1px rgba(255,138,42,.20), 0 0 26px var(--neonSoft);
       overflow:hidden;
       position:relative;
       height: 100%;
@@ -68,6 +72,15 @@
       pointer-events:none;
     }
     .panel > *{position:relative; z-index:1}
+
+    .panel:hover{
+      box-shadow: var(--shadow), 0 0 0 1px rgba(255,138,42,.32), 0 0 34px rgba(255,138,42,.20);
+    }
+    .section:hover{
+      border-color: rgba(255,138,42,.42);
+      box-shadow: 0 0 0 1px rgba(255,138,42,.18), 0 0 26px rgba(255,138,42,.14);
+    }
+    
 
     .panelHeader{
       display:flex; align-items:center; justify-content:space-between;
@@ -118,10 +131,12 @@
     }
     .section{
       background: rgba(10,14,20,.22);
-      border: 1px solid rgba(255,255,255,.08);
+      border: 1px solid rgba(255,138,42,.28);
       border-radius: 18px;
       padding: 14px;
       margin-bottom: 14px;
+      box-shadow: 0 0 0 1px rgba(255,138,42,.12), 0 0 18px rgba(255,138,42,.10);
+
     }
     .section h3{
       margin:0 0 10px 0;
@@ -521,8 +536,12 @@
     .modalBackdrop{
       position:absolute;
       inset:0;
-      background: rgba(0,0,0,.55);
-      backdrop-filter: blur(8px);
+      /* darker + soft orange aura */
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(255,138,42,.14), transparent 60%),
+        radial-gradient(900px 520px at 80% 15%, rgba(255,178,77,.10), transparent 62%),
+        rgba(0,0,0,.62);
+      backdrop-filter: blur(10px);
       display:none;
       align-items:center;
       justify-content:center;
@@ -530,21 +549,52 @@
       z-index: 40;
     }
     .modalBackdrop.on{ display:flex; }
+    .modalBackdrop.on .modal{ animation: modalPop .18s ease-out; }
+    @keyframes modalPop{
+      from{ transform: translateY(10px) scale(.985); opacity:.0;}
+      to{ transform: translateY(0) scale(1); opacity:1;}
+    }
     .modal{
       width: min(980px, 96vw);
       border-radius: 22px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(6,8,10,.88);  /* NOT transparent */
-      box-shadow: 0 24px 95px rgba(0,0,0,.70);
+      border:1px solid var(--neonLine);
+      background:
+        radial-gradient(800px 420px at 22% 8%, rgba(255,138,42,.10), transparent 55%),
+        linear-gradient(180deg, rgba(10,13,18,.94), rgba(6,8,10,.90));
+      box-shadow:
+        0 28px 110px rgba(0,0,0,.78),
+        0 0 0 1px rgba(255,138,42,.18),
+        0 0 46px rgba(255,138,42,.18);
       overflow:hidden;
       position:relative;
       display:flex;
       flex-direction:column;
       max-height: calc(100vh - 36px);
+      backdrop-filter: blur(8px);
     }
+    .modal::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      border-radius: 24px;
+      pointer-events:none;
+      background: linear-gradient(135deg, rgba(255,138,42,.35), rgba(255,178,77,.10), rgba(255,138,42,.26));
+      filter: blur(14px);
+      opacity:.55;
+    }
+    .modal::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius: 22px;
+      pointer-events:none;
+      box-shadow: inset 0 0 0 1px rgba(255,138,42,.22), inset 0 0 34px rgba(255,138,42,.10);
+    }
+    .modal > *{ position:relative; }
     .modalHeader{
       padding: 14px 16px;
-      border-bottom:1px solid rgba(255,255,255,.10);
+      background: linear-gradient(90deg, rgba(255,138,42,.18), rgba(255,138,42,.06) 40%, rgba(255,138,42,0));
+      border-bottom:1px solid rgba(255,138,42,.22);
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -562,6 +612,15 @@
       background: rgba(255,255,255,.06);
       color: rgba(255,255,255,.92);
       cursor:pointer;
+    }
+    .modalClose:hover{
+      border-color: rgba(255,138,42,.40);
+      background: rgba(255,138,42,.10);
+      box-shadow: 0 0 0 1px rgba(255,138,42,.18), 0 0 18px rgba(255,138,42,.20);
+    }
+    .modalClose:focus-visible{
+      outline:none;
+      box-shadow: 0 0 0 2px rgba(255,138,42,.32), 0 0 22px rgba(255,138,42,.22);
     }
     .modalBody{
       padding: 16px;
@@ -1618,8 +1677,14 @@ function mountEditor(){
                   <option value="6.png">6</option>
                   <option value="7.png">7</option>
                   <option value="8.png">8</option>
+                  <option value="__custom__">По ссылке</option>
                 </select>
                 <input id="bgInput" type="hidden" value="2.png"/>
+                <div style="display:flex; gap:10px; margin-top:8px;">
+                  <input id="bgUrl" type="text" placeholder="Ссылка на фон (png/jpg/webp)"/>
+                  <button class="btn" id="btnBgApply" type="button">Применить</button>
+                </div>
+                <div class="help">Можно вставить ссылку на картинку. Подойдут https://… и относительные пути (например: images/bg.png).</div>
               </div>
             </div>
 <div class="row">
@@ -1631,8 +1696,14 @@ function mountEditor(){
                   <option value="12.png">12</option>
                   <option value="13.png" selected>13</option>
                   <option value="14.png">14</option>
+                  <option value="__custom__">По ссылке</option>
                 </select>
                 <input id="targetInput" type="hidden" value="13.png"/>
+                <div style="display:flex; gap:10px; margin-top:8px;">
+                  <input id="targetUrl" type="text" placeholder="Ссылка на мишень (png/webp с прозрачностью)"/>
+                  <button class="btn" id="btnTargetApply" type="button">Применить</button>
+                </div>
+                <div class="help">Лучше использовать PNG/WebP с прозрачным фоном.</div>
               </div>
               <div class="field">
                 <label>Позиции мишеней</label>
@@ -1802,22 +1873,31 @@ function mountEditor(){
   const latexToggle = document.getElementById('latexToggle');
   const bgInput = document.getElementById('bgInput') || document.getElementById('bgSelect');
   const bgSelect = document.getElementById('bgSelect');
-  
-  bgSelect?.addEventListener('change', ()=>{ readCfgFromUI(); try{ if(!isGame) schedulePreviewUpdate(); }catch(e){} });
+  const bgUrl = document.getElementById('bgUrl');
+  const btnBgApply = document.getElementById('btnBgApply');
+
+  // keep hidden input in sync (cfg читается из bgInput)
+  bgSelect?.addEventListener('change', ()=>{ 
+    try { if (bgSelect.value !== '__custom__') { if (bgInput) bgInput.value = bgSelect.value; } } catch(e) {}
+    try{ if(!isGame) schedulePreviewUpdate(); }catch(e){} 
+  });
+
 const targetInput = document.getElementById('targetInput');
   const targetSelect = document.getElementById('targetSelect');
+  const targetUrl = document.getElementById('targetUrl');
+  const btnTargetApply = document.getElementById('btnTargetApply');
   const targetLineY = document.getElementById('targetLineY');
   const targetLineJitter = document.getElementById('targetLineJitter');
 
 // Live-update preview when background/target change
 bgSelect?.addEventListener('change', () => {
-  try { if (typeof bgInput !== 'undefined' && bgInput) bgInput.value = bgSelect.value; } catch(e) {}
+  try { if (typeof bgInput !== 'undefined' && bgInput && bgSelect.value !== '__custom__') bgInput.value = bgSelect.value; } catch(e) {}
   schedulePreviewUpdate();
 });
 
 targetSelect?.addEventListener('change', () => {
   // keep file input in sync (cfg читается из targetInput)
-  try { if (targetInput) targetInput.value = targetSelect.value; } catch(e) {}
+  try { if (targetInput && targetSelect.value !== '__custom__') targetInput.value = targetSelect.value; } catch(e) {}
   schedulePreviewUpdate();
 });
 
@@ -1833,6 +1913,63 @@ try { if (bgInput) bgInput.value = bgSelect?.value || '2.png'; } catch(e) {}
 if (targetSelect && !targetSelect.value) targetSelect.value = '13.png';
 if (targetInput && !targetInput.value) targetInput.value = targetSelect?.value || '13.png';
 
+  function normalizeAssetUrl(u){
+    u = String(u||'').trim();
+    // reject dangerous schemes
+    if(!u) return '';
+    const low = u.toLowerCase();
+    if(low.startsWith('javascript:') || low.startsWith('data:') || low.startsWith('vbscript:')) return '';
+    return u;
+  }
+  function isSupportedImage(u){
+    const s = String(u||'').trim().toLowerCase();
+    // allow relative paths and http(s)
+    const okScheme = s.startsWith('http://') || s.startsWith('https://') || !s.includes('://');
+    const okExt = /\.(png|jpg|jpeg|webp)(\?.*)?$/.test(s);
+    return okScheme && okExt;
+  }
+
+  // Apply custom BG by URL
+  btnBgApply?.addEventListener('click', ()=>{
+    const u0 = normalizeAssetUrl(bgUrl?.value || '');
+    if(!u0 || !isSupportedImage(u0)){
+      toast('Ссылка на фон: нужен png/jpg/webp (https://… или относительный путь)');
+      return;
+    }
+    if(bgInput) bgInput.value = u0;
+    if(bgSelect) bgSelect.value = '__custom__';
+    schedulePreviewUpdate();
+  });
+
+  // Apply custom target by URL
+  btnTargetApply?.addEventListener('click', ()=>{
+    const u0 = normalizeAssetUrl(targetUrl?.value || '');
+    if(!u0 || !isSupportedImage(u0)){
+      toast('Ссылка на мишень: нужен png/jpg/webp (https://… или относительный путь)');
+      return;
+    }
+    if(targetInput) targetInput.value = u0;
+    if(targetSelect) targetSelect.value = '__custom__';
+    schedulePreviewUpdate();
+  });
+
+  // If user edits URL fields, keep select on "По ссылке" (but don't apply until button)
+  bgUrl?.addEventListener('input', ()=>{ if(bgSelect) bgSelect.value = '__custom__'; });
+  targetUrl?.addEventListener('input', ()=>{ if(targetSelect) targetSelect.value = '__custom__'; });
+
+  // When switching back to built-in assets, clear URL fields
+  bgSelect?.addEventListener('change', ()=>{
+    if(bgSelect.value !== '__custom__'){
+      try{ if(bgUrl) bgUrl.value = ''; }catch(e){}
+      try{ if(bgInput) bgInput.value = bgSelect.value; }catch(e){}
+    }
+  });
+  targetSelect?.addEventListener('change', ()=>{
+    if(targetSelect.value !== '__custom__'){
+      try{ if(targetUrl) targetUrl.value = ''; }catch(e){}
+      try{ if(targetInput) targetInput.value = targetSelect.value; }catch(e){}
+    }
+  });
 
   const shotVariant = document.getElementById('shotVariant');
   const shotVol = document.getElementById('shotVol');
