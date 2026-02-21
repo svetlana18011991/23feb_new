@@ -1947,27 +1947,18 @@ function mountEditor(){
             </div>
             <div class="help">Файлы мишеней: 10.png … 14.png (рядом с index.html).</div>
 
-            <div class="row" style="margin-top:10px;">
-              <div class="field">
-                <label>Высота мишени</label>
-                <input id="targetLineY" class="range" type="range" min="0" max="100" step="1" value="50" />
-                </div>
-              <div class="field">
-                <label>Разброс</label>
-                <input id="targetLineJitter" class="range" type="range" min="0" max="40" step="1" value="8" />
-                </div>
-
-            <div class="row" style="margin-top:10px;">
-              <div class="field">
-                <label>Движение мишеней — радиус</label>
-                <input id="targetOrbitRadius" class="range" type="range" min="0" max="260" step="5" value="0" />
-                <div class="hint">0 — мишени стоят на месте. Чем больше значение, тем больше радиус окружности (в пикселях).</div>
-              </div>
-              <div class="field">
-                <label>Движение мишеней — скорость</label>
-                <input id="targetOrbitSpeed" class="range" type="range" min="0" max="12" step="1" value="0" />
-                <div class="hint">0 — без движения. Чем больше, тем быстрее “шагают” по точкам окружности.</div>
-              </div>
+            <div class="orbitPanel">
+  <div class="field">
+    <label>Радиус движения мишени</label>
+    <input id="targetOrbitRadius" class="range" type="range" min="0" max="260" step="5" value="0" />
+    <div class="hint">0 — мишени стоят на месте. Чем больше значение, тем больше радиус (в пикселях).</div>
+  </div>
+  <div class="field">
+    <label>Скорость движения мишени</label>
+    <input id="targetOrbitSpeed" class="range" type="range" min="0" max="12" step="1" value="0" />
+    <div class="hint">0 — без движения. Чем больше, тем быстрее “шагают” по точкам окружности.</div>
+  </div>
+</div>
             </div>
             </div>
 
