@@ -1839,12 +1839,6 @@ if (targetInput && !targetInput.value) targetInput.value = targetSelect?.value |
   const qFontSelect = document.getElementById('qFontSelect');
   const aFontSelect = document.getElementById('aFontSelect');
 
-// Fonts defaults
-fillFontSelect(qFontSelect, cfg.qFont);
-fillFontSelect(aFontSelect, cfg.aFont);
-qFontSelect?.addEventListener('change', schedulePreviewUpdate);
-aFontSelect?.addEventListener('change', schedulePreviewUpdate);
-
 
   const FONT_CHOICES = [
     {label:'Roboto', css:'Roboto'},
@@ -1874,6 +1868,13 @@ aFontSelect?.addEventListener('change', schedulePreviewUpdate);
     const found = Array.from(sel.options).some(o=>o.value===want);
     sel.value = found ? want : (sel.options[0]?.value || 'Roboto');
   }
+
+
+// Fonts defaults
+fillFontSelect(qFontSelect, cfg.qFont);
+fillFontSelect(aFontSelect, cfg.aFont);
+qFontSelect?.addEventListener('change', schedulePreviewUpdate);
+aFontSelect?.addEventListener('change', schedulePreviewUpdate);
 
   function readCfgFromUI(){
     cfg.title = inpTitle.value || "Математический тир";
