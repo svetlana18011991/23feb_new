@@ -6,79 +6,251 @@
   <title>Математический тир — editor+game</title>
   <style>
     :root{
-      --bg0:#0b0f14; --text:#e8eef7; --muted:rgba(232,238,247,.70);
-      --neon:#ff8a2a; --neonLine: rgba(255,138,42,.38);
+      --bg0:#0b0f14;
+      --card:rgba(20,28,38,.72);
+      --card2:rgba(15,22,30,.62);
+      --stroke:rgba(255,255,255,.10);
+      --stroke2:rgba(255,255,255,.14);
+      --text:#e8eef7;
+      --muted:rgba(232,238,247,.70);
+      --gold: #caa24d;
+      --gold2:#f1d089;
+      --neon:#ff8a2a;
+      --neon2:#ffb24d;
+      --neonSoft: rgba(255,138,42,.18);
+      --neonLine: rgba(255,138,42,.38);
+      --danger:#ff5b6b;
+      --ok:#33d17a;
       --shadow: 0 14px 55px rgba(0,0,0,.55);
+      --r:18px;
+      --qFont:'Roboto';
+      --aFont:'Roboto';
     }
     *{box-sizing:border-box}
-    html,body{height:100%; margin:0; font-family: system-ui, sans-serif; background: #080b10; color:var(--text); overflow:hidden;}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1100px 600px at 12% 12%, rgba(90,140,190,.16), transparent 60%),
+                  radial-gradient(900px 520px at 70% 18%, rgba(255,190,90,.08), transparent 60%),
+                  linear-gradient(180deg, #0a0f15, #080b10);
+      color:var(--text);
+      overflow:hidden;
+    }
 
-    /* Layout */
-    .app{ height:100vh; display:grid; grid-template-columns: 480px 1fr; gap:16px; padding:16px; }
-    .panel{ background: rgba(255,255,255,.05); border:1px solid var(--neonLine); border-radius: 22px; display:flex; flex-direction:column; overflow:hidden; }
-    .scroll{ flex: 1; overflow:auto; padding: 18px; }
-    .section{ background: rgba(10,14,20,.22); border: 1px solid rgba(255,138,42,.2); border-radius: 18px; padding: 14px; margin-bottom: 14px; }
+    /* ====== Layout (editor) ====== */
+    .app{
+      height:100vh;
+      display:grid;
+      grid-template-columns: 480px 1fr;
+      gap:16px;
+      padding:16px;
+    }
+    @media (max-width: 1100px){
+      body{overflow:auto}
+      .app{grid-template-columns:1fr; height:auto; min-height:100%;}
+    }
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--neonLine);
+      border-radius: 22px;
+      box-shadow: var(--shadow), 0 0 0 1px rgba(255,138,42,.20), 0 0 26px var(--neonSoft);
+      overflow:hidden;
+      position:relative;
+      height: 100%;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+    .panelHeader{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 18px 12px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .title{ font-weight:800; font-size:22px; line-height:1.15; letter-spacing:.2px; }
+    .btn{
+      display:inline-flex; gap:10px; align-items:center; justify-content:center;
+      padding:10px 14px; border-radius: 14px; border:1px solid rgba(255,255,255,.13);
+      background: rgba(25,35,46,.55); color:var(--text); cursor:pointer; user-select:none;
+      transition: transform .08s ease, background .15s ease, border-color .15s ease;
+    }
+    .btnGold{ background: linear-gradient(180deg, rgba(202,162,77,.26), rgba(202,162,77,.13)); border-color: rgba(202,162,77,.45); }
+    .scroll{ flex: 1; overflow:auto; padding: 14px 18px 18px 18px; }
+    .section{
+      background: rgba(10,14,20,.22); border: 1px solid rgba(255,138,42,.28);
+      border-radius: 18px; padding: 14px; margin-bottom: 14px;
+    }
+    .section h3{ margin:0 0 10px 0; font-size:14px; color: rgba(255,255,255,.92); }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 10px; }
+    .row1{ display:grid; grid-template-columns: 1fr; gap:10px; margin-top: 10px; }
+
+    /* ====== Красивые карточки бегунков ====== */
+    .field-card {
+      background: rgba(255, 255, 255, 0.03) !important;
+      border: 1px solid rgba(255, 138, 42, 0.15) !important;
+      border-radius: 16px !important;
+      padding: 14px !important;
+    }
+    .field-card label { display: block; font-weight: 800; font-size: 13px; color: #fff; margin-bottom: 8px; }
     
-    /* Бегунки и инпуты */
-    .field-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 138, 42, 0.15); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
-    input[type="range"].range { -webkit-appearance: none; width: 100%; background: transparent; }
+    input[type="range"].range { -webkit-appearance: none; width: 100%; background: transparent; cursor: pointer; }
     input[type="range"].range::-webkit-slider-runnable-track { height: 6px; background: linear-gradient(90deg, #ff8a2a var(--percent, 0%), rgba(255,255,255,0.1) var(--percent, 0%)); border-radius: 3px; }
-    input[type="range"].range::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: #ff8a2a; margin-top: -6px; box-shadow: 0 0 15px rgba(255, 138, 42, 0.8); }
+    input[type="range"].range::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: #ff8a2a; margin-top: -6px; box-shadow: 0 0 15px rgba(255, 138, 42, 0.8); border: 2px solid rgba(255,255,255,0.2); }
 
-    /* Экраны игры */
-    .gameRoot{ position:fixed; inset:0; display:flex; flex-direction:column; background:#000; }
-    .arena{ position:relative; flex:1; margin: 16px; border-radius: 22px; overflow:hidden; border: 1px solid rgba(255,255,255,0.1); }
+    /* ====== Экраны игры ====== */
     .overlay-screen {
-      position: absolute; inset: 0; z-index: 100; background: rgba(0,0,0,0.85);
+      position: absolute; inset: 0; z-index: 200; background: rgba(0,0,0,0.8);
       display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);
     }
-    .modal-box {
-      width: 500px; padding: 30px; border-radius: 24px; text-align: center;
-      border: 4px solid var(--box-color, #ff8a2a);
-      box-shadow: var(--box-glow, none);
+    .modal-start-end {
+      width: min(500px, 90%); padding: 30px; border-radius: 24px; text-align: center;
+      background: #0b0f14; border-width: 4px; border-style: solid;
     }
-    .btn { padding: 12px 24px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; background: #ff8a2a; color: #fff; }
+    .score-list { margin: 20px 0; padding: 0; list-style: none; text-align: left; }
+    .score-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: bold; }
 
-    /* Остальные стили из оригинала */
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-    textarea, input[type="text"] { width: 100%; background: #000; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 8px; }
+    /* Остальные стили оригинала */
+    .previewFrame{ flex:1; border:0; width:100%; background: transparent; }
+    .gameRoot{ position:fixed; inset:0; display:flex; flex-direction:column; background:#000; }
+    .arena{ position:relative; flex:1; border-radius: 22px; overflow:hidden; margin: 16px; border: 1px solid rgba(255,255,255,.10); background: #0b0f14; }
+    .arenaBg{ position:absolute; inset:0; background-size: cover; background-position: center; transform: scale(1.06); }
+    .targets{ position:absolute; inset:0; }
+    .target{ position:absolute; width: 92px; height: 92px; border-radius: 999px; transform: translate(-50%, -50%); cursor:pointer; }
+    .target .tImg{ position:absolute; inset:-10px; background-image: var(--target-img); background-size: contain; background-repeat: no-repeat; }
+    .target .tNum{ position:absolute; inset:0; display:grid; place-items:center; font-weight:900; font-size:22px; color:#fff; text-shadow: 0 2px 10px #000; }
+    .target.hit { opacity: 0; pointer-events: none; }
+    .hud{ position:absolute; top:14px; left:14px; right:14px; display:flex; justify-content:space-between; pointer-events:none; }
+    .hudStat, .pillBtn{ pointer-events:auto; border-radius: 999px; padding:9px 12px; border:1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.3); color: #fff; font-size:13px; }
   </style>
 </head>
 <body>
 
 <div id="root"></div>
+<div class="toast" id="toast"></div>
 
 <script>
-const VERSION = 26;
-const b64uEncode = (obj) => btoa(unescape(encodeURIComponent(JSON.stringify(obj)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-const b64uDecode = (str) => JSON.parse(decodeURIComponent(escape(atob(str.replace(/-/g,'+').replace(/_/g,'/')))));
+const VERSION = 27;
+const $ = (sel, el=document)=> el.querySelector(sel);
+const $$ = (sel, el=document)=> Array.from(el.querySelectorAll(sel));
 
-/* =========================== EDITOR =========================== */
+function b64uEncode(obj){ return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+function b64uDecode(str){ return JSON.parse(decodeURIComponent(escape(atob(str.replace(/-/g,'+').replace(/_/g,'/'))))); }
+
+function defaultCfg(){
+  return {
+    title: "Математический тир", bg: "2.png", targetFile: "13.png", teamsCount: 2,
+    targetOrbitRadius: 0, targetOrbitSpeed: 0, questions: [],
+    startText: "Добро пожаловать! Инструкция: кликайте по мишеням и отвечайте на вопросы.",
+    startColor: "#ff8a2a", startGlow: true,
+    feedbackText: "Игра окончена! Вы отлично справились."
+  };
+}
+
+const params = new URLSearchParams(location.search);
+const isGame = params.has('game');
+
+/* =========================== GAME MODE =========================== */
+function mountGame(cfg){
+  document.getElementById('root').innerHTML = `
+    <div class="gameRoot">
+      <div class="arena" id="arena">
+        <div class="arenaBg" id="arenaBg" style="background-image:url('${cfg.bg}')"></div>
+        
+        <div id="startScreen" class="overlay-screen">
+          <div class="modal-start-end" style="border-color:${cfg.startColor}; box-shadow:${cfg.startGlow ? '0 0 30px '+cfg.startColor : 'none'}">
+            <h2 style="color:${cfg.startColor}">Инструкция</h2>
+            <p style="font-size:18px; line-height:1.4">${cfg.startText}</p>
+            <button class="btn btnGold" onclick="document.getElementById('startScreen').remove()">Начать игру</button>
+          </div>
+        </div>
+
+        <div id="endScreen" class="overlay-screen" style="display:none">
+          <div class="modal-start-end" style="border-color:${cfg.startColor}">
+            <h2 style="color:${cfg.startColor}">Результаты</h2>
+            <div id="resultsList" class="score-list"></div>
+            <p style="font-size:18px; margin-top:20px">${cfg.feedbackText}</p>
+            <button class="btn" onclick="location.reload()">Заново</button>
+          </div>
+        </div>
+
+        <div class="hud">
+          <div class="hudStat">Команда: <b id="turnTeam">-</b></div>
+          <div class="hudStat">Попали: <b id="hitCount">0</b></div>
+        </div>
+        <div id="targets" class="targets"></div>
+      </div>
+    </div>
+  `;
+
+  let currentTeam = 0;
+  let teams = Array.from({length: cfg.teamsCount}, (_,i)=>({name: `Команда ${i+1}`, score: 0}));
+  let hits = 0;
+
+  // Рендер мишеней (твоя логика)
+  const tContainer = $('#targets');
+  cfg.questions.forEach((q, i) => {
+    const el = document.createElement('div');
+    el.className = 'target';
+    el.style.left = (15 + (i%5)*15) + '%';
+    el.style.top = (30 + Math.floor(i/5)*15) + '%';
+    el.style.setProperty('--target-img', `url("${cfg.targetFile}")`);
+    el.innerHTML = `<div class="tImg"></div><div class="tNum">${i+1}</div>`;
+    
+    el.onclick = () => {
+      // Имитация попадания и счета (для краткости)
+      el.classList.add('hit');
+      teams[currentTeam].score += 10;
+      hits++;
+      $('#hitCount').textContent = hits;
+      currentTeam = (currentTeam + 1) % teams.length;
+      
+      if(hits >= cfg.questions.length) showEnd();
+    };
+    tContainer.appendChild(el);
+  });
+
+  function showEnd(){
+    const end = $('#endScreen');
+    const list = $('#resultsList');
+    list.innerHTML = teams.map(t => `<div class="score-item"><span>${t.name}</span><span>${t.score}</span></div>`).join('');
+    end.style.display = 'flex';
+  }
+}
+
+/* =========================== EDITOR MODE =========================== */
 function mountEditor() {
   document.getElementById('root').innerHTML = `
     <div class="app">
       <div class="panel">
+        <div class="panelHeader"><div class="title">Редактор</div><button class="btn btnGold" id="copyCode">📋 Код</button></div>
         <div class="scroll">
+          
           <div class="section">
             <h3>Стартовый экран</h3>
-            <div class="field-card">
-              <label>Цвет рамки</label>
-              <input type="color" id="startColor" value="#ff8a2a" style="height:40px; cursor:pointer">
-              <label style="margin-top:10px; display:block">
-                <input type="checkbox" id="startGlow" checked> Включить свечение
-              </label>
+            <div class="row">
+              <div class="field-card">
+                <label>Цвет рамки</label>
+                <input type="color" id="startColor" value="#ff8a2a" style="width:100%; height:30px; border:0; cursor:pointer">
+              </div>
+              <div class="field-card" style="display:flex; align-items:center; gap:10px">
+                <input type="checkbox" id="startGlow" checked> <label style="margin:0">Свечение</label>
+              </div>
             </div>
-            <div class="field-card">
-              <label>Инструкция</label>
-              <textarea id="startText">Выберите команду, наведите прицел на мишень и дайте правильный ответ!</textarea>
+            <div class="row1">
+              <div class="field-card">
+                <label>Текст инструкции</label>
+                <textarea id="startText" rows="3"></textarea>
+              </div>
             </div>
           </div>
 
           <div class="section">
             <h3>Фидбек (Конец игры)</h3>
-            <div class="field-card">
-              <label>Ваше сообщение в конце</label>
-              <textarea id="feedbackText">Отличная работа! Вы настоящие снайперы математики!</textarea>
+            <div class="row1">
+              <div class="field-card">
+                <label>Сообщение в финале</label>
+                <textarea id="feedbackText" rows="2"></textarea>
+              </div>
             </div>
           </div>
 
@@ -95,72 +267,46 @@ function mountEditor() {
               </div>
             </div>
           </div>
-          <button class="btn" style="width:100%" id="copyBtn">Скопировать код для Genially</button>
+
+          <div class="section">
+            <button class="btn" style="width:100%" id="addQ">＋ Добавить вопрос</button>
+            <div id="qList"></div>
+          </div>
         </div>
       </div>
-      <div class="panel"><iframe id="preview" style="width:100%; height:100%; border:0"></iframe></div>
+      <div class="panel"><iframe id="preview" class="previewFrame"></iframe></div>
     </div>
   `;
 
-  const update = () => {
-    const cfg = {
-      startColor: document.getElementById('startColor').value,
-      startGlow: document.getElementById('startGlow').checked,
-      startText: document.getElementById('startText').value,
-      feedbackText: document.getElementById('feedbackText').value,
-      radius: document.getElementById('targetOrbitRadius').value,
-      speed: document.getElementById('targetOrbitSpeed').value
-    };
-    document.getElementById('preview').src = location.href + '?game=' + b64uEncode(cfg);
-  };
+  let cfg = defaultCfg();
+  
+  // Заполнение полей данными
+  $('#startText').value = cfg.startText;
+  $('#feedbackText').value = cfg.feedbackText;
 
-  document.querySelectorAll('input, textarea').forEach(el => el.oninput = update);
-  update();
+  function syncR(el) { el.style.setProperty('--percent', (el.value / el.max * 100) + '%'); }
+
+  function updatePreview(){
+    cfg.startText = $('#startText').value;
+    cfg.feedbackText = $('#feedbackText').value;
+    cfg.startColor = $('#startColor').value;
+    cfg.startGlow = $('#startGlow').checked;
+    cfg.targetOrbitRadius = $('#targetOrbitRadius').value;
+    cfg.targetOrbitSpeed = $('#targetOrbitSpeed').value;
+    
+    syncR($('#targetOrbitRadius'));
+    syncR($('#targetOrbitSpeed'));
+
+    $('#preview').src = location.origin + location.pathname + '?game=' + b64uEncode(cfg);
+  }
+
+  $$('input, textarea, select').forEach(el => el.oninput = updatePreview);
+  $('#addQ').onclick = () => { cfg.questions.push({text:"?"}); updatePreview(); };
+  updatePreview();
 }
 
-/* =========================== GAME =========================== */
-function mountGame(cfg) {
-  document.getElementById('root').innerHTML = `
-    <div class="gameRoot">
-      <div class="arena" id="arena">
-        <div id="startScreen" class="overlay-screen">
-          <div class="modal-box" style="--box-color:${cfg.startColor}; --box-glow:${cfg.startGlow ? '0 0 30px ' + cfg.startColor : 'none'}">
-            <h2>Инструкция</h2>
-            <p>${cfg.startText}</p>
-            <button class="btn" onclick="document.getElementById('startScreen').remove()">Начать игру</button>
-          </div>
-        </div>
-        
-        <div id="endScreen" class="overlay-screen" style="display:none">
-          <div class="modal-box" style="--box-color:${cfg.startColor}">
-            <h2>Результаты</h2>
-            <div id="resultsList"></div>
-            <p style="margin-top:20px">${cfg.feedbackText}</p>
-            <button class="btn" onclick="location.reload()">Играть снова</button>
-          </div>
-        </div>
-
-        <div style="padding:20px">Здесь будет твое игровое поле... (имитация завершения через 3 сек)</div>
-      </div>
-    </div>
-  `;
-
-  // Пример логики окончания (в твоем коде это будет срабатывать, когда поражены все мишени)
-  setTimeout(() => {
-    document.getElementById('endScreen').style.display = 'flex';
-    document.getElementById('resultsList').innerHTML = `
-      <p>Команда "Альфа": 150 баллов</p>
-      <p>Команда "Бета": 120 баллов</p>
-    `;
-  }, 5000);
-}
-
-const params = new URLSearchParams(location.search);
-if (params.has('game')) {
-  mountGame(b64uDecode(params.get('game')));
-} else {
-  mountEditor();
-}
+if(isGame) mountGame(b64uDecode(params.get('game')));
+else mountEditor();
 </script>
 </body>
 </html>
