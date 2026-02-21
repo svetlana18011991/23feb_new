@@ -1915,45 +1915,71 @@ if (targetInput && !targetInput.value) targetInput.value = targetSelect?.value |
 
   function normalizeAssetUrl(u){
     u = String(u||'').trim();
-    // reject dangerous schemes
     if(!u) return '';
-    const low = u.toLowerCase();
-    if(low.startsWith('javascript:') || low.startsWith('data:') || low.startsWith('vbscript:')) return '';
     return u;
   }
-  function isSupportedImage(u){
-    const s = String(u||'').trim().toLowerCase();
-    // allow relative paths and http(s)
-    const okScheme = s.startsWith('http://') || s.startsWith('https://') || !s.includes('://');
-    const okExt = /\.(png|jpg|jpeg|webp)(\?.*)?$/.test(s);
-    return okScheme && okExt;
+  function isSafeUrl(u){
+    const s = String(u||'').trim();
+    if(!s) return false;
+    const low = s.toLowerCase();
+    if(low.startsWith('javascript:') || low.startsWith('data:') || low.startsWith('vbscript:')) return false;
+    // allow http(s) and relative paths (no other schemes)
+    const hasScheme = low.includes('://');
+    if(hasScheme && !(low.startsWith('http://') || low.startsWith('https://'))) return false;
+    return true;
   }
 
-  // Apply custom BG by URL
+  // Try to preload image to make sure the link реально ведёт на картинку
+  function preloadImage(url, cb){
+    try{
+      const img = new Image();
+      img.onload = ()=> cb(true);
+      img.onerror = ()=> cb(false);
+      img.src = url;
+    }catch(e){ cb(false); }
+  }
+
+// Apply custom BG by URL
   btnBgApply?.addEventListener('click', ()=>{
     const u0 = normalizeAssetUrl(bgUrl?.value || '');
-    if(!u0 || !isSupportedImage(u0)){
-      toast('Ссылка на фон: нужен png/jpg/webp (https://… или относительный путь)');
+    if(!u0 || !isSafeUrl(u0)){
+      toast('Ссылка на фон: вставь https://… или относительный путь');
       return;
     }
-    if(bgInput) bgInput.value = u0;
-    if(bgSelect) bgSelect.value = '__custom__';
-    schedulePreviewUpdate();
+    toast('Пробую загрузить фон…');
+    preloadImage(u0, (ok)=>{
+      if(!ok){
+        toast('Фон не загрузился. Часто причина: ссылка ведёт не на картинку или хостинг блокирует прямые ссылки.');
+        return;
+      }
+      if(bgInput) bgInput.value = u0;
+      if(bgSelect) bgSelect.value = '__custom__';
+      schedulePreviewUpdate();
+      toast('Фон применён');
+    });
   });
 
-  // Apply custom target by URL
+// Apply custom target by URL
   btnTargetApply?.addEventListener('click', ()=>{
     const u0 = normalizeAssetUrl(targetUrl?.value || '');
-    if(!u0 || !isSupportedImage(u0)){
-      toast('Ссылка на мишень: нужен png/jpg/webp (https://… или относительный путь)');
+    if(!u0 || !isSafeUrl(u0)){
+      toast('Ссылка на мишень: вставь https://… или относительный путь');
       return;
     }
-    if(targetInput) targetInput.value = u0;
-    if(targetSelect) targetSelect.value = '__custom__';
-    schedulePreviewUpdate();
+    toast('Пробую загрузить мишень…');
+    preloadImage(u0, (ok)=>{
+      if(!ok){
+        toast('Мишень не загрузилась. Часто причина: ссылка ведёт не на картинку или хостинг блокирует прямые ссылки.');
+        return;
+      }
+      if(targetInput) targetInput.value = u0;
+      if(targetSelect) targetSelect.value = '__custom__';
+      schedulePreviewUpdate();
+      toast('Мишень применена');
+    });
   });
 
-  // If user edits URL fields, keep select on "По ссылке" (but don't apply until button)
+// If user edits URL fields, keep select on "По ссылке" (but don't apply until button)
   bgUrl?.addEventListener('input', ()=>{ if(bgSelect) bgSelect.value = '__custom__'; });
   targetUrl?.addEventListener('input', ()=>{ if(targetSelect) targetSelect.value = '__custom__'; });
 
