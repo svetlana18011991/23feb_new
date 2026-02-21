@@ -562,7 +562,10 @@
       white-space:nowrap;
       pointer-events:none;
     }
-    .target.hit{ opacity:.25; filter: grayscale(1); }
+    
+    .target.draggable{ cursor: grab; }
+    .target.draggable:active{ cursor: grabbing; }
+.target.hit{ opacity:.25; filter: grayscale(1); }
     @keyframes targetFloat{
       0%{ transform: translateY(0px) scale(1); }
       50%{ transform: translateY(-7px) scale(1.02); }
@@ -1648,8 +1651,11 @@ const teamsEl = document.getElementById('teams');
 
   function countDone(){ return hit.size; }
 
-  function positionTargets(){
+  function positionTargets(useManual=true){
     const n = questions.length;
+    if(useManual && Array.isArray(cfg.targetPositions) && cfg.targetPositions.length>=n){
+      return cfg.targetPositions.slice(0,n).map(p=>({x:Number(p.x), y:Number(p.y)}));
+    }
     const pts = [];
     for(let i=0;i<n;i++){
       const col = (i % 6);
@@ -1726,12 +1732,17 @@ const teamsEl = document.getElementById('teams');
   function renderTargets(){
     targetsEl.innerHTML = '';
     const n = questions.length;
+    if(useManual && Array.isArray(cfg.targetPositions) && cfg.targetPositions.length>=n){
+      return cfg.targetPositions.slice(0,n).map(p=>({x:Number(p.x), y:Number(p.y)}));
+    }
     const pts = positionTargets();
     const targetFile = (cfg.targetFile || '13.png').trim();
     for(let i=0;i<n;i++){
       const q = questions[i];
       const el = document.createElement('div');
       el.className = 'target' + (hit.has(i)?' hit':'');
+      el.dataset.idx = String(i);
+      if(placingTargets){ el.classList.add('draggable'); }
       el.style.left = (pts[i]?.x ?? 50) + '%';
       el.style.top  = (pts[i]?.y ?? 40) + '%';
 
@@ -1747,7 +1758,9 @@ const teamsEl = document.getElementById('teams');
         <div class="tNum">${i+1}</div>
         <div class="tPts">${Number(q.points||10)} очк.</div>
       `;
+      if(placingTargets) el.addEventListener('mousedown', onTargetDragStart);
       el.addEventListener('click', async (e)=>{
+        if(placingTargets) return;
         if(hit.has(i)) return;
         try{ el.classList.remove('punch'); void el.offsetWidth; el.classList.add('punch'); }catch(err){}
         try{ if(e) spawnHitFx(e.clientX, e.clientY); }catch(err){}
@@ -1762,6 +1775,82 @@ const teamsEl = document.getElementById('teams');
       targetsEl.appendChild(el);
     }
     startOrbitMotion();
+  }
+
+  // ====== Manual target placement (editor) ======
+  let dragIdx = null;
+  let dragRect = null;
+
+  function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+
+  function onTargetDragStart(e){
+    if(!placingTargets) return;
+    const idx = Number(e.currentTarget?.dataset?.idx ?? -1);
+    if(!(idx>=0)) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    dragIdx = idx;
+    dragRect = targetsEl.getBoundingClientRect();
+    document.addEventListener('mousemove', onTargetDragMove);
+    document.addEventListener('mouseup', onTargetDragEnd, { once:true });
+  }
+
+  function onTargetDragMove(e){
+    if(dragIdx==null || !dragRect) return;
+    const x = (e.clientX - dragRect.left) / dragRect.width;
+    const y = (e.clientY - dragRect.top)  / dragRect.height;
+    const px = clamp(x, 0.02, 0.98) * 100;
+    const py = clamp(y, 0.02, 0.98) * 100;
+
+    if(!Array.isArray(cfg.targetPositions)) cfg.targetPositions = [];
+    cfg.targetPositions[dragIdx] = { x: +px.toFixed(2), y: +py.toFixed(2) };
+
+    const el = targetsEl.querySelector(`.target[data-idx="${dragIdx}"]`);
+    if(el){
+      el.style.left = px + '%';
+      el.style.top  = py + '%';
+    }
+  }
+
+  function onTargetDragEnd(){
+    document.removeEventListener('mousemove', onTargetDragMove);
+    dragIdx = null;
+    dragRect = null;
+    // notify editor about updated positions
+    try{ if(window.parent && window.parent!==window){ window.parent.postMessage({type:'ATOMIC_TARGET_POSITIONS', positions: cfg.targetPositions}, '*'); } }catch(e){}
+  }
+
+  function enterPlacementMode(){
+    placingTargets = true;
+    if(btnPlaceTargets) btnPlaceTargets.textContent = 'Готово';
+    // seed missing positions from auto layout
+    const n = cfg.questions.length;
+    const autoPts = positionTargets(false);
+    if(!Array.isArray(cfg.targetPositions)) cfg.targetPositions = [];
+    cfg.targetPositions = cfg.targetPositions.slice(0, n);
+    for(let i=0;i<n;i++){
+      if(!cfg.targetPositions[i] || cfg.targetPositions[i].x==null || cfg.targetPositions[i].y==null){
+        cfg.targetPositions[i] = autoPts[i] || {x:50,y:40};
+      }
+    }
+    renderTargets();
+    try{ if(window.parent && window.parent!==window){ window.parent.postMessage({type:'ATOMIC_PLACE_MODE_ACK', on:true}, '*'); } }catch(e){}
+  }
+
+  // listen from editor (iframe parent) to toggle placement mode
+  window.addEventListener('message', (ev)=>{
+    const d = ev?.data;
+    if(!d || d.type!=='ATOMIC_PLACE_MODE') return;
+    if(d.reset){ cfg.targetPositions = []; }
+    if(d.on) enterPlacementMode(); else exitPlacementMode();
+  });
+
+  function exitPlacementMode(){
+    placingTargets = false;
+    if(btnPlaceTargets) btnPlaceTargets.textContent = 'Расставить мишени';
+    renderTargets();
+    try{ if(window.parent && window.parent!==window){ window.parent.postMessage({type:'ATOMIC_PLACE_MODE_ACK', on:true}, '*'); } }catch(e){}
   }
 
   // modal logic
@@ -2189,28 +2278,10 @@ function mountEditor(){
             <div class="help">Файлы мишеней: 10.png … 14.png (рядом с index.html).</div>
 
             <div class="row" style="margin-top:10px;">
-              <div class="field">
-                <label>Высота мишени</label>
-                <input id="targetLineY" class="range" type="range" min="0" max="100" step="1" value="50" />
-                </div>
-              <div class="field">
-                <label>Разброс</label>
-                <input id="targetLineJitter" class="range" type="range" min="0" max="40" step="1" value="8" />
-                </div>
+              <button id="btnPlaceTargets" class="btn">Расставить мишени</button>
+              <button id="btnResetTargets" class="btn ghost">Сбросить расстановку</button>
             </div>
-
-            <div class="row" style="margin-top:10px;">
-              <div class="field">
-                <label>Радиус движения мишени</label>
-                <input id="targetOrbitRadius" class="range" type="range" min="0" max="260" step="5" value="0" />
-                <div class="hint" style="font-size:11px; margin-top:5px; color:rgba(232,238,247,0.5)">0 — мишени стоят на месте.</div>
-              </div>
-              <div class="field">
-                <label>Скорость движения мишени</label>
-                <input id="targetOrbitSpeed" class="range" type="range" min="0" max="12" step="1" value="0" />
-                <div class="hint" style="font-size:11px; margin-top:5px; color:rgba(232,238,247,0.5)">Чем больше, тем быстрее.</div>
-              </div>
-            </div>
+            <div class="help">Нажмите «Расставить мишени» и перетащите мишени на превью справа. Позиции сохраняются и будут использованы в игре.</div>
 
           </div>
 
@@ -2395,6 +2466,7 @@ function mountEditor(){
   `;
 
   let cfg = defaultCfg();
+  let placingTargets = false;
   let editingIndex = null;
 
   const inpTitle = document.getElementById('inpTitle');
@@ -2410,10 +2482,11 @@ function mountEditor(){
   const targetSelect = document.getElementById('targetSelect');
   const targetUrl = document.getElementById('targetUrl');
   const btnTargetApply = document.getElementById('btnTargetApply');
-  const targetLineY = document.getElementById('targetLineY');
-  const targetLineJitter = document.getElementById('targetLineJitter');
-  const targetOrbitRadius = document.getElementById('targetOrbitRadius');
+const targetOrbitRadius = document.getElementById('targetOrbitRadius');
   const targetOrbitSpeed = document.getElementById('targetOrbitSpeed');
+
+  const btnPlaceTargets = document.getElementById('btnPlaceTargets');
+  const btnResetTargets = document.getElementById('btnResetTargets');
 
   const startEnabled = document.getElementById('startEnabled');
   const startColor = document.getElementById('startColor');
@@ -2449,9 +2522,7 @@ function mountEditor(){
     cfg.latex = (latexToggle.value === 'true');
     cfg.bg = (bgInput.value || "2.png").trim();
     cfg.targetFile = (targetInput?.value || "13.png").trim();
-    cfg.targetLineOffset = (50 - Number(targetLineY?.value ?? 50));
-    cfg.targetLineJitter = Number(targetLineJitter?.value ?? 4);
-    cfg.targetOrbitRadius = Number(targetOrbitRadius?.value ?? 0);
+cfg.targetOrbitRadius = Number(targetOrbitRadius?.value ?? 0);
     cfg.targetOrbitSpeed = Number(targetOrbitSpeed?.value ?? 0);
     cfg.shot.variant = document.getElementById('shotVariant').value;
     cfg.shot.volume = clamp(Number(document.getElementById('shotVol').value||0.7),0,1);
@@ -2476,9 +2547,57 @@ function mountEditor(){
 
     const gameUrl = urlOfSelf() + `?game=${encodeURIComponent(b64uEncode(cfg))}&v=${VERSION}&t=${Date.now()}`;
     document.getElementById('previewFrame').src = gameUrl;
+
+    // if we are in placement mode, re-enable it after iframe reload
+    if(window.__atomicPlaceMode){
+      const fr = document.getElementById('previewFrame');
+      const send = ()=>{ try{ fr.contentWindow.postMessage({type:'ATOMIC_PLACE_MODE', on:true}, '*'); }catch(e){} };
+      fr.addEventListener('load', send, { once:true });
+    }
   }
 
-  [inpTitle, teamsCount, autoNext, latexToggle, bgSelect, targetSelect, targetLineY, targetLineJitter, targetOrbitRadius, targetOrbitSpeed, shotVariantEl, shotVolEl, startEnabled, startColor, startNeon, startTextInp, feedEnabled, feedExtraInp].forEach(el=>{
+  // ====== Manual target placement controls (editor) ======
+  window.__atomicPlaceMode = false;
+
+  function sendPlaceModeMessage(payload){
+    const fr = document.getElementById('previewFrame');
+    if(!fr || !fr.contentWindow) return;
+    try{ fr.contentWindow.postMessage(payload, '*'); }catch(e){}
+  }
+
+  if(btnPlaceTargets){
+    btnPlaceTargets.addEventListener('click', ()=>{
+      window.__atomicPlaceMode = !window.__atomicPlaceMode;
+      btnPlaceTargets.textContent = window.__atomicPlaceMode ? 'Готово' : 'Расставить мишени';
+      // ensure iframe has latest cfg (including targetPositions) before toggling mode
+      updatePreview();
+      const fr = document.getElementById('previewFrame');
+      fr.addEventListener('load', ()=> sendPlaceModeMessage({type:'ATOMIC_PLACE_MODE', on: window.__atomicPlaceMode}), { once:true });
+    });
+  }
+
+  if(btnResetTargets){
+    btnResetTargets.addEventListener('click', ()=>{
+      cfg.targetPositions = [];
+      window.__atomicPlaceMode = true;
+      if(btnPlaceTargets) btnPlaceTargets.textContent = 'Готово';
+      updatePreview();
+      const fr = document.getElementById('previewFrame');
+      fr.addEventListener('load', ()=> sendPlaceModeMessage({type:'ATOMIC_PLACE_MODE', on:true, reset:true}), { once:true });
+    });
+  }
+
+  window.addEventListener('message', (ev)=>{
+    const d = ev?.data;
+    if(!d || d.type!=='ATOMIC_TARGET_POSITIONS') return;
+    if(Array.isArray(d.positions)){
+      cfg.targetPositions = d.positions;
+      // keep preview as-is while dragging; cfg is now updated for export
+    }
+  });
+
+
+  [inpTitle, teamsCount, autoNext, latexToggle, bgSelect, targetSelect,  targetOrbitRadius, targetOrbitSpeed, shotVariantEl, shotVolEl, startEnabled, startColor, startNeon, startTextInp, feedEnabled, feedExtraInp].forEach(el=>{
     el.addEventListener('change', updatePreview);
     if(el.type === 'range' || el.type === 'text') el.addEventListener('input', updatePreview);
   });
@@ -2739,6 +2858,7 @@ function mountEditor(){
 (function boot(){
   if(isGame){
     let cfg = defaultCfg();
+  let placingTargets = false;
     try { cfg = b64uDecode(params.get('game')); } catch(e){}
     mountGame(cfg);
   } else {
