@@ -3,225 +3,784 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Математический тир — Editor v27</title>
+  <title>Математический тир — Editor + Game</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Neucha&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Neucha&family=Roboto:wght@400;700;900&display=swap');
+    
     :root {
-      --text:#eaf0ff; --muted:#a9b6e6; --border: rgba(255,255,255,.10);
-      --neon-orange-base: #ffae00; --neon-orange-glow: rgba(255, 136, 0, 0.6);
-      --neon-box-shadow: 0 0 5px var(--neon-orange-glow), 0 0 15px var(--neon-orange-glow);
+      --text: #eaf0ff; --muted: #a9b6e6;
+      --neon-orange-base: #ffae00;
+      --neon-orange-glow: rgba(255, 136, 0, 0.6);
+      --neon-box-shadow: 0 0 5px var(--neon-orange-glow), 0 0 15px var(--neon-orange-glow), inset 0 0 5px rgba(255, 136, 0, 0.2);
+      --shadow: 0 14px 40px rgba(0,0,0,0.5);
     }
-    *{box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif}
-    body{margin:0;color:var(--text);background:radial-gradient(1100px 700px at 12% 18%, rgba(35,82,200,.15), transparent), #050816; min-height:100vh; overflow:hidden;}
-    .app{display:grid; grid-template-columns: 460px 1fr; gap:14px; padding:14px; height:100vh;}
-    .panel{background:rgba(255,255,255,.05); border:1px solid var(--neon-orange-base); border-radius:22px; box-shadow: var(--neon-box-shadow); display:flex; flex-direction:column; overflow:hidden;}
-    .scroll{flex:1; overflow-y:auto; padding:18px;}
-    .section{background: rgba(20,10,0,0.3); border:1px solid rgba(255,174,0,0.4); border-radius:16px; padding:14px; margin-bottom:12px;}
-    .title{font-weight:900; font-size:14px; color:var(--neon-orange-base); margin-bottom:10px; display:flex; justify-content:space-between;}
-    input, select, textarea{width:100%; border-radius:12px; padding:10px; border:1px solid rgba(255,255,255,.1); background:rgba(0,0,0,.3); color:#fff; outline:none; margin-top:5px;}
-    .btn{padding:10px 14px; border-radius:12px; border:1px solid var(--neon-orange-base); background:rgba(255,255,255,.05); color:#fff; cursor:pointer; font-weight:900; display:inline-flex; align-items:center; gap:8px;}
-    .btn.primary{background: linear-gradient(90deg, rgba(255,174,0,0.3), rgba(255,100,0,0.2));}
-    .topBrand{display:flex; align-items:center; gap:12px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1);}
-    .topBrand img{height:40px; border-radius:8px;}
-    .preview-stage{flex:1; background:rgba(0,0,0,0.2); border-radius:20px; overflow:hidden; border:1px solid rgba(255,255,255,0.1); position:relative;}
-    iframe{width:100%; height:100%; border:0;}
-    .modal-backdrop{position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; z-index:9999;}
-    .modal{width:min(800px, 95%); background:#0f0b08; border:1px solid var(--neon-orange-base); border-radius:20px; padding:20px; box-shadow: var(--neon-box-shadow); max-height:90vh; overflow-y:auto;}
-    .q-item{padding:10px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+    
+    * { box-sizing: border-box; font-family: 'Roboto', system-ui, sans-serif; }
+    html, body { height: 100%; margin: 0; background: #0a0f15; color: var(--text); overflow: hidden; }
+    
+    /* Фоны для редактора */
+    body.editor-mode {
+      background: radial-gradient(1100px 700px at 12% 18%, rgba(255, 170, 0, 0.15) 0%, rgba(5,8,22,0) 58%), #050816;
+    }
+    body.game-mode { background: #000; }
+
+    /* --- EDITOR UI --- */
+    .app { display: grid; grid-template-columns: 460px 1fr; gap: 14px; padding: 14px; height: 100vh; max-width: 1600px; margin: 0 auto; }
+    @media (max-width: 1020px) { .app { grid-template-columns: 1fr; } }
+    
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border: 1px solid var(--neon-orange-base); border-radius: 22px;
+      box-shadow: var(--neon-box-shadow); backdrop-filter: blur(10px);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    
+    .panel-header {
+      padding: 12px 14px; border-bottom: 1px solid rgba(255, 174, 0, 0.4);
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    
+    .panel-body { padding: 14px; overflow-y: auto; flex: 1; }
+    .panel-body::-webkit-scrollbar { width: 6px; }
+    .panel-body::-webkit-scrollbar-thumb { background: rgba(255, 174, 0, 0.4); border-radius: 4px; }
+    
+    .section { background: rgba(20, 10, 0, 0.3); border: 1px solid rgba(255, 174, 0, 0.5); border-radius: 16px; padding: 12px; margin-bottom: 12px; }
+    .section .title { font-weight: 900; font-size: 14px; color: var(--neon-orange-base); margin-bottom: 10px; display: flex; justify-content: space-between; }
+    
+    label { display: block; font-size: 12px; color: rgba(255,255,255,.8); margin: 8px 0 4px; }
+    input[type="text"], input[type="number"], select, textarea {
+      width: 100%; border-radius: 12px; padding: 10px;
+      border: 1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.3); color: #fff; outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--neon-orange-base); box-shadow: 0 0 8px var(--neon-orange-glow); }
+    textarea { resize: vertical; min-height: 70px; }
+    input[type="range"] { width: 100%; accent-color: var(--neon-orange-base); }
+    input[type="color"] { width: 44px; height: 44px; padding: 2px; border-radius: 10px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); background: transparent; }
+    
+    .row { display: flex; gap: 10px; align-items: center; }
+    .row > * { flex: 1; }
+    
+    .btn {
+      padding: 10px 14px; border-radius: 12px; border: 1px solid var(--neon-orange-base);
+      background: rgba(255, 136, 0, 0.1); color: #fff; cursor: pointer; font-weight: 900; font-size: 14px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;
+    }
+    .btn:hover { background: rgba(255, 136, 0, 0.25); box-shadow: 0 0 10px var(--neon-orange-glow); }
+    .btn.primary { background: linear-gradient(90deg, rgba(255, 174, 0, 0.4), rgba(255, 136, 0, 0.3)); }
+    .btn.danger { border-color: #ff4d4d; background: rgba(255, 77, 77, 0.1); }
+    .btn.small { padding: 6px 10px; font-size: 12px; }
+    
+    .preview-stage { flex: 1; background: rgba(0,0,0,.3); border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,.1); position: relative; }
+    iframe { width: 100%; height: 100%; border: 0; background: #000; }
+    
+    .q-list { display: flex; flex-direction: column; gap: 8px; }
+    .q-item { padding: 10px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
+    
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 9999; }
+    .modal-backdrop.show { display: flex; }
+    .modal { width: min(800px, 95%); background: #16110c; border: 1px solid var(--neon-orange-base); border-radius: 20px; box-shadow: var(--neon-box-shadow); max-height: 90vh; display: flex; flex-direction: column; }
+    .modal-head { padding: 14px 20px; border-bottom: 1px solid rgba(255, 174, 0, 0.3); display: flex; justify-content: space-between; align-items: center; font-weight: 900; font-size: 18px; }
+    .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+    .modal-foot { padding: 14px 20px; border-top: 1px solid rgba(255, 174, 0, 0.3); display: flex; justify-content: flex-end; gap: 10px; }
+    
+    .ans-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    
+    /* --- GAME UI --- */
+    .gameRoot { position: absolute; inset: 0; overflow: hidden; background: #000; font-family: 'Roboto', sans-serif; }
+    .arenaBg { position: absolute; inset: 0; background-size: cover; background-position: center; transform: scale(1.05); }
+    .hud { position: absolute; top: 14px; left: 14px; right: 14px; pointer-events: none; z-index: 10; }
+    .gameTitle { font-weight: 900; font-size: 24px; text-shadow: 0 4px 15px #000; color: #fff; }
+    .teams { display: grid; gap: 10px; margin-top: 20px; pointer-events: auto; }
+    .teamCard { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 10px; backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; }
+    .teamCard.active { border-color: #ffae00; box-shadow: 0 0 15px rgba(255,174,0,0.4); }
+    .teamInput { background: transparent; border: none; outline: none; color: #fff; font-weight: 900; font-size: 16px; width: 120px; }
+    
+    .target { position: absolute; width: 90px; height: 90px; transform: translate(-50%, -50%); cursor: pointer; z-index: 5; transition: transform 0.1s; }
+    .target:hover { transform: translate(-50%, -50%) scale(1.1); }
+    .target .img { position: absolute; inset: 0; background-size: contain; background-repeat: no-repeat; background-position: center; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6)); }
+    .target .num { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 900; font-size: 22px; color: #fff; text-shadow: 0 2px 8px #000; }
+    .target.hit { opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(0); transition: 0.3s ease; }
+    
+    .edit-mode .target { cursor: move !important; border: 2px dashed rgba(255, 174, 0, 0.8); border-radius: 50%; }
+    .edit-mode .target:hover { transform: translate(-50%, -50%); } /* Отключаем зум при наведении в редакторе */
+
+    .game-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 50; }
+    .game-modal.on { display: flex; }
+    .game-modal-content { background: #0a0d12; border: 1px solid #ffae00; border-radius: 20px; padding: 24px; width: min(800px, 90%); box-shadow: 0 0 30px rgba(255,174,0,0.3); }
+    .game-ans-btn { width: 100%; text-align: left; padding: 14px; margin-top: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; color: #fff; font-size: 18px; cursor: pointer; transition: 0.2s; }
+    .game-ans-btn:hover { background: rgba(255,255,255,0.1); }
+    
+    .screen { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; text-align: center; }
+    .screen.on { display: flex; }
+    .screenCard { background: #111; border-radius: 20px; padding: 30px; border: 1px solid; max-width: 600px; }
   </style>
 </head>
 <body>
 
-<div class="app" id="editorView">
+<div class="app" id="editorApp" style="display:none;">
   <div class="panel">
-    <div class="scroll">
-      <div class="topBrand">
-        <img src="63.png" alt="Логотип" />
+    <div class="panel-header">
+      <div class="row">
+        <img src="63.png" alt="Logo" style="height:36px; border-radius:6px;">
         <div>
-          <div style="font-weight:950; font-size:16px;">Светлана Быкова</div>
-          <div style="color:var(--neon-orange-base); font-size:12px;">Редактор «Математический тир»</div>
+          <div style="font-weight:900; font-size:16px;">Светлана Быкова</div>
+          <div style="color:var(--neon-orange-base); font-size:12px;" data-i18n="edTitle">Редактор «Математический тир»</div>
         </div>
       </div>
-
-      <div class="section" style="margin-top:20px;">
-        <div class="title">Язык интерфейса</div>
-        <select id="selLang"><option value="ru">Русский</option><option value="en">English</option></select>
+      <button class="btn primary" id="btnCopyCodeTop" data-i18n="btnCopy">📋 Код для Genially</button>
+    </div>
+    
+    <div class="panel-body">
+      <div class="section">
+        <div class="title" data-i18n="sLang">Язык интерфейса</div>
+        <select id="selLang">
+          <option value="ru">Русский</option>
+          <option value="en">English</option>
+          <option value="de">Deutsch</option>
+          <option value="zh">中文</option>
+        </select>
       </div>
 
       <div class="section">
-        <div class="title">Название</div>
+        <div class="title" data-i18n="sName">Название игры</div>
         <input type="text" id="inpTitle" value="Математический тир">
       </div>
 
       <div class="section">
-        <div class="title">Оформление и движение</div>
-        <label>Фон игры (URL)</label>
-        <input type="text" id="inpBg" value="2.png">
-        <label style="margin-top:10px; display:block">Мишень (URL)</label>
-        <input type="text" id="inpTargetImg" value="13.png">
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-          <div><label>Радиус</label><input type="range" id="inpRadius" min="0" max="150" value="0"></div>
-          <div><label>Скорость</label><input type="range" id="inpSpeed" min="0" max="10" value="0"></div>
+        <div class="title" data-i18n="sDesign">Оформление и движение</div>
+        
+        <label data-i18n="lBg">Фон игры</label>
+        <select id="selBg">
+          <option value="1.png">Фон 1</option>
+          <option value="2.png" selected>Фон 2</option>
+          <option value="3.png">Фон 3</option>
+          <option value="4.png">Фон 4</option>
+          <option value="5.png">Фон 5</option>
+          <option value="6.png">Фон 6</option>
+          <option value="7.png">Фон 7</option>
+          <option value="8.png">Фон 8</option>
+          <option value="custom" data-i18n="optCustom">По ссылке...</option>
+        </select>
+        <input type="text" id="inpBgCustom" placeholder="https://..." style="display:none; margin-top:8px;">
+
+        <label data-i18n="lTarget">Мишень</label>
+        <select id="selTarget">
+          <option value="10.png">Мишень 10</option>
+          <option value="11.png">Мишень 11</option>
+          <option value="12.png">Мишень 12</option>
+          <option value="13.png" selected>Мишень 13</option>
+          <option value="14.png">Мишень 14</option>
+          <option value="custom" data-i18n="optCustom">По ссылке...</option>
+        </select>
+        <input type="text" id="inpTargetCustom" placeholder="https://..." style="display:none; margin-top:8px;">
+
+        <div class="row" style="margin-top:10px;">
+          <div><label data-i18n="lRadius">Радиус движения</label><input type="range" id="inpRadius" min="0" max="250" value="0"></div>
+          <div><label data-i18n="lSpeed">Скорость</label><input type="range" id="inpSpeed" min="0" max="10" value="0"></div>
         </div>
       </div>
 
       <div class="section">
-        <div class="title">Стартовый экран</div>
-        <textarea id="inpInstText" placeholder="Текст инструкции..."></textarea>
-        <div style="display:flex; gap:10px; margin-top:10px; align-items:center;">
-          <input type="color" id="inpInstColor" value="#ff8a2a" style="width:44px; height:44px; padding:2px;">
-          <label style="margin:0"><input type="checkbox" id="chkInstGlow" checked> Свечение</label>
+        <div class="title" data-i18n="sGame">Настройки игры</div>
+        <div class="row">
+          <div>
+            <label data-i18n="lTeams">Команд</label>
+            <select id="inpTeams"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select>
+          </div>
+          <div>
+            <label data-i18n="lSound">Выстрел</label>
+            <select id="inpSound"><option value="pif">Пиф</option><option value="snap">Щелчок</option><option value="boom">Бум</option></select>
+          </div>
+          <div>
+            <label data-i18n="lVol">Громкость</label>
+            <input type="range" id="inpVol" min="0" max="1" step="0.1" value="0.7">
+          </div>
         </div>
       </div>
 
       <div class="section">
-        <div class="title">Вопросы <span id="qCount">0 / 9</span></div>
-        <div style="display:flex; gap:10px;">
-          <button class="btn primary" id="btnAddQ">＋ Добавить</button>
-          <button class="btn" id="btnClearQs">🧹 Очистить</button>
+        <div class="title" data-i18n="sStart">Стартовый экран</div>
+        <textarea id="inpStartText" placeholder="Инструкция..."></textarea>
+        <div class="row" style="margin-top:8px;">
+          <input type="color" id="inpStartColor" value="#ff8a2a">
+          <label class="row" style="margin:0"><input type="checkbox" id="chkStartGlow" checked> <span data-i18n="lGlow">Свечение рамки</span></label>
         </div>
-        <div id="qList" style="margin-top:12px;"></div>
+      </div>
+      
+      <div class="section">
+        <div class="title" data-i18n="sEnd">Финальный экран</div>
+        <textarea id="inpEndText" placeholder="Доп. текст в конце..."></textarea>
       </div>
 
-      <button class="btn primary" id="btnCopyCode" style="width:100%;">📋 Скопировать код (iframe)</button>
+      <div class="section">
+        <div class="title"><span data-i18n="sQ">Вопросы</span> <span id="qCount" style="color:#fff">0</span></div>
+        <div class="row" style="margin-bottom:12px;">
+          <button class="btn primary" id="btnAddQ" data-i18n="btnAdd">➕ Добавить</button>
+          <button class="btn" id="btnClearQ" data-i18n="btnClr">🧹 Очистить</button>
+        </div>
+        <div style="font-size:11px; color:var(--neon-orange-base); margin-bottom:8px;" data-i18n="lDragHint">💡 Двигайте мишени прямо в превью справа!</div>
+        <div id="qList" class="q-list"></div>
+      </div>
+
     </div>
   </div>
 
   <div class="panel">
-    <div style="padding:14px; border-bottom:1px solid rgba(255,255,255,0.1); font-weight:900;">Просмотр</div>
-    <div class="preview-stage">
-      <iframe id="livePreview"></iframe>
+    <div class="panel-header">
+      <div style="font-weight:900" data-i18n="previewTitle">Просмотр</div>
+      <div style="font-size:12px; color:var(--muted)" data-i18n="previewHint">Живое превью (координаты сохраняются)</div>
+    </div>
+    <div class="panel-body" style="display:flex; flex-direction:column; padding:0;">
+      <div class="preview-stage" style="border-radius:0; border:none;">
+        <iframe id="previewFrame"></iframe>
+      </div>
     </div>
   </div>
 </div>
 
 <div class="modal-backdrop" id="modalBackdrop">
   <div class="modal">
-    <div class="title"><span id="modalTitle">Вопрос</span> <button class="btn" onclick="closeModal()">✖</button></div>
-    <div class="section">
-      <label>Текст вопроса</label>
-      <textarea id="qPrompt"></textarea>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-        <div><label>Баллы</label><input type="number" id="qPts" value="10"></div>
-        <div><label>Тип</label><select id="qType"><option value="choice">Выбор</option><option value="input">Ввод</option></select></div>
+    <div class="modal-head">
+      <span id="modalTitle" data-i18n="mTitle">Редактировать вопрос</span>
+      <button class="btn small danger" onclick="closeModal()">✖</button>
+    </div>
+    <div class="modal-body">
+      <div class="row">
+        <div>
+          <label data-i18n="lQType">Тип вопроса</label>
+          <select id="modType">
+            <option value="choice" data-i18n="oChoice">Выбор ответа</option>
+            <option value="input" data-i18n="oInput">Ввод ответа</option>
+          </select>
+        </div>
+        <div>
+          <label data-i18n="lPts">Очки за вопрос</label>
+          <input type="number" id="modPts" value="10">
+        </div>
       </div>
-      <label style="margin-top:10px; display:block;">Шрифт</label>
-      <select id="qFont"><option value="Roboto">Roboto</option><option value="Caveat">Caveat</option><option value="Neucha">Neucha</option></select>
+      
+      <label data-i18n="lQText">Текст вопроса</label>
+      <textarea id="modPrompt"></textarea>
+
+      <div class="row" style="margin-top:10px;">
+        <div>
+          <label data-i18n="lFont">Шрифт</label>
+          <select id="modFont">
+            <option value="Roboto">Roboto</option>
+            <option value="Caveat">Caveat (рукописный)</option>
+            <option value="Neucha">Neucha (рукописный)</option>
+          </select>
+        </div>
+        <div>
+          <label data-i18n="lFontSize">Размер шрифта (px)</label>
+          <input type="number" id="modFontSize" value="20">
+        </div>
+      </div>
+
+      <div class="section" style="margin-top:15px;">
+        <div class="title" data-i18n="lAnsOpts">Варианты ответа</div>
+        <div id="modOptsList"></div>
+        <button class="btn small" style="margin-top:10px;" onclick="addOptRow()" id="btnAddOpt" data-i18n="btnAddOpt">➕ Добавить вариант</button>
+      </div>
     </div>
-    <div id="optArea" class="section">
-      <div class="title">Варианты ответов</div>
-      <div id="optList"></div>
-      <button class="btn" style="margin-top:10px;" onclick="addOptRow()">＋ Добавить вариант</button>
-    </div>
-    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
-      <button class="btn" onclick="closeModal()">Отмена</button>
-      <button class="btn primary" id="btnSaveQ">💾 Сохранить</button>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()" data-i18n="btnCancel">Отмена</button>
+      <button class="btn primary" id="btnSaveQ" data-i18n="btnSave">💾 Сохранить</button>
     </div>
   </div>
 </div>
 
+<div id="gameRoot" style="display:none;">
+  <div class="gameRoot" id="gArena">
+    <div class="arenaBg" id="gBg"></div>
+    <div class="hud">
+      <div class="gameTitle" id="gTitle"></div>
+      <div class="teams" id="gTeams"></div>
+    </div>
+    <div id="gTargets"></div>
+
+    <div class="game-modal" id="gModal">
+      <div class="game-modal-content">
+        <h2 id="gQText" style="color:#fff; margin-top:0;"></h2>
+        <div id="gAnswers"></div>
+        <div id="gInputWrap" style="display:none; gap:10px; margin-top:15px;">
+          <input type="text" id="gInput" style="flex:1; font-size:18px;">
+          <button class="btn primary" id="gSubmitBtn">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="gStartScreen">
+      <div class="screenCard" id="gStartCard">
+        <h1 id="gStartTitle" style="color:#fff; margin-top:0;"></h1>
+        <p id="gStartText" style="color:#ccc; font-size:18px; white-space:pre-wrap;"></p>
+        <button class="btn primary" id="gBtnPlay" style="font-size:20px; padding:12px 24px; margin-top:20px;">▶ Начать</button>
+      </div>
+    </div>
+
+    <div class="screen" id="gEndScreen">
+      <div class="screenCard">
+        <h1 style="color:#ffae00; margin-top:0;" data-i18n="lGameOver">Игра окончена!</h1>
+        <div id="gEndStats" style="margin:20px 0; display:flex; gap:15px; justify-content:center; flex-wrap:wrap;"></div>
+        <p id="gEndText" style="color:#ccc; font-size:16px; white-space:pre-wrap;"></p>
+        <button class="btn primary" id="gBtnRestart" style="margin-top:15px;" data-i18n="btnRestart">↻ Сыграть еще раз</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script>
-/* --- Логика Данных --- */
+/* ========================
+   Словарь (i18n)
+   ======================== */
+const dict = {
+  ru: {
+    edTitle: "Редактор «Математический тир»", btnCopy: "📋 Код для Genially", sLang: "Язык интерфейса",
+    sName: "Название игры", sDesign: "Оформление и движение", lBg: "Фон игры", lTarget: "Мишень",
+    optCustom: "По ссылке...", lRadius: "Радиус движения", lSpeed: "Скорость", sGame: "Настройки игры",
+    lTeams: "Команд", lSound: "Выстрел", lVol: "Громкость", sStart: "Стартовый экран", lGlow: "Свечение рамки",
+    sEnd: "Финальный экран", sQ: "Вопросы", btnAdd: "➕ Добавить", btnClr: "🧹 Очистить",
+    lDragHint: "💡 Двигайте мишени прямо в превью справа!", previewTitle: "Просмотр", previewHint: "Живое превью (координаты сохраняются)",
+    mTitle: "Редактировать вопрос", lQType: "Тип вопроса", oChoice: "Выбор ответа", oInput: "Ввод ответа",
+    lPts: "Очки за вопрос", lQText: "Текст вопроса", lFont: "Шрифт", lFontSize: "Размер шрифта (px)",
+    lAnsOpts: "Варианты ответа", btnAddOpt: "➕ Добавить вариант", btnCancel: "Отмена", btnSave: "💾 Сохранить",
+    lRightAns: "Верный", lOptText: "Текст варианта", lDel: "Удалить",
+    lGameOver: "Игра окончена!", btnRestart: "↻ Сыграть еще раз", lTeam: "Команда"
+  },
+  en: {
+    edTitle: "Math Shooter Editor", btnCopy: "📋 Copy Genially Code", sLang: "Interface Language",
+    sName: "Game Title", sDesign: "Design & Movement", lBg: "Background", lTarget: "Target",
+    optCustom: "Custom URL...", lRadius: "Orbit Radius", lSpeed: "Speed", sGame: "Game Settings",
+    lTeams: "Teams", lSound: "Shot Sound", lVol: "Volume", sStart: "Start Screen", lGlow: "Border Glow",
+    sEnd: "Finish Screen", sQ: "Questions", btnAdd: "➕ Add", btnClr: "🧹 Clear",
+    lDragHint: "💡 Drag targets directly in the preview on the right!", previewTitle: "Preview", previewHint: "Live preview (coordinates are saved)",
+    mTitle: "Edit Question", lQType: "Question Type", oChoice: "Multiple Choice", oInput: "Text Input",
+    lPts: "Points", lQText: "Question Text", lFont: "Font", lFontSize: "Font Size (px)",
+    lAnsOpts: "Answer Options", btnAddOpt: "➕ Add Option", btnCancel: "Cancel", btnSave: "💾 Save",
+    lRightAns: "Correct", lOptText: "Option Text", lDel: "Delete",
+    lGameOver: "Game Over!", btnRestart: "↻ Play Again", lTeam: "Team"
+  },
+  de: {
+    edTitle: "Mathe-Shooter Editor", btnCopy: "📋 Genially-Code kopieren", sLang: "Sprache",
+    sName: "Spieltitel", sDesign: "Design & Bewegung", lBg: "Hintergrund", lTarget: "Ziel",
+    optCustom: "Eigene URL...", lRadius: "Radius", lSpeed: "Geschwindigkeit", sGame: "Spieleinstellungen",
+    lTeams: "Teams", lSound: "Schuss-Sound", lVol: "Lautstärke", sStart: "Startbildschirm", lGlow: "Randleuchten",
+    sEnd: "Endbildschirm", sQ: "Fragen", btnAdd: "➕ Hinzufügen", btnClr: "🧹 Leeren",
+    lDragHint: "💡 Ziehen Sie die Ziele direkt in der Vorschau rechts!", previewTitle: "Vorschau", previewHint: "Live-Vorschau (Koordinaten werden gespeichert)",
+    mTitle: "Frage bearbeiten", lQType: "Fragetyp", oChoice: "Multiple Choice", oInput: "Texteingabe",
+    lPts: "Punkte", lQText: "Fragentext", lFont: "Schriftart", lFontSize: "Schriftgröße (px)",
+    lAnsOpts: "Antwortmöglichkeiten", btnAddOpt: "➕ Option hinzufügen", btnCancel: "Abbrechen", btnSave: "💾 Speichern",
+    lRightAns: "Richtig", lOptText: "Optionstext", lDel: "Löschen",
+    lGameOver: "Spiel vorbei!", btnRestart: "↻ Nochmal spielen", lTeam: "Team"
+  },
+  zh: {
+    edTitle: "数学射击编辑器", btnCopy: "📋 复制 Genially 代码", sLang: "界面语言",
+    sName: "游戏名称", sDesign: "设计与运动", lBg: "背景", lTarget: "目标",
+    optCustom: "自定义 URL...", lRadius: "轨道半径", lSpeed: "速度", sGame: "游戏设置",
+    lTeams: "队伍", lSound: "射击声音", lVol: "音量", sStart: "开始屏幕", lGlow: "边框发光",
+    sEnd: "结束屏幕", sQ: "问题", btnAdd: "➕ 添加", btnClr: "🧹 清除",
+    lDragHint: "💡 直接在右侧预览中拖动目标！", previewTitle: "预览", previewHint: "实时预览（坐标已保存）",
+    mTitle: "编辑问题", lQType: "问题类型", oChoice: "多项选择", oInput: "文本输入",
+    lPts: "分数", lQText: "问题文本", lFont: "字体", lFontSize: "字体大小 (px)",
+    lAnsOpts: "答案选项", btnAddOpt: "➕ 添加选项", btnCancel: "取消", btnSave: "💾 保存",
+    lRightAns: "正确", lOptText: "选项文本", lDel: "删除",
+    lGameOver: "游戏结束！", btnRestart: "↻ 再玩一次", lTeam: "队伍"
+  }
+};
+let lang = "ru";
+function t(key) { return dict[lang][key] || dict["ru"][key] || key; }
+function applyLang() {
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const k = el.getAttribute("data-i18n");
+    if(el.tagName==="INPUT" || el.tagName==="TEXTAREA") el.placeholder = t(k);
+    else el.innerText = t(k);
+  });
+  renderQList();
+}
+
+/* ========================
+   База данных (Config)
+   ======================== */
 let cfg = {
-  title: "Математический тир", bg: "2.png", targetImg: "13.png",
-  radius: 0, speed: 0, inst: { text: "", color: "#ff8a2a", glow: true },
+  title: "Математический тир", bg: "2.png", bgUrl: "", target: "13.png", targetUrl: "",
+  radius: 0, speed: 0, teams: 2, sound: "pif", vol: 0.7,
+  start: { text: "Сбей мишень и ответь на вопрос!", color: "#ffae00", glow: true },
+  end: { text: "Отличная работа!" },
   questions: []
 };
 let editIdx = null;
 
 const b64e = (o) => btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const b64d = (s) => JSON.parse(decodeURIComponent(escape(atob(s.replace(/-/g,'+').replace(/_/g,'/')))));
+const qs = new URLSearchParams(location.search);
 
-/* --- Интерфейс --- */
-function initEditor(){
-  const upd = () => {
-    cfg.title = document.getElementById('inpTitle').value;
-    cfg.bg = document.getElementById('inpBg').value;
-    cfg.targetImg = document.getElementById('inpTargetImg').value;
-    cfg.radius = document.getElementById('inpRadius').value;
-    cfg.speed = document.getElementById('inpSpeed').value;
-    cfg.inst.text = document.getElementById('inpInstText').value;
-    cfg.inst.color = document.getElementById('inpInstColor').value;
-    cfg.inst.glow = document.getElementById('chkInstGlow').checked;
-    
-    const data = b64e(cfg);
-    document.getElementById('livePreview').src = location.origin + location.pathname + "?game=" + data + "&editMode=1";
-    document.getElementById('qCount').innerText = cfg.questions.length + " / 9";
-    renderQList();
+/* ========================
+   Звуковой движок (WebAudio)
+   ======================== */
+const AudioSys = (() => {
+  let ctx, master;
+  function init(){ if(!ctx){ ctx=new(window.AudioContext||window.webkitAudioContext)(); master=ctx.createGain(); master.connect(ctx.destination); } }
+  return {
+    play: (type, v) => {
+      init(); if(ctx.state==='suspended') ctx.resume();
+      master.gain.value = v; const t = ctx.currentTime;
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      if(type==='boom'){ osc.type='sine'; osc.frequency.setValueAtTime(90,t); osc.frequency.exponentialRampToValueAtTime(40,t+0.2); g.gain.setValueAtTime(0.8,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.2); osc.connect(g).connect(master); osc.start(t); osc.stop(t+0.25); }
+      else if(type==='snap'){ osc.type='square'; osc.frequency.setValueAtTime(220,t); osc.frequency.exponentialRampToValueAtTime(880,t+0.05); g.gain.setValueAtTime(0.5,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.08); osc.connect(g).connect(master); osc.start(t); osc.stop(t+0.1); }
+      else { osc.type='triangle'; osc.frequency.setValueAtTime(600,t); osc.frequency.exponentialRampToValueAtTime(200,t+0.1); g.gain.setValueAtTime(0.6,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.1); osc.connect(g).connect(master); osc.start(t); osc.stop(t+0.15); }
+    }
   };
+})();
 
-  document.querySelectorAll('input, select, textarea').forEach(el => el.oninput = upd);
-  document.getElementById('btnAddQ').onclick = () => openModal();
-  document.getElementById('btnSaveQ').onclick = saveQ;
-  document.getElementById('btnCopyCode').onclick = () => {
-    const url = location.origin + location.pathname + "?game=" + b64e(cfg);
-    navigator.clipboard.writeText(`<iframe src="${url}" style="width:100%;height:600px;border:0" allowfullscreen></iframe>`);
-    alert("Код скопирован!");
-  };
+/* ========================
+   РЕЖИМ РЕДАКТОРА
+   ======================== */
+function bootEditor() {
+  document.body.classList.add('editor-mode');
+  document.getElementById('editorApp').style.display = 'grid';
 
+  // Обработчики выпадающих списков (Фон и Мишень)
+  const selBg = document.getElementById('selBg');
+  const inpBgCustom = document.getElementById('inpBgCustom');
+  selBg.onchange = () => { inpBgCustom.style.display = selBg.value === 'custom' ? 'block' : 'none'; updateEditor(); };
+  inpBgCustom.oninput = updateEditor;
+
+  const selTgt = document.getElementById('selTarget');
+  const inpTgtCustom = document.getElementById('inpTargetCustom');
+  selTgt.onchange = () => { inpTgtCustom.style.display = selTgt.value === 'custom' ? 'block' : 'none'; updateEditor(); };
+  inpTgtCustom.oninput = updateEditor;
+
+  // Язык
+  document.getElementById('selLang').onchange = (e) => { lang = e.target.value; applyLang(); };
+
+  // Звук тест
+  document.getElementById('inpSound').onchange = (e) => { AudioSys.play(e.target.value, document.getElementById('inpVol').value); updateEditor(); };
+
+  // Остальные инпуты
+  document.querySelectorAll('.panel input:not(#inpBgCustom):not(#inpTargetCustom), .panel textarea, .panel select:not(#selBg):not(#selTarget)').forEach(el => {
+    el.addEventListener('input', updateEditor);
+    el.addEventListener('change', updateEditor);
+  });
+
+  // Кнопки
+  document.getElementById('btnAddQ').onclick = () => openMod();
+  document.getElementById('btnClearQ').onclick = () => { cfg.questions=[]; updateEditor(); };
+  document.getElementById('btnSaveQ').onclick = saveMod;
+  document.getElementById('btnCopyCodeTop').onclick = copyIframe;
+
+  // Drag Drop от Iframe
   window.addEventListener('message', e => {
-    if(e.data.type === 'updPos') {
-      cfg.questions[e.data.idx].x = e.data.x;
-      cfg.questions[e.data.idx].y = e.data.y;
-      renderQList();
+    if(e.data.type==='updPos' && cfg.questions[e.data.idx]) {
+      cfg.questions[e.data.idx].x = e.data.x; cfg.questions[e.data.idx].y = e.data.y;
+      renderQList(); // Обновляем список, но не iframe, чтобы не мерцало
     }
   });
-  upd();
+
+  applyLang();
+  updateEditor();
 }
 
-function renderQList(){
+function updateEditor() {
+  cfg.title = document.getElementById('inpTitle').value;
+  cfg.bg = document.getElementById('selBg').value;
+  cfg.bgUrl = document.getElementById('inpBgCustom').value;
+  cfg.target = document.getElementById('selTarget').value;
+  cfg.targetUrl = document.getElementById('inpTargetCustom').value;
+  cfg.radius = Number(document.getElementById('inpRadius').value);
+  cfg.speed = Number(document.getElementById('inpSpeed').value);
+  cfg.teams = Number(document.getElementById('inpTeams').value);
+  cfg.sound = document.getElementById('inpSound').value;
+  cfg.vol = Number(document.getElementById('inpVol').value);
+  
+  cfg.start.text = document.getElementById('inpStartText').value;
+  cfg.start.color = document.getElementById('inpStartColor').value;
+  cfg.start.glow = document.getElementById('chkStartGlow').checked;
+  cfg.end.text = document.getElementById('inpEndText').value;
+
+  document.getElementById('qCount').innerText = cfg.questions.length;
+  renderQList();
+
+  const data = b64e(cfg);
+  document.getElementById('previewFrame').src = location.origin + location.pathname + "?game=" + data + "&edit=1&lang=" + lang;
+}
+
+function renderQList() {
   const list = document.getElementById('qList');
   list.innerHTML = cfg.questions.map((q, i) => `
     <div class="q-item">
-      <span>#${i+1} ${q.text.slice(0,15)}...</span>
-      <div><button class="btn" onclick="openModal(${i})" style="padding:5px">✏️</button>
-      <button class="btn" onclick="delQ(${i})" style="padding:5px">🗑️</button></div>
+      <div><b>#${i+1}</b> ${q.text.substring(0,25)}... <div style="font-size:11px; color:#aaa">x:${q.x}%, y:${q.y}%</div></div>
+      <div>
+        <button class="btn small" onclick="openMod(${i})">✏️</button>
+        <button class="btn small danger" onclick="delQ(${i})">🗑️</button>
+      </div>
     </div>
   `).join('');
 }
 
-function openModal(idx = null){
+function delQ(i) { cfg.questions.splice(i,1); updateEditor(); }
+
+// --- Модалка ---
+function openMod(idx = null) {
   editIdx = idx;
-  const q = idx !== null ? cfg.questions[idx] : { text: "", pts: 10, type: "choice", opts: [{t:"Да", c:true}, {t:"Нет", c:false}] };
-  document.getElementById('qPrompt').value = q.text;
-  document.getElementById('qPts').value = q.pts;
-  document.getElementById('qType').value = q.type;
-  renderOptRows(q.opts);
-  document.getElementById('modalBackdrop').style.display = 'flex';
+  const q = idx !== null ? cfg.questions[idx] : { type: "choice", text: "Новый вопрос", pts: 10, font: "Roboto", size: 20, opts: [{t:"Вариант 1", c:true}, {t:"Вариант 2", c:false}], acc: ["Ответ"] };
+  
+  document.getElementById('modType').value = q.type;
+  document.getElementById('modPrompt').value = q.text;
+  document.getElementById('modPts').value = q.pts;
+  document.getElementById('modFont').value = q.font;
+  document.getElementById('modFontSize').value = q.size;
+  
+  syncModType();
+  document.getElementById('modType').onchange = syncModType;
+
+  function syncModType() {
+    const isChoice = document.getElementById('modType').value === 'choice';
+    if(isChoice) renderOpts(q.opts || [{t:"1", c:true}]);
+    else renderAccs(q.acc || [""]);
+  }
+  
+  document.getElementById('modalBackdrop').classList.add('show');
 }
 
-function renderOptRows(opts){
-  document.getElementById('optList').innerHTML = opts.map((o, i) => `
-    <div style="display:flex; gap:10px; margin-top:5px;">
-      <input type="checkbox" ${o.c?'checked':''} style="width:20px" onchange="cfg.questions[editIdx].opts[${i}].c = this.checked">
-      <input type="text" value="${o.t}" oninput="cfg.questions[editIdx].opts[${i}].t = this.value">
+function renderOpts(opts) {
+  const list = document.getElementById('modOptsList');
+  list.innerHTML = opts.map((o, i) => `
+    <div class="row" style="margin-bottom:6px;">
+      <input type="checkbox" style="width:24px;height:24px;" ${o.c?'checked':''} id="optC_${i}">
+      <input type="text" value="${o.t}" id="optT_${i}" placeholder="${t('lOptText')}">
+      <button class="btn small danger" onclick="delOptRow(${i}, 'choice')">✖</button>
+    </div>
+  `).join('');
+}
+function renderAccs(acc) {
+  const list = document.getElementById('modOptsList');
+  list.innerHTML = acc.map((a, i) => `
+    <div class="row" style="margin-bottom:6px;">
+      <input type="text" value="${a}" id="accT_${i}" placeholder="${t('lRightAns')}">
+      <button class="btn small danger" onclick="delOptRow(${i}, 'input')">✖</button>
     </div>
   `).join('');
 }
 
-function saveQ(){
-  const q = {
-    text: document.getElementById('qPrompt').value,
-    pts: document.getElementById('qPts').value,
-    type: document.getElementById('qType').value,
-    x: editIdx !== null ? cfg.questions[editIdx].x : 50,
-    y: editIdx !== null ? cfg.questions[editIdx].y : 50,
-    opts: [{t:"Верно", c:true}] // В реальном сохранении берем из DOM
-  };
-  if(editIdx !== null) cfg.questions[editIdx] = q; else cfg.questions.push(q);
-  closeModal(); initEditor(); // Перерисовка
+window.addOptRow = () => {
+  const type = document.getElementById('modType').value;
+  if(type==='choice') {
+    const opts = collectOpts(); opts.push({t:"", c:false}); renderOpts(opts);
+  } else {
+    const acc = collectAccs(); acc.push(""); renderAccs(acc);
+  }
+};
+window.delOptRow = (i, type) => {
+  if(type==='choice'){ const o=collectOpts(); o.splice(i,1); renderOpts(o); }
+  else { const a=collectAccs(); a.splice(i,1); renderAccs(a); }
+};
+
+function collectOpts() {
+  const arr=[]; let i=0;
+  while(document.getElementById(`optT_${i}`)) {
+    arr.push({ c: document.getElementById(`optC_${i}`).checked, t: document.getElementById(`optT_${i}`).value }); i++;
+  }
+  return arr;
+}
+function collectAccs() {
+  const arr=[]; let i=0;
+  while(document.getElementById(`accT_${i}`)) { arr.push(document.getElementById(`accT_${i}`).value); i++; }
+  return arr;
 }
 
-function closeModal(){ document.getElementById('modalBackdrop').style.display = 'none'; }
-function delQ(i){ cfg.questions.splice(i,1); renderQList(); }
+function saveMod() {
+  const q = {
+    type: document.getElementById('modType').value,
+    text: document.getElementById('modPrompt').value,
+    pts: Number(document.getElementById('modPts').value),
+    font: document.getElementById('modFont').value,
+    size: Number(document.getElementById('modFontSize').value),
+    x: editIdx !== null ? cfg.questions[editIdx].x : 50,
+    y: editIdx !== null ? cfg.questions[editIdx].y : 50
+  };
+  if(q.type==='choice') q.opts = collectOpts(); else q.acc = collectAccs();
+  
+  if(editIdx !== null) cfg.questions[editIdx] = q; else cfg.questions.push(q);
+  closeModal(); updateEditor();
+}
+
+function closeModal() { document.getElementById('modalBackdrop').classList.remove('show'); }
+
+function copyIframe() {
+  const url = location.origin + location.pathname + "?game=" + b64e(cfg);
+  navigator.clipboard.writeText(`<iframe src="${url}" style="width:100%;height:600px;border:0" allowfullscreen></iframe>`).then(()=>alert("Скопировано!"));
+}
+
+/* ========================
+   РЕЖИМ ИГРЫ (И ПРЕВЬЮ)
+   ======================== */
+function bootGame() {
+  document.body.classList.add('game-mode');
+  document.getElementById('gameRoot').style.display = 'block';
+  lang = qs.get('lang') || 'ru'; // Подтягиваем язык
+  
+  let gCfg = cfg;
+  if(qs.get('game')) {
+    try { gCfg = b64d(qs.get('game')); } catch(e){}
+  }
+  const isEdit = qs.get('edit') === '1';
+
+  // Фоны и картинки
+  const bgImg = gCfg.bg === 'custom' ? gCfg.bgUrl : gCfg.bg;
+  document.getElementById('gBg').style.backgroundImage = `url("${bgImg}")`;
+  const tgtImg = gCfg.target === 'custom' ? gCfg.targetUrl : gCfg.target;
+  
+  document.getElementById('gTitle').innerText = gCfg.title;
+
+  // Отрисовка команд
+  const tDiv = document.getElementById('gTeams');
+  tDiv.style.gridTemplateColumns = `repeat(${gCfg.teams}, 1fr)`;
+  let scores = Array(gCfg.teams).fill(0);
+  let curTeam = 0;
+  
+  function drawTeams() {
+    tDiv.innerHTML = scores.map((s, i) => `
+      <div class="teamCard ${i===curTeam ? 'active':''}">
+        <input type="text" class="teamInput" value="${t('lTeam')} ${i+1}">
+        <b style="color:#fff; font-size:20px;">${s}</b>
+      </div>
+    `).join('');
+  }
+  drawTeams();
+
+  // Отрисовка мишеней
+  const tgtDiv = document.getElementById('gTargets');
+  tgtDiv.className = isEdit ? "edit-mode" : "";
+  let targetsHit = 0;
+
+  gCfg.questions.forEach((q, i) => {
+    const el = document.createElement('div');
+    el.className = 'target';
+    el.style.left = (q.x || 50) + '%';
+    el.style.top = (q.y || 50) + '%';
+    el.innerHTML = `<div class="img" style="background-image:url('${tgtImg}')"></div><div class="num">${i+1}</div>`;
+    
+    // Орбитальное движение
+    let ang = Math.random() * Math.PI * 2;
+    if(gCfg.radius > 0 && gCfg.speed > 0) {
+      setInterval(() => {
+        ang += (gCfg.speed * 0.01);
+        const ox = Math.cos(ang) * gCfg.radius;
+        const oy = Math.sin(ang) * gCfg.radius;
+        el.style.transform = `translate(calc(-50% + ${ox}px), calc(-50% + ${oy}px))`;
+      }, 30);
+    }
+
+    if(isEdit) {
+      // Drag in Preview
+      el.onmousedown = (e) => {
+        const rect = document.getElementById('gArena').getBoundingClientRect();
+        function move(ev) {
+          let nx = Math.round(((ev.clientX - rect.left) / rect.width) * 100);
+          let ny = Math.round(((ev.clientY - rect.top) / rect.height) * 100);
+          el.style.left = nx + "%"; el.style.top = ny + "%";
+          window.parent.postMessage({ type: 'updPos', idx: i, x: nx, y: ny }, '*');
+        }
+        function stop() { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', stop); }
+        window.addEventListener('mousemove', move); window.addEventListener('mouseup', stop);
+      };
+    } else {
+      // Клик в Игре
+      el.onclick = () => {
+        AudioSys.play(gCfg.sound, gCfg.vol);
+        el.classList.add('hit');
+        openGameQuestion(q, () => {
+          targetsHit++;
+          if(targetsHit >= gCfg.questions.length) showEndScreen();
+        });
+      };
+    }
+    tgtDiv.appendChild(el);
+  });
+
+  // Логика вопроса в Игре
+  function openGameQuestion(q, onDone) {
+    document.getElementById('gModal').classList.add('on');
+    const txt = document.getElementById('gQText');
+    txt.innerText = q.text;
+    txt.style.fontFamily = q.font || 'Roboto';
+    txt.style.fontSize = (q.size || 20) + "px";
+
+    const ansDiv = document.getElementById('gAnswers');
+    const inpWrap = document.getElementById('gInputWrap');
+    ansDiv.innerHTML = "";
+    
+    if(q.type === 'choice') {
+      inpWrap.style.display = 'none';
+      ansDiv.style.display = 'block';
+      // Перемешиваем
+      let opts = [...q.opts].sort(() => Math.random() - 0.5);
+      opts.forEach(o => {
+        const b = document.createElement('button');
+        b.className = 'game-ans-btn';
+        b.innerText = o.t;
+        b.style.fontFamily = q.font || 'Roboto';
+        b.onclick = () => {
+          if(o.c) scores[curTeam] += q.pts;
+          finishTurn();
+        };
+        ansDiv.appendChild(b);
+      });
+    } else {
+      ansDiv.style.display = 'none';
+      inpWrap.style.display = 'flex';
+      const inp = document.getElementById('gInput');
+      inp.value = ""; inp.style.fontFamily = q.font || 'Roboto';
+      document.getElementById('gSubmitBtn').onclick = () => {
+        const user = inp.value.trim().toLowerCase();
+        const accs = q.acc.map(a=>a.trim().toLowerCase());
+        if(accs.includes(user)) scores[curTeam] += q.pts;
+        finishTurn();
+      };
+    }
+
+    function finishTurn() {
+      document.getElementById('gModal').classList.remove('on');
+      curTeam = (curTeam + 1) % gCfg.teams;
+      drawTeams();
+      onDone();
+    }
+  }
+
+  // Экраны
+  if(!isEdit && gCfg.start.text) {
+    const sCard = document.getElementById('gStartCard');
+    document.getElementById('gStartScreen').classList.add('on');
+    document.getElementById('gStartTitle').innerText = gCfg.title;
+    document.getElementById('gStartText').innerText = gCfg.start.text;
+    sCard.style.borderColor = gCfg.start.color;
+    if(gCfg.start.glow) sCard.style.boxShadow = `0 0 25px ${gCfg.start.color}, inset 0 0 10px ${gCfg.start.color}`;
+    document.getElementById('gBtnPlay').onclick = () => {
+      AudioSys.init(); // Важно для инициализации звука
+      document.getElementById('gStartScreen').classList.remove('on');
+    };
+  }
+
+  function showEndScreen() {
+    document.getElementById('gEndScreen').classList.add('on');
+    document.getElementById('gEndText').innerText = gCfg.end.text;
+    document.getElementById('gEndStats').innerHTML = scores.map((s,i) => `
+      <div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:12px; min-width:120px; border:1px solid rgba(255,255,255,0.2);">
+        <div style="color:#aaa; font-size:14px; margin-bottom:5px;">Команда ${i+1}</div>
+        <div style="color:#fff; font-size:24px; font-weight:900;">${s}</div>
+      </div>
+    `).join('');
+    document.getElementById('gBtnRestart').onclick = () => location.reload();
+  }
+}
 
 /* --- Запуск --- */
-const gameData = params.get('game');
-if(gameData) {
-  document.getElementById('editorView').style.display = 'none';
-  // Здесь запускается сам ИГРОВОЙ движок (как в ваших прошлых версиях)
+if(qs.get('game') && qs.get('edit') !== '1') {
+  bootGame();
 } else {
-  initEditor();
+  bootEditor();
+  if(qs.get('edit') === '1') bootGame(); // Запускаем игру ВНУТРИ превью
 }
 </script>
 </body>
