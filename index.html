@@ -22,6 +22,7 @@
     body.editor-mode { background: radial-gradient(1100px 700px at 12% 18%, rgba(217, 154, 41, 0.12) 0%, rgba(5,8,22,0) 58%), #050816; }
     body.game-mode { background: #000; }
 
+    /* --- EDITOR UI --- */
     .app { display: grid; grid-template-columns: 480px 1fr; gap: 14px; padding: 14px; height: 100vh; max-width: 1600px; margin: 0 auto; }
     @media (max-width: 1020px) { .app { grid-template-columns: 1fr; } }
     
@@ -52,7 +53,7 @@
     .btn.small { padding: 6px 10px; font-size: 12px; border-radius: 10px; }
     
     .preview-stage { flex: 1; background: #000; border-radius: 20px; overflow: hidden; position: relative; }
-    iframe { width: 100%; height: 100%; border: 0; background: #000; }
+    iframe { width: 100%; height: 100%; border: 0; background: #000; pointer-events: auto; }
     
     .q-list { display: flex; flex-direction: column; gap: 8px; }
     .q-item { padding: 10px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
@@ -75,7 +76,7 @@
     .hud { position: absolute; top: 14px; left: 14px; right: 14px; pointer-events: none; z-index: 10; display:flex; justify-content:space-between; align-items:center; }
     .gameTitle { font-weight: 900; font-size: 24px; text-shadow: 0 4px 15px #000; color: #fff; }
     .teams { display: grid; gap: 10px; margin-top: 54px; padding:0 14px; pointer-events: auto; position:relative; z-index:10; cursor: default; }
-    .teamCard { background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 10px; backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; transition: 0.3s; }
+    .teamCard { background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 10px; backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
     .teamInput { background: transparent; border: none; outline: none; color: #fff; font-weight: 900; font-size: 16px; width: 100%; max-width: 150px; }
     
     /* Targets */
@@ -84,8 +85,14 @@
     .target:hover { transform: translate(-50%, -50%) translate(var(--orbit-x, 0px), var(--orbit-y, 0px)) scale(1.1); }
     .target .img { position: absolute; inset: 0; background-image: var(--target-img); background-size: contain; background-repeat: no-repeat; background-position: center; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6)); }
     .target .num { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 900; font-size: 24px; color: #fff; text-shadow: 0 2px 8px #000; }
-    .target .pts { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); border: 1px solid rgba(217,154,41,0.5); color: var(--neon-orange-base); padding: 2px 8px; border-radius: 8px; font-size: 12px; font-weight: 900; white-space: nowrap; pointer-events: none; backdrop-filter: blur(4px); text-shadow: 0 2px 4px #000; }
-    .target.hit { opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(0); transition: 0.3s ease; }
+    .target .pts { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); border: 1px solid rgba(217,154,41,0.5); color: var(--neon-orange-base); padding: 2px 8px; border-radius: 8px; font-size: 12px; font-weight: 900; white-space: nowrap; pointer-events: none; backdrop-filter: blur(4px); text-shadow: 0 2px 4px #000; }
+    
+    /* Анимация исчезновения цели */
+    .target.hit { pointer-events: none; animation: targetHitAnim 0.3s forwards; }
+    @keyframes targetHitAnim {
+        0% { transform: translate(-50%, -50%) translate(var(--orbit-x, 0px), var(--orbit-y, 0px)) scale(1); opacity: 1; filter: brightness(2); }
+        100% { transform: translate(-50%, -50%) translate(var(--orbit-x, 0px), var(--orbit-y, 0px)) scale(0); opacity: 0; filter: brightness(1); }
+    }
     
     .edit-mode .target { cursor: move !important; border: 2px dashed rgba(217, 154, 41, 0.8); border-radius: 50%; }
     .edit-mode .target:hover { transform: translate(-50%, -50%) translate(var(--orbit-x, 0px), var(--orbit-y, 0px)); }
@@ -95,34 +102,115 @@
     #aimCursor { position: absolute; pointer-events: none; z-index: 45; transform: translate(-50%, -50%); display: none; }
     #gArena.aiming #aimCursor { display: block; }
 
-    /* Эффекты взрыва */
-    .hit-shockwave { position: absolute; width: 20px; height: 20px; border-radius: 50%; border: 4px solid currentColor; transform: translate(-50%, -50%); pointer-events: none; z-index: 39; animation: shockwaveAnim 0.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
-    .hit-particle { position: absolute; width: 8px; height: 8px; border-radius: 50%; pointer-events: none; z-index: 40; filter: drop-shadow(0 0 4px currentColor); }
-    @keyframes shockwaveAnim { 0% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(7); opacity: 0; border-width: 1px; } }
+    /* НОВЫЕ КРУТЫЕ ЭФФЕКТЫ ВЗРЫВА */
+    .fx-ring {
+      position: absolute; width: 10px; height: 10px; border-radius: 50%;
+      border: 4px solid #fff; transform: translate(-50%, -50%);
+      pointer-events: none; z-index: 99;
+      animation: fxRingAnim 0.4s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+    }
+    @keyframes fxRingAnim {
+      0% { width: 10px; height: 10px; opacity: 1; border-width: 6px; }
+      100% { width: 180px; height: 180px; opacity: 0; border-width: 1px; }
+    }
+    .fx-particle {
+      position: absolute; width: 12px; height: 12px; border-radius: 50%;
+      pointer-events: none; z-index: 100;
+      animation: fxPartAnim 0.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+    }
+    @keyframes fxPartAnim {
+      0% { transform: translate(-50%, -50%) scale(1); opacity: 1; filter: brightness(2); }
+      100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0); opacity: 0; filter: brightness(1); }
+    }
 
-    /* Modals & Screens */
-    @keyframes modalPopIn { 0% { opacity: 0; transform: scale(0.85) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
-    .game-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 50; cursor: default; }
+    /* =========================================
+       РОСКОШНЫЙ ДИЗАЙН ОКНА С ВОПРОСОМ 
+       ========================================= */
+    @keyframes modalPopIn {
+      0% { opacity: 0; transform: scale(0.85) translateY(30px); }
+      70% { transform: scale(1.02) translateY(-5px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .game-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); display: none; align-items: center; justify-content: center; z-index: 50; cursor: default; perspective: 1000px; padding: 20px; }
     .game-modal.on { display: flex; }
-    .game-modal-content { background: linear-gradient(145deg, rgba(20,25,30,0.85), rgba(10,12,15,0.95)); border: 1px solid rgba(255,255,255,0.1); border-top: 1px solid rgba(217, 154, 41, 0.6); border-radius: 28px; padding: 40px; width: min(850px, 92vw); box-shadow: 0 30px 60px rgba(0,0,0,0.6), 0 0 40px rgba(217, 154, 41, 0.15); position: relative; max-height: 90vh; overflow-y: auto; animation: modalPopIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; backdrop-filter: blur(16px); }
+    
+    .game-modal-content {
+      background: linear-gradient(135deg, rgba(30, 35, 45, 0.95), rgba(15, 20, 25, 0.98));
+      border: 1px solid rgba(255,255,255,0.1);
+      border-top: 2px solid var(--neon-orange-base);
+      border-radius: 30px;
+      padding: 50px 40px;
+      width: min(850px, 100%);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(217, 154, 41, 0.15);
+      position: relative;
+      max-height: 95vh;
+      overflow-y: auto;
+      animation: modalPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
     .game-modal-content::-webkit-scrollbar { width: 6px; }
-    .game-modal-content::-webkit-scrollbar-thumb { background: rgba(217, 154, 41, 0.4); border-radius: 4px; }
-    #gTimer { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); background: linear-gradient(90deg, #d99a29, #ffae00); color: #000; padding: 6px 24px; border-radius: 20px; font-weight: 900; font-size: 20px; box-shadow: 0 4px 15px rgba(217, 154, 41, 0.4); z-index: 10; }
-    #gQText { color: #fff; margin-top: 0; margin-bottom: 24px; text-align: center; line-height: 1.35; text-shadow: 0 4px 15px rgba(0,0,0,0.6); word-wrap: break-word; }
-    #gQImgWrap { text-align: center; margin-bottom: 24px; }
-    #gQImgWrap img { max-width: 100%; max-height: 35vh; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
-    #gAnswers { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
-    .game-ans-btn { width: 100%; text-align: center; padding: 18px 24px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; color: #fff; font-size: 18px; cursor: pointer; transition: all 0.25s ease; box-shadow: inset 0 0 0 0 rgba(217, 154, 41, 0); word-wrap: break-word; }
-    .game-ans-btn:hover { background: rgba(217, 154, 41, 0.15); border-color: rgba(217, 154, 41, 0.5); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.3), inset 0 0 15px rgba(217, 154, 41, 0.1); }
-    #gInputWrap { display: flex; gap: 12px; margin-top: 15px; justify-content: center; }
-    #gInput { width: 100%; max-width: 400px; font-size: 20px; padding: 16px 20px; border-radius: 18px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); color: #fff; text-align: center; outline: none; transition: 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
-    #gInput:focus { border-color: #d99a29; background: rgba(0,0,0,0.6); box-shadow: 0 0 15px rgba(217, 154, 41, 0.2), inset 0 2px 5px rgba(0,0,0,0.5); }
-    #gSubmitBtn { border-radius: 18px; padding: 0 30px; font-size: 18px; }
+    .game-modal-content::-webkit-scrollbar-thumb { background: rgba(217, 154, 41, 0.5); border-radius: 4px; }
 
-    .screen { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; text-align: center; cursor: default; }
+    #gTimerWrap {
+      position: absolute;
+      top: 0; left: 50%; transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, #ffae00, #ff5b6b);
+      padding: 8px 30px;
+      border-radius: 30px;
+      box-shadow: 0 5px 20px rgba(255, 91, 107, 0.4);
+      display: none;
+      align-items: center; gap: 8px;
+    }
+    #gTimer { font-weight: 900; font-size: 26px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    .timer-icon { font-size: 20px; }
+
+    #gQText {
+      color: #fff;
+      margin-top: 0;
+      margin-bottom: 30px;
+      text-align: center;
+      line-height: 1.4;
+      text-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      word-wrap: break-word;
+    }
+
+    #gQImgWrap { text-align: center; margin-bottom: 30px; }
+    #gQImgWrap img { max-width: 100%; max-height: 40vh; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.05); }
+
+    #gAnswers { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    
+    .game-ans-btn {
+      width: 100%;
+      text-align: center;
+      padding: 20px 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      color: #fff;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      word-wrap: break-word;
+    }
+    .game-ans-btn:hover {
+      background: linear-gradient(180deg, rgba(217, 154, 41, 0.2), rgba(217, 154, 41, 0.05));
+      border-color: var(--neon-orange-base);
+      transform: translateY(-5px);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.4), 0 0 20px rgba(217, 154, 41, 0.3);
+    }
+    .game-ans-btn:active { transform: translateY(0); }
+
+    #gInputWrap { display: flex; gap: 12px; margin-top: 10px; justify-content: center; }
+    #gInput { width: 100%; max-width: 450px; font-size: 24px; padding: 18px 24px; border-radius: 20px; background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.1); color: #fff; text-align: center; outline: none; transition: 0.3s; box-shadow: inset 0 4px 10px rgba(0,0,0,0.5); }
+    #gInput:focus { border-color: var(--neon-orange-base); background: rgba(0,0,0,0.7); box-shadow: 0 0 20px rgba(217, 154, 41, 0.3), inset 0 4px 10px rgba(0,0,0,0.5); }
+    #gSubmitBtn { border-radius: 20px; padding: 0 40px; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; }
+
+    .screen { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(15px); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; text-align: center; cursor: default; }
     .screen.on { display: flex; }
-    .screenCard { background: #111; border-radius: 20px; padding: 30px; border: 1px solid; max-width: 600px; width: 90%; }
-    .resultRow { display:flex; justify-content:space-between; background:rgba(255,255,255,0.1); padding:12px 20px; border-radius:12px; margin-bottom:10px; font-size:18px; font-weight:bold; }
+    .screenCard { background: linear-gradient(135deg, rgba(30, 35, 45, 0.95), rgba(15, 20, 25, 0.98)); border-radius: 30px; padding: 40px; border: 1px solid var(--neon-orange-base); max-width: 600px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(217, 154, 41, 0.2); animation: modalPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;}
+    .resultRow { display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:16px 24px; border-radius:16px; margin-bottom:12px; font-size:22px; font-weight:bold; border: 1px solid rgba(255,255,255,0.1); }
   </style>
 </head>
 <body>
@@ -264,7 +352,7 @@
     </div>
     <div class="panel-body" style="display:flex; flex-direction:column; padding:0;">
       <div class="preview-stage" style="border-radius:0; border:none;">
-        <iframe id="previewFrame"></iframe>
+        <iframe id="previewFrame" allow="autoplay"></iframe>
       </div>
     </div>
   </div>
@@ -304,7 +392,7 @@
             <option value="Merriweather" style="font-family: 'Merriweather';">Merriweather</option>
             <option value="Playfair Display" style="font-family: 'Playfair Display';">Playfair Display</option>
             <option value="Lora" style="font-family: 'Lora';">Lora</option>
-            <option value="Courier New" style="font-family: 'Courier New';">Courier New</option>
+            <option value="Courier New" style="font-family: 'Courier New';">Courier New (Моноширинный)</option>
             <option value="Caveat" style="font-family: 'Caveat', cursive;">Caveat (Рукописный)</option>
             <option value="Neucha" style="font-family: 'Neucha', cursive;">Neucha (Рукописный)</option>
           </select>
@@ -339,7 +427,7 @@
 
     <div class="game-modal" id="gModal">
       <div class="game-modal-content">
-        <div id="gTimer" style="display:none;">30</div>
+        <div id="gTimerWrap"><span class="timer-icon">⏱</span> <span id="gTimer">30</span></div>
         <h2 id="gQText"></h2>
         <div id="gQImgWrap" style="display:none;"><img id="gQImg"></div>
         <div id="gAnswers"></div>
@@ -380,7 +468,7 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
    ======================== */
 const dict = {
   ru: {
-    btnResetProj: "🗑 Сбросить", confirmReset: "Точно удалить все вопросы и настройки? Это нельзя отменить.", btnCopy: "📋 Код", sLang: "Язык интерфейса", sName: "Название игры", sDesign: "Оформление", lBg: "Фон игры", lTarget: "Мишень", optCustom: "По ссылке...", lRadius: "Радиус движения", lSpeed: "Скорость", sGame: "Настройки игры", lTeams: "Команд (1-3)", lTeamColors: "Цвета рамок команд", lSound: "Выстрел", lVol: "Громкость", lPenaltyOn: "Штраф за промах (мимо мишени)", lPenaltyPts: "Вычитать очков", oOff: "Выкл", oOn: "Вкл", sStart: "Стартовый экран", lInstructionColor: "Цвет рамки", lGlow: "Свечение рамки", sEnd: "Финальный экран (Фидбек)", sQ: "Вопросы", btnAdd: "➕ Добавить", btnClr: "🧹 Очистить", previewTitle: "Просмотр", btnModeEdit: "✏️ Редактор", btnModePlay: "▶️ Тест", mTitle: "Редактировать вопрос", lQType: "Тип вопроса", oChoice: "Выбор ответа", oInput: "Ввод ответа", lPts: "Очки", lTimer: "Таймер", lSec: "Секунды", lImg: "🖼️ Картинка (URL)", lQText: "Текст вопроса", lFont: "Шрифт", lFontSize: "Размер шрифта", lAnsOpts: "Варианты ответа", btnAddOpt: "➕ Добавить вариант", btnCancel: "Отмена", btnSave: "💾 Сохранить", lRightAns: "Верный", lOptText: "Текст варианта", lDel: "Удалить", lGameOver: "Результаты игры", btnRestart: "↻ Сыграть еще раз", lTeam: "Команда", btnPlay: "▶ Начать", btnReset: "Сброс", btnOK: "ОК", lCursor: "Прицел (курсор в игре)", oCrosshair: "Стандартный крестик", oSniper: "Снайперский (чёрный)", oRedDot: "Коллиматор (красный)", lSizeOk: "Код в норме", lSizeWarn: "Почти лимит", lSizeErr: "ПРЕВЫШЕН ЛИМИТ",
+    btnResetProj: "🗑 Сбросить", confirmReset: "Точно удалить все вопросы и настройки? Это нельзя отменить.", btnCopy: "📋 Код", sLang: "Язык интерфейса", sName: "Название игры", sDesign: "Оформление", lBg: "Фон игры", lTarget: "Мишень", optCustom: "По ссылке...", lRadius: "Радиус движения", lSpeed: "Скорость", sGame: "Настройки игры", lTeams: "Команд (1-3)", lTeamColors: "Цвета рамок команд", lSound: "Выстрел", lVol: "Громкость", lPenaltyOn: "Штраф за промах (клик мимо мишени)", lPenaltyPts: "Вычитать очков", oOff: "Выкл", oOn: "Вкл", sStart: "Стартовый экран", lInstructionColor: "Цвет рамки", lGlow: "Свечение рамки", sEnd: "Финальный экран (Фидбек)", sQ: "Вопросы", btnAdd: "➕ Добавить", btnClr: "🧹 Очистить", previewTitle: "Просмотр", btnModeEdit: "✏️ Редактор", btnModePlay: "▶️ Тест", mTitle: "Редактировать вопрос", lQType: "Тип вопроса", oChoice: "Выбор ответа", oInput: "Ввод ответа", lPts: "Очки", lTimer: "Таймер", lSec: "Секунды", lImg: "🖼️ Картинка (URL)", lQText: "Текст вопроса", lFont: "Шрифт", lFontSize: "Размер шрифта", lAnsOpts: "Варианты ответа", btnAddOpt: "➕ Добавить вариант", btnCancel: "Отмена", btnSave: "💾 Сохранить", lRightAns: "Верный", lOptText: "Текст варианта", lDel: "Удалить", lGameOver: "Результаты игры", btnRestart: "↻ Сыграть еще раз", lTeam: "Команда", btnPlay: "▶ Начать", btnReset: "Сброс", btnOK: "ОК", lCursor: "Прицел (курсор в игре)", oCrosshair: "Стандартный крестик", oSniper: "Снайперский (чёрный)", oRedDot: "Коллиматор (красный)", lSizeOk: "Код в норме", lSizeWarn: "Почти лимит", lSizeErr: "ПРЕВЫШЕН ЛИМИТ",
     bg1: "🌌 Космические дали", bg2: "🌲 Сказочный лес", bg3: "🌊 Морское дно", bg4: "💧 Водный мир", bg5: "🌳 Старый парк", bg6: "🏜️ Древний Египет", bg7: "🏙️ Современный город", bg8: "🌵 Дикий Запад",
     tgt10: "🔘 Спортивная мишень", tgt11: "💠 Модерн", tgt12: "🛸 Космическая мишень", tgt13: "🎯 Классическая мишень", tgt14: "⭐ Золотая звезда"
   },
@@ -414,7 +502,7 @@ function applyLang() {
 }
 
 /* ========================
-   База данных (Config) & LocalStorage & Сжатие
+   База данных (Config)
    ======================== */
 const LS_KEY = 'mathShooterSave_v3';
 function defaultCfg() {
@@ -553,9 +641,45 @@ window.checkImgLink = (inp) => {
 };
 
 /* ========================
+   Звуковой движок (Глобальный + Надежный)
+   ======================== */
+const AudioSys = (() => {
+  let ctx, master;
+  function init(){ 
+    if(ctx) {
+        if(ctx.state === 'suspended') ctx.resume();
+        return;
+    }
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if(!AudioContext) return;
+    ctx = new AudioContext(); 
+    master = ctx.createGain(); 
+    master.connect(ctx.destination); 
+  }
+  
+  // Инициализация при любом первом клике/касании
+  document.addEventListener('pointerdown', init, {once:true});
+  document.addEventListener('click', init, {once:true});
+  
+  return {
+    init,
+    play: (type, v) => {
+      init();
+      if(!ctx) return;
+      if(ctx.state==='suspended') ctx.resume();
+      master.gain.value = v * 2; const t = ctx.currentTime;
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      if(type==='boom'){ osc.type='sine'; osc.frequency.setValueAtTime(90,t); osc.frequency.exponentialRampToValueAtTime(40,t+0.2); g.gain.setValueAtTime(0.8,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.2); osc.connect(g).connect(master); osc.start(t); osc.stop(t+0.25); }
+      else if(type==='snap'){ osc.type='square'; osc.frequency.setValueAtTime(220,t); osc.frequency.exponentialRampToValueAtTime(880,t+0.05); g.gain.setValueAtTime(0.5,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.08); osc.connect(g).connect(master); osc.start(t); osc.stop(t+0.1); }
+      else { osc.type='triangle'; osc.frequency.setValueAtTime(600,t); osc.frequency.exponentialRampToValueAtTime(200,t+0.1); g.gain.setValueAtTime(0.6,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.1); osc.connect(g).connect(master); osc.start(t); osc.stop(t+0.15); }
+    }
+  };
+})();
+
+/* ========================
    РЕЖИМ РЕДАКТОРА
    ======================== */
-let previewMode = 'edit'; // 'edit' или 'play'
+let previewMode = 'edit'; 
 
 function bootEditor() {
   document.body.classList.add('editor-mode');
@@ -597,7 +721,7 @@ function bootEditor() {
   document.getElementById('btnSaveQ').onclick = saveMod;
   document.getElementById('btnCopyCodeTop').onclick = () => {
     const url = location.origin + location.pathname + "?game=" + encodeURIComponent(b64e(cfg));
-    navigator.clipboard.writeText(`<iframe src="${url}" style="width:100%;height:600px;border:0" allowfullscreen></iframe>`).then(()=>alert("Код скопирован!"));
+    navigator.clipboard.writeText(`<iframe src="${url}" allow="autoplay" style="width:100%;height:600px;border:0" allowfullscreen></iframe>`).then(()=>alert("Код скопирован!"));
   };
 
   document.getElementById('btnModeEdit').onclick = () => {
@@ -685,8 +809,7 @@ function openMod(idx = null) {
   document.getElementById('modImg').value = q.img || ""; document.getElementById('modPrompt').value = q.text;
   
   const fSel = document.getElementById('modFont');
-  fSel.value = q.font || "Roboto";
-  fSel.style.fontFamily = fSel.value;
+  fSel.value = q.font || "Roboto"; fSel.style.fontFamily = fSel.value;
   
   document.getElementById('modFontSize').value = q.size || 20;
   syncModType(); document.getElementById('modType').onchange = syncModType;
@@ -730,11 +853,6 @@ function bootGame() {
   let gCfg = cfg;
   if(qs.get('game')) { try { gCfg = b64d(qs.get('game')); } catch(e){} }
   const isEdit = qs.get('edit') === '1';
-
-  // Разблокируем аудио на мобильных при любом клике по экрану (незаметно для пользователя)
-  window.addEventListener('pointerdown', () => { 
-    try { if(AudioSys.ctx && AudioSys.ctx.state === 'suspended') AudioSys.ctx.resume(); } catch(e){}
-  }, {once: true});
 
   const arenaEl = document.getElementById('gArena');
   const arenaBg = document.getElementById('gBg');
@@ -800,37 +918,35 @@ function bootGame() {
 
   function createExplosion(x, y, teamColor) {
     const wave = document.createElement('div');
-    wave.className = 'hit-shockwave';
+    wave.className = 'fx-ring';
     wave.style.left = x + 'px'; wave.style.top = y + 'px';
-    wave.style.color = teamColor || '#d99a29';
+    wave.style.borderColor = teamColor || '#d99a29';
     arenaEl.appendChild(wave);
     setTimeout(() => wave.remove(), 500);
 
     const count = 12;
     for(let i=0; i<count; i++) {
       const p = document.createElement('div');
-      p.className = 'hit-particle';
+      p.className = 'fx-particle';
       p.style.backgroundColor = teamColor || '#d99a29';
       p.style.color = teamColor || '#d99a29';
       p.style.left = x + 'px'; p.style.top = y + 'px';
       const angle = (Math.PI * 2 / count) * i + (Math.random()*0.5);
       const dist = 50 + Math.random() * 70;
       const tx = Math.cos(angle) * dist; const ty = Math.sin(angle) * dist;
+      p.style.setProperty('--tx', tx + 'px');
+      p.style.setProperty('--ty', ty + 'px');
       arenaEl.appendChild(p);
-      p.animate([
-        { transform: `translate(-50%, -50%) scale(1)`, opacity: 1 },
-        { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`, opacity: 0 }
-      ], { duration: 400 + Math.random()*200, easing: 'cubic-bezier(0.25, 1, 0.5, 1)', fill: 'forwards' });
       setTimeout(() => p.remove(), 600);
     }
   }
 
-  // СТРОГИЙ ОБРАБОТЧИК ПРОМАХОВ (работает через onclick для максимальной стабильности)
+  // Штраф ТОЛЬКО за промах (теперь через надежный onclick)
   arenaEl.onclick = (e) => {
     if(isEdit || !arenaEl.classList.contains('aiming')) return;
     if(e.target.closest('.target') || e.target.closest('.hud') || e.target.closest('.teams') || e.target.closest('.game-modal') || e.target.closest('.screen')) return;
     
-    try { AudioSys.play(gCfg.sound, gCfg.vol); } catch(err){}
+    try { AudioSys.play(gCfg.sound, gCfg.vol); }catch(err){}
     
     if(gCfg.penalty && gCfg.penalty.enabled) {
       const p = Number(gCfg.penalty.points || 0);
@@ -868,7 +984,7 @@ function bootGame() {
     }
 
     if(isEdit) {
-      // Для редактора оставляем mousedown/touchstart, чтобы можно было тянуть
+      // Сенсорный/мышиный drag для редактора
       const startDrag = (e) => {
         e.preventDefault(); e.stopPropagation();
         const rect = arenaEl.getBoundingClientRect();
@@ -891,12 +1007,12 @@ function bootGame() {
       el.onmousedown = startDrag;
       el.ontouchstart = startDrag;
     } else {
-      // ИГРА: Надежный onclick для выстрелов
+      // ИГРА: Надежный onclick
       el.onclick = (e) => {
         e.stopPropagation(); // Не промах!
         if(!arenaEl.classList.contains('aiming')) return;
         
-        try { AudioSys.play(gCfg.sound, gCfg.vol); } catch(err){}
+        try { AudioSys.play(gCfg.sound, gCfg.vol); }catch(err){}
         
         const rArena = arenaEl.getBoundingClientRect();
         const rTarget = el.getBoundingClientRect();
@@ -929,11 +1045,12 @@ function bootGame() {
     const ansDiv = document.getElementById('gAnswers'); const inpWrap = document.getElementById('gInputWrap');
     ansDiv.innerHTML = "";
     
-    const timerEl = document.getElementById('gTimer');
+    const timerElWrap = document.getElementById('gTimerWrap');
+    const timerElText = document.getElementById('gTimer');
     if(q.timer && q.sec > 0) {
-      timerEl.style.display = 'block'; let timeLeft = q.sec; timerEl.innerText = timeLeft;
-      timerId = setInterval(() => { timeLeft--; timerEl.innerText = timeLeft; if(timeLeft <= 0) finishTurn(false); }, 1000);
-    } else { timerEl.style.display = 'none'; }
+      timerElWrap.style.display = 'flex'; let timeLeft = q.sec; timerElText.innerText = timeLeft;
+      timerId = setInterval(() => { timeLeft--; timerElText.innerText = timeLeft; if(timeLeft <= 0) finishTurn(false); }, 1000);
+    } else { timerElWrap.style.display = 'none'; }
 
     if(q.type === 'choice') {
       inpWrap.style.display = 'none'; ansDiv.style.display = 'grid';
@@ -971,7 +1088,6 @@ function bootGame() {
     if(gCfg.start.neon) sCard.style.boxShadow = `0 0 25px ${gCfg.start.color}, inset 0 0 10px ${gCfg.start.color}`;
     document.getElementById('gBtnPlay').onclick = () => { try{ AudioSys.init(); }catch(e){} document.getElementById('gStartScreen').classList.remove('on'); arenaEl.classList.add('aiming'); };
   } else if (!isEdit) {
-    // Если стартового экрана нет, просто включаем прицел
     arenaEl.classList.add('aiming');
   }
 
