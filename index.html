@@ -85,7 +85,7 @@
     .target .img { position: absolute; inset: 0; background-image: var(--target-img); background-size: contain; background-repeat: no-repeat; background-position: center; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6)); }
     .target .num { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 900; font-size: 24px; color: #fff; text-shadow: 0 2px 8px #000; }
     .target .pts { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); border: 1px solid rgba(217,154,41,0.5); color: var(--neon-orange-base); padding: 2px 8px; border-radius: 8px; font-size: 12px; font-weight: 900; white-space: nowrap; pointer-events: none; backdrop-filter: blur(4px); text-shadow: 0 2px 4px #000; }
-    .target.hit { opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(0); transition: 0.3s ease; }
+    .target.hit { opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(0); transition: 0.2s ease; }
     
     .edit-mode .target { cursor: move !important; border: 2px dashed rgba(217, 154, 41, 0.8); border-radius: 50%; }
     .edit-mode .target:hover { transform: translate(-50%, -50%) translate(var(--orbit-x, 0px), var(--orbit-y, 0px)); }
@@ -95,12 +95,30 @@
     #aimCursor { position: absolute; pointer-events: none; z-index: 45; transform: translate(-50%, -50%); display: none; }
     #gArena.aiming #aimCursor { display: block; }
 
+    /* Эффекты взрыва */
+    .hit-shockwave { position: absolute; width: 20px; height: 20px; border-radius: 50%; border: 4px solid currentColor; transform: translate(-50%, -50%); pointer-events: none; z-index: 39; animation: shockwaveAnim 0.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
+    .hit-particle { position: absolute; width: 8px; height: 8px; border-radius: 50%; pointer-events: none; z-index: 40; filter: drop-shadow(0 0 4px currentColor); }
+    @keyframes shockwaveAnim { 0% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(7); opacity: 0; border-width: 1px; } }
+
     /* Modals & Screens */
-    .game-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 50; cursor: default; }
+    @keyframes modalPopIn { 0% { opacity: 0; transform: scale(0.85) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+    .game-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 50; cursor: default; }
     .game-modal.on { display: flex; }
-    .game-modal-content { background: #0a0d12; border: 1px solid var(--neon-orange-base); border-radius: 20px; padding: 24px; width: min(800px, 90%); box-shadow: 0 0 30px rgba(217,154,41,0.25); position:relative; max-height:90vh; overflow-y:auto; }
-    .game-ans-btn { width: 100%; text-align: left; padding: 14px; margin-top: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; color: #fff; font-size: 18px; cursor: pointer; transition: 0.2s; }
-    .game-ans-btn:hover { background: rgba(255,255,255,0.1); }
+    .game-modal-content { background: linear-gradient(145deg, rgba(20,25,30,0.85), rgba(10,12,15,0.95)); border: 1px solid rgba(255,255,255,0.1); border-top: 1px solid rgba(217, 154, 41, 0.6); border-radius: 28px; padding: 40px; width: min(850px, 92vw); box-shadow: 0 30px 60px rgba(0,0,0,0.6), 0 0 40px rgba(217, 154, 41, 0.15); position: relative; max-height: 90vh; overflow-y: auto; animation: modalPopIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; backdrop-filter: blur(16px); }
+    .game-modal-content::-webkit-scrollbar { width: 6px; }
+    .game-modal-content::-webkit-scrollbar-thumb { background: rgba(217, 154, 41, 0.4); border-radius: 4px; }
+    #gTimer { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); background: linear-gradient(90deg, #d99a29, #ffae00); color: #000; padding: 6px 24px; border-radius: 20px; font-weight: 900; font-size: 20px; box-shadow: 0 4px 15px rgba(217, 154, 41, 0.4); z-index: 10; }
+    #gQText { color: #fff; margin-top: 0; margin-bottom: 24px; text-align: center; line-height: 1.35; text-shadow: 0 4px 15px rgba(0,0,0,0.6); word-wrap: break-word; }
+    #gQImgWrap { text-align: center; margin-bottom: 24px; }
+    #gQImgWrap img { max-width: 100%; max-height: 35vh; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
+    #gAnswers { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+    .game-ans-btn { width: 100%; text-align: center; padding: 18px 24px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; color: #fff; font-size: 18px; cursor: pointer; transition: all 0.25s ease; word-wrap: break-word; }
+    .game-ans-btn:hover { background: rgba(217, 154, 41, 0.15); border-color: rgba(217, 154, 41, 0.5); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.3), inset 0 0 15px rgba(217, 154, 41, 0.1); }
+    #gInputWrap { display: flex; gap: 12px; margin-top: 15px; justify-content: center; }
+    #gInput { width: 100%; max-width: 400px; font-size: 20px; padding: 16px 20px; border-radius: 18px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); color: #fff; text-align: center; outline: none; transition: 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
+    #gInput:focus { border-color: #d99a29; background: rgba(0,0,0,0.6); box-shadow: 0 0 15px rgba(217, 154, 41, 0.2), inset 0 2px 5px rgba(0,0,0,0.5); }
+    #gSubmitBtn { border-radius: 18px; padding: 0 30px; font-size: 18px; }
+
     .screen { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; text-align: center; cursor: default; }
     .screen.on { display: flex; }
     .screenCard { background: #111; border-radius: 20px; padding: 30px; border: 1px solid; max-width: 600px; width: 90%; }
@@ -150,14 +168,14 @@
           <div>
             <label data-i18n="lBg">Фон игры</label>
             <select id="selBg">
-              <option value="1.png" data-i18n="bg1">🌲 Сказочный лес</option>
-              <option value="2.png" selected data-i18n="bg2">🌌 Космические дали</option>
+              <option value="1.png" data-i18n="bg1">🌌 Космические дали</option>
+              <option value="2.png" selected data-i18n="bg2">🌲 Сказочный лес</option>
               <option value="3.png" data-i18n="bg3">🌊 Морское дно</option>
-              <option value="4.png" data-i18n="bg4">🏰 Старый замок</option>
-              <option value="5.png" data-i18n="bg5">🌵 Дикий Запад</option>
-              <option value="6.png" data-i18n="bg6">❄️ Зимний пейзаж</option>
-              <option value="7.png" data-i18n="bg7">🏴‍☠️ Пиратский корабль</option>
-              <option value="8.png" data-i18n="bg8">🏫 Школьная доска</option>
+              <option value="4.png" data-i18n="bg4">💧 Водный мир</option>
+              <option value="5.png" data-i18n="bg5">🌳 Старый парк</option>
+              <option value="6.png" data-i18n="bg6">🏜️ Древний Египет</option>
+              <option value="7.png" data-i18n="bg7">🏙️ Современный город</option>
+              <option value="8.png" data-i18n="bg8">🌵 Дикий Запад</option>
               <option value="custom" data-i18n="optCustom">По ссылке...</option>
             </select>
             <input type="text" id="inpBgCustom" placeholder="https://..." style="display:none; margin-top:8px;">
@@ -165,10 +183,10 @@
           <div>
             <label data-i18n="lTarget">Мишень</label>
             <select id="selTarget">
-              <option value="10.png" data-i18n="tgt10">🎯 Классическая мишень</option>
-              <option value="11.png" data-i18n="tgt11">🎈 Воздушный шарик</option>
-              <option value="12.png" data-i18n="tgt12">🛸 Летающая тарелка</option>
-              <option value="13.png" selected data-i18n="tgt13">🛡️ Деревянный щит</option>
+              <option value="10.png" data-i18n="tgt10">🔘 Спортивная мишень</option>
+              <option value="11.png" data-i18n="tgt11">💠 Модерн</option>
+              <option value="12.png" data-i18n="tgt12">🛸 Космическая мишень</option>
+              <option value="13.png" selected data-i18n="tgt13">🎯 Классическая мишень</option>
               <option value="14.png" data-i18n="tgt14">⭐ Золотая звезда</option>
               <option value="custom" data-i18n="optCustom">По ссылке...</option>
             </select>
@@ -281,9 +299,9 @@
             <option value="Merriweather" style="font-family: 'Merriweather';">Merriweather</option>
             <option value="Playfair Display" style="font-family: 'Playfair Display';">Playfair Display</option>
             <option value="Lora" style="font-family: 'Lora';">Lora</option>
-            <option value="Courier New" style="font-family: 'Courier New';">Courier New</option>
-            <option value="Caveat" style="font-family: 'Caveat';">Caveat (Рукописный)</option>
-            <option value="Neucha" style="font-family: 'Neucha';">Neucha (Рукописный)</option>
+            <option value="Courier New" style="font-family: 'Courier New';">Courier New (Моноширинный)</option>
+            <option value="Caveat" style="font-family: 'Caveat', cursive;">Caveat (Рукописный)</option>
+            <option value="Neucha" style="font-family: 'Neucha', cursive;">Neucha (Рукописный)</option>
           </select>
         </div>
         <div><label data-i18n="lFontSize">Размер шрифта</label><input type="number" id="modFontSize" value="20"></div>
@@ -316,12 +334,12 @@
 
     <div class="game-modal" id="gModal">
       <div class="game-modal-content">
-        <div id="gTimer" style="position:absolute; top:10px; right:20px; font-weight:900; font-size:24px; color:var(--neon-orange-base); display:none;">30</div>
-        <h2 id="gQText" style="color:#fff; margin-top:0; padding-right:40px;"></h2>
-        <div id="gQImgWrap" style="text-align:center; margin-bottom:15px; display:none;"><img id="gQImg" style="max-width:100%; max-height:300px; border-radius:10px;"></div>
+        <div id="gTimer" style="display:none;">30</div>
+        <h2 id="gQText"></h2>
+        <div id="gQImgWrap" style="display:none;"><img id="gQImg"></div>
         <div id="gAnswers"></div>
-        <div id="gInputWrap" style="display:none; gap:10px; margin-top:15px;">
-          <input type="text" id="gInput" style="flex:1; font-size:18px; padding:10px; border-radius:10px;">
+        <div id="gInputWrap" style="display:none;">
+          <input type="text" id="gInput" autocomplete="off" placeholder="...">
           <button class="btn primary" id="gSubmitBtn" data-i18n="btnOK">OK</button>
         </div>
       </div>
@@ -358,23 +376,23 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
 const dict = {
   ru: {
     btnResetProj: "🗑 Сбросить", confirmReset: "Точно удалить все вопросы и настройки? Это нельзя отменить.", btnCopy: "📋 Код", sLang: "Язык интерфейса", sName: "Название игры", sDesign: "Оформление", lBg: "Фон игры", lTarget: "Мишень", optCustom: "По ссылке...", lRadius: "Радиус движения", lSpeed: "Скорость", sGame: "Настройки игры", lTeams: "Команд (1-3)", lTeamColors: "Цвета рамок команд", lSound: "Выстрел", lVol: "Громкость", lPenaltyOn: "Штраф за промах (клик мимо мишени)", lPenaltyPts: "Вычитать очков", oOff: "Выкл", oOn: "Вкл", sStart: "Стартовый экран", lInstructionColor: "Цвет рамки", lGlow: "Свечение рамки", sEnd: "Финальный экран (Фидбек)", sQ: "Вопросы", btnAdd: "➕ Добавить", btnClr: "🧹 Очистить", lDragHint: "💡 В редакторе курсор обычный (чтобы перетаскивать мишени). В самой игре он станет прицелом везде!", previewTitle: "Просмотр", previewHint: "Живое превью (координаты сохраняются)", mTitle: "Редактировать вопрос", lQType: "Тип вопроса", oChoice: "Выбор ответа", oInput: "Ввод ответа", lPts: "Очки", lTimer: "Таймер", lSec: "Секунды", lImg: "🖼️ Картинка (URL)", lQText: "Текст вопроса", lFont: "Шрифт", lFontSize: "Размер шрифта", lAnsOpts: "Варианты ответа", btnAddOpt: "➕ Добавить вариант", btnCancel: "Отмена", btnSave: "💾 Сохранить", lRightAns: "Верный", lOptText: "Текст варианта", lDel: "Удалить", lGameOver: "Результаты игры", btnRestart: "↻ Сыграть еще раз", lTeam: "Команда", btnPlay: "▶ Начать", btnReset: "Сброс", btnOK: "ОК", lCursor: "Прицел (курсор в игре)", oCrosshair: "Стандартный крестик", oSniper: "Снайперский (чёрный оптический)", oRedDot: "Коллиматор (красная точка)", lSizeOk: "Код в норме", lSizeWarn: "Почти лимит", lSizeErr: "ПРЕВЫШЕН ЛИМИТ",
-    bg1: "🌲 Сказочный лес", bg2: "🌌 Космические дали", bg3: "🌊 Морское дно", bg4: "🏰 Старый замок", bg5: "🌵 Дикий Запад", bg6: "❄️ Зимний пейзаж", bg7: "🏴‍☠️ Пиратский корабль", bg8: "🏫 Школьная доска",
-    tgt10: "🎯 Классическая мишень", tgt11: "🎈 Воздушный шарик", tgt12: "🛸 Летающая тарелка", tgt13: "🛡️ Деревянный щит", tgt14: "⭐ Золотая звезда"
+    bg1: "🌌 Космические дали", bg2: "🌲 Сказочный лес", bg3: "🌊 Морское дно", bg4: "💧 Водный мир", bg5: "🌳 Старый парк", bg6: "🏜️ Древний Египет", bg7: "🏙️ Современный город", bg8: "🌵 Дикий Запад",
+    tgt10: "🔘 Спортивная мишень", tgt11: "💠 Модерн", tgt12: "🛸 Космическая мишень", tgt13: "🎯 Классическая мишень", tgt14: "⭐ Золотая звезда"
   },
   en: {
     btnResetProj: "🗑 Reset", confirmReset: "Are you sure you want to delete all questions and settings? This cannot be undone.", btnCopy: "📋 Copy Code", sLang: "Interface Language", sName: "Game Title", sDesign: "Design", lBg: "Background", lTarget: "Target", optCustom: "Custom URL...", lRadius: "Orbit Radius", lSpeed: "Speed", sGame: "Game Settings", lTeams: "Teams (1-3)", lTeamColors: "Team Colors", lSound: "Shot Sound", lVol: "Volume", lPenaltyOn: "Penalty for missing target", lPenaltyPts: "Points to Deduct", oOff: "Off", oOn: "On", sStart: "Start Screen", lInstructionColor: "Border Color", lGlow: "Border Glow", sEnd: "Feedback Screen", sQ: "Questions", btnAdd: "➕ Add", btnClr: "🧹 Clear", lDragHint: "💡 In preview, the cursor is normal for easy dragging. In the game, it becomes a crosshair!", previewTitle: "Preview", previewHint: "Live preview (coordinates are saved)", mTitle: "Edit Question", lQType: "Question Type", oChoice: "Multiple Choice", oInput: "Text Input", lPts: "Points", lTimer: "Timer", lSec: "Seconds", lImg: "🖼️ Image (URL)", lQText: "Question Text", lFont: "Font", lFontSize: "Font Size", lAnsOpts: "Answer Options", btnAddOpt: "➕ Add Option", btnCancel: "Cancel", btnSave: "💾 Save", lRightAns: "Correct", lOptText: "Option Text", lDel: "Delete", lGameOver: "Game Results", btnRestart: "↻ Play Again", lTeam: "Team", btnPlay: "▶ Play", btnReset: "Reset", btnOK: "OK", lCursor: "Crosshair (in-game cursor)", oCrosshair: "Standard Crosshair", oSniper: "Sniper (Black)", oRedDot: "Red Dot Sight", lSizeOk: "Code Size OK", lSizeWarn: "Close to Limit", lSizeErr: "LIMIT REACHED",
-    bg1: "🌲 Fairy Forest", bg2: "🌌 Deep Space", bg3: "🌊 Ocean Floor", bg4: "🏰 Old Castle", bg5: "🌵 Wild West", bg6: "❄️ Winter Landscape", bg7: "🏴‍☠️ Pirate Ship", bg8: "🏫 Blackboard",
-    tgt10: "🎯 Classic Target", tgt11: "🎈 Balloon", tgt12: "🛸 UFO", tgt13: "🛡️ Wooden Shield", tgt14: "⭐ Golden Star"
+    bg1: "🌌 Deep Space", bg2: "🌲 Fairy Forest", bg3: "🌊 Ocean Floor", bg4: "💧 Water World", bg5: "🌳 Old Park", bg6: "🏜️ Ancient Egypt", bg7: "🏙️ Modern City", bg8: "🌵 Wild West",
+    tgt10: "🔘 Sport Target", tgt11: "💠 Modern", tgt12: "🛸 Space Target", tgt13: "🎯 Classic Target", tgt14: "⭐ Golden Star"
   },
   de: {
     btnResetProj: "🗑 Alles zurücksetzen", confirmReset: "Möchten Sie wirklich alle Fragen und Einstellungen löschen? Dies kann nicht rückgängig gemacht werden.", btnCopy: "📋 Code kopieren", sLang: "Sprache", sName: "Spieltitel", sDesign: "Design", lBg: "Hintergrund", lTarget: "Ziel", optCustom: "Eigene URL...", lRadius: "Orbit-Radius", lSpeed: "Geschwindigkeit", sGame: "Spieleinstellungen", lTeams: "Teams (1-3)", lTeamColors: "Teamfarben", lSound: "Schuss-Sound", lVol: "Lautstärke", lPenaltyOn: "Strafe bei Fehlschuss", lPenaltyPts: "Punkte abziehen", oOff: "Aus", oOn: "An", sStart: "Startbildschirm", lInstructionColor: "Randfarbe", lGlow: "Randleuchten", sEnd: "Endbildschirm", sQ: "Fragen", btnAdd: "➕ Hinzufügen", btnClr: "🧹 Leeren", lDragHint: "💡 In der Vorschau ist der Cursor normal zum einfachen Ziehen. Im Spiel wird er zum Fadenkreuz!", previewTitle: "Vorschau", previewHint: "Live-Vorschau (Koordinaten werden gespeichert)", mTitle: "Frage bearbeiten", lQType: "Fragetyp", oChoice: "Multiple Choice", oInput: "Texteingabe", lPts: "Punkte", lTimer: "Timer", lSec: "Sekunden", lImg: "🖼️ Bild (URL)", lQText: "Fragentext", lFont: "Schriftart", lFontSize: "Schriftgröße", lAnsOpts: "Antwortmöglichkeiten", btnAddOpt: "➕ Option hinzufügen", btnCancel: "Abbrechen", btnSave: "💾 Speichern", lRightAns: "Richtig", lOptText: "Optionstext", lDel: "Löschen", lGameOver: "Spielergebnisse", btnRestart: "↻ Nochmal spielen", lTeam: "Team", btnPlay: "▶ Start", btnReset: "Zurücksetzen", btnOK: "OK", lCursor: "Fadenkreuz (Spiel-Cursor)", oCrosshair: "Standard-Fadenkreuz", oSniper: "Scharfschütze (Schwarz)", oRedDot: "Leuchtpunktvisier", lSizeOk: "Code Size OK", lSizeWarn: "Close to Limit", lSizeErr: "LIMIT REACHED",
-    bg1: "🌲 Märchenwald", bg2: "🌌 Weltraum", bg3: "🌊 Meeresgrund", bg4: "🏰 Alte Burg", bg5: "🌵 Wilder Westen", bg6: "❄️ Winterlandschaft", bg7: "🏴‍☠️ Piratenschiff", bg8: "🏫 Schultafel",
-    tgt10: "🎯 Klassisches Ziel", tgt11: "🎈 Luftballon", tgt12: "🛸 UFO", tgt13: "🛡️ Holzschild", tgt14: "⭐ Goldener Stern"
+    bg1: "🌌 Weltraum", bg2: "🌲 Märchenwald", bg3: "🌊 Meeresgrund", bg4: "💧 Wasserwelt", bg5: "🌳 Alter Park", bg6: "🏜️ Altes Ägypten", bg7: "🏙️ Moderne Stadt", bg8: "🌵 Wilder Westen",
+    tgt10: "🔘 Sportziel", tgt11: "💠 Modern", tgt12: "🛸 Weltraumziel", tgt13: "🎯 Klassisches Ziel", tgt14: "⭐ Goldener Stern"
   },
   zh: {
     btnResetProj: "🗑 重置全部", confirmReset: "您确定要删除所有问题和设置吗？此操作无法撤销。", btnCopy: "📋 复制代码", sLang: "界面语言", sName: "游戏名称", sDesign: "设计", lBg: "背景", lTarget: "目标", optCustom: "自定义 URL...", lRadius: "轨道半径", lSpeed: "速度", sGame: "游戏设置", lTeams: "队伍 (1-3)", lTeamColors: "队伍边框颜色", lSound: "射击声音", lVol: "音量", lPenaltyOn: "脱靶惩罚", lPenaltyPts: "扣除分数", oOff: "关", oOn: "开", sStart: "开始屏幕", lInstructionColor: "边框颜色", lGlow: "边框发光", sEnd: "反馈屏幕", sQ: "问题", btnAdd: "➕ 添加", btnClr: "🧹 清除", lDragHint: "💡 在预览中，光标正常以便拖动。在游戏中，它会变成十字准星！", previewTitle: "预览", previewHint: "实时预览（坐标已保存）", mTitle: "编辑问题", lQType: "问题类型", oChoice: "选择题", oInput: "填空题", lPts: "分数", lTimer: "计时器", lSec: "秒", lImg: "🖼️ 图片 (URL)", lQText: "问题文本", lFont: "字体", lFontSize: "字体大小", lAnsOpts: "答案选项", btnAddOpt: "➕ 添加选项", btnCancel: "取消", btnSave: "💾 保存", lRightAns: "正确", lOptText: "选项文本", lDel: "删除", lGameOver: "游戏结果", btnRestart: "↻ 再玩一次", lTeam: "队伍", btnPlay: "▶ 开始", btnReset: "重置", btnOK: "确定", lCursor: "准星（游戏内光标）", oCrosshair: "标准十字", oSniper: "狙击（黑色）", oRedDot: "红点瞄准镜", lSizeOk: "Code Size OK", lSizeWarn: "Close to Limit", lSizeErr: "LIMIT REACHED",
-    bg1: "🌲 童话森林", bg2: "🌌 深空", bg3: "🌊 海底", bg4: "🏰 古堡", bg5: "🌵 狂野西部", bg6: "❄️ 冬季景观", bg7: "🏴‍☠️ 海盗船", bg8: "🏫 黑板",
-    tgt10: "🎯 经典靶子", tgt11: "🎈 气球", tgt12: "🛸 飞碟", tgt13: "🛡️ 木盾", tgt14: "⭐ 金星"
+    bg1: "🌌 深空", bg2: "🌲 童话森林", bg3: "🌊 海底", bg4: "💧 水世界", bg5: "🌳 老公园", bg6: "🏜️ 古埃及", bg7: "🏙️ 现代城市", bg8: "🌵 狂野西部",
+    tgt10: "🔘 运动靶", tgt11: "💠 现代靶", tgt12: "🛸 太空靶", tgt13: "🎯 经典靶子", tgt14: "⭐ 金星"
   }
 };
 let lang = "ru";
@@ -396,7 +414,7 @@ function applyLang() {
 const LS_KEY = 'mathShooterSave_v3';
 function defaultCfg() {
   return {
-    title: "Математический тир", bg: "2.png", bgUrl: "", target: "13.png", targetUrl: "",
+    title: "Математический тир", bg: "1.png", bgUrl: "", target: "10.png", targetUrl: "",
     cursor: "crosshair", cursorUrl: "",
     radius: 0, speed: 0, teams: 2, teamCols: ["#ffae00", "#33d17a", "#ff5b6b"], sound: "pif", vol: 0.7,
     penalty: { enabled: false, points: 5 },
@@ -517,8 +535,8 @@ function checkLinkSize(data) {
       if(bar) bar.style.background = "#33d17a";
       if(lblText) { lblText.textContent = "🟢 " + t("lSizeOk"); lblText.style.color = "#33d17a"; }
   } else if (curLen <= maxLen) {
-      if(bar) bar.style.background = "#ffae00";
-      if(lblText) { lblText.textContent = "🟡 " + t("lSizeWarn"); lblText.style.color = "#ffae00"; }
+      if(bar) bar.style.background = "#d99a29";
+      if(lblText) { lblText.textContent = "🟡 " + t("lSizeWarn"); lblText.style.color = "#d99a29"; }
   } else {
       if(bar) bar.style.background = "#ff5b6b";
       if(lblText) { lblText.textContent = "🔴 " + t("lSizeErr"); lblText.style.color = "#ff5b6b"; }
@@ -750,6 +768,34 @@ function bootGame() {
     setTimeout(() => el.remove(), 800);
   }
 
+  // Волшебный эффект взрыва
+  function createExplosion(x, y, teamColor) {
+    const wave = document.createElement('div');
+    wave.className = 'hit-shockwave';
+    wave.style.left = x + 'px'; wave.style.top = y + 'px';
+    wave.style.color = teamColor || '#ffae00';
+    arenaEl.appendChild(wave);
+    setTimeout(() => wave.remove(), 500);
+
+    const count = 12;
+    for(let i=0; i<count; i++) {
+      const p = document.createElement('div');
+      p.className = 'hit-particle';
+      p.style.backgroundColor = teamColor || '#ffae00';
+      p.style.color = teamColor || '#ffae00';
+      p.style.left = x + 'px'; p.style.top = y + 'px';
+      const angle = (Math.PI * 2 / count) * i + (Math.random()*0.5);
+      const dist = 50 + Math.random() * 70;
+      const tx = Math.cos(angle) * dist; const ty = Math.sin(angle) * dist;
+      arenaEl.appendChild(p);
+      p.animate([
+        { transform: `translate(-50%, -50%) scale(1)`, opacity: 1 },
+        { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`, opacity: 0 }
+      ], { duration: 400 + Math.random()*200, easing: 'cubic-bezier(0.25, 1, 0.5, 1)', fill: 'forwards' });
+      setTimeout(() => p.remove(), 600);
+    }
+  }
+
   // Штраф ТОЛЬКО за промах
   arenaEl.addEventListener('mousedown', (e) => {
     if(isEdit || !arenaEl.classList.contains('aiming')) return;
@@ -810,6 +856,16 @@ function bootGame() {
         e.stopPropagation(); // Не промах!
         if(!arenaEl.classList.contains('aiming')) return;
         AudioSys.play(gCfg.sound, gCfg.vol);
+        
+        // --- ВЗРЫВ ---
+        const rArena = arenaEl.getBoundingClientRect();
+        const rTarget = el.getBoundingClientRect();
+        const cx = rTarget.left - rArena.left + rTarget.width/2;
+        const cy = rTarget.top - rArena.top + rTarget.height/2;
+        const tCol = gCfg.teamCols[curTeam] || '#ffae00';
+        createExplosion(cx, cy, tCol);
+        // -------------
+
         el.classList.add('hit');
         openGameQuestion(q, () => {
           targetsHit++;
