@@ -85,7 +85,7 @@
     .target .img { position: absolute; inset: 0; background-image: var(--target-img); background-size: contain; background-repeat: no-repeat; background-position: center; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6)); }
     .target .num { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 900; font-size: 24px; color: #fff; text-shadow: 0 2px 8px #000; }
     .target .pts { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); border: 1px solid rgba(217,154,41,0.5); color: var(--neon-orange-base); padding: 2px 8px; border-radius: 8px; font-size: 12px; font-weight: 900; white-space: nowrap; pointer-events: none; backdrop-filter: blur(4px); text-shadow: 0 2px 4px #000; }
-    .target.hit { opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(0); transition: 0.2s ease; }
+    .target.hit { opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(0); transition: 0.3s ease; }
     
     .edit-mode .target { cursor: move !important; border: 2px dashed rgba(217, 154, 41, 0.8); border-radius: 50%; }
     .edit-mode .target:hover { transform: translate(-50%, -50%) translate(var(--orbit-x, 0px), var(--orbit-y, 0px)); }
@@ -112,7 +112,7 @@
     #gQImgWrap { text-align: center; margin-bottom: 24px; }
     #gQImgWrap img { max-width: 100%; max-height: 35vh; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
     #gAnswers { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
-    .game-ans-btn { width: 100%; text-align: center; padding: 18px 24px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; color: #fff; font-size: 18px; cursor: pointer; transition: all 0.25s ease; word-wrap: break-word; }
+    .game-ans-btn { width: 100%; text-align: center; padding: 18px 24px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; color: #fff; font-size: 18px; cursor: pointer; transition: all 0.25s ease; box-shadow: inset 0 0 0 0 rgba(217, 154, 41, 0); word-wrap: break-word; }
     .game-ans-btn:hover { background: rgba(217, 154, 41, 0.15); border-color: rgba(217, 154, 41, 0.5); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.3), inset 0 0 15px rgba(217, 154, 41, 0.1); }
     #gInputWrap { display: flex; gap: 12px; margin-top: 15px; justify-content: center; }
     #gInput { width: 100%; max-width: 400px; font-size: 20px; padding: 16px 20px; border-radius: 18px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); color: #fff; text-align: center; outline: none; transition: 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
@@ -254,8 +254,13 @@
 
   <div class="panel">
     <div class="panel-header">
-      <div style="font-weight:900" data-i18n="previewTitle">Просмотр</div>
-      <div style="font-size:12px; color:var(--muted)" data-i18n="previewHint">Живое превью (координаты сохраняются)</div>
+      <div>
+        <div style="font-weight:900" data-i18n="previewTitle">Просмотр</div>
+      </div>
+      <div style="display:flex; background:rgba(0,0,0,0.4); border-radius:12px; padding:4px; gap:4px; border:1px solid rgba(255,255,255,0.1);">
+        <button id="btnModeEdit" class="btn small" style="background:var(--neon-orange-base); color:#000; border:none;" data-i18n="btnModeEdit">✏️ Редактор</button>
+        <button id="btnModePlay" class="btn small" style="background:transparent; color:#fff; border:none;" data-i18n="btnModePlay">▶️ Тест</button>
+      </div>
     </div>
     <div class="panel-body" style="display:flex; flex-direction:column; padding:0;">
       <div class="preview-stage" style="border-radius:0; border:none;">
@@ -299,7 +304,7 @@
             <option value="Merriweather" style="font-family: 'Merriweather';">Merriweather</option>
             <option value="Playfair Display" style="font-family: 'Playfair Display';">Playfair Display</option>
             <option value="Lora" style="font-family: 'Lora';">Lora</option>
-            <option value="Courier New" style="font-family: 'Courier New';">Courier New (Моноширинный)</option>
+            <option value="Courier New" style="font-family: 'Courier New';">Courier New</option>
             <option value="Caveat" style="font-family: 'Caveat', cursive;">Caveat (Рукописный)</option>
             <option value="Neucha" style="font-family: 'Neucha', cursive;">Neucha (Рукописный)</option>
           </select>
@@ -375,22 +380,22 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
    ======================== */
 const dict = {
   ru: {
-    btnResetProj: "🗑 Сбросить", confirmReset: "Точно удалить все вопросы и настройки? Это нельзя отменить.", btnCopy: "📋 Код", sLang: "Язык интерфейса", sName: "Название игры", sDesign: "Оформление", lBg: "Фон игры", lTarget: "Мишень", optCustom: "По ссылке...", lRadius: "Радиус движения", lSpeed: "Скорость", sGame: "Настройки игры", lTeams: "Команд (1-3)", lTeamColors: "Цвета рамок команд", lSound: "Выстрел", lVol: "Громкость", lPenaltyOn: "Штраф за промах (клик мимо мишени)", lPenaltyPts: "Вычитать очков", oOff: "Выкл", oOn: "Вкл", sStart: "Стартовый экран", lInstructionColor: "Цвет рамки", lGlow: "Свечение рамки", sEnd: "Финальный экран (Фидбек)", sQ: "Вопросы", btnAdd: "➕ Добавить", btnClr: "🧹 Очистить", lDragHint: "💡 В редакторе курсор обычный (чтобы перетаскивать мишени). В самой игре он станет прицелом везде!", previewTitle: "Просмотр", previewHint: "Живое превью (координаты сохраняются)", mTitle: "Редактировать вопрос", lQType: "Тип вопроса", oChoice: "Выбор ответа", oInput: "Ввод ответа", lPts: "Очки", lTimer: "Таймер", lSec: "Секунды", lImg: "🖼️ Картинка (URL)", lQText: "Текст вопроса", lFont: "Шрифт", lFontSize: "Размер шрифта", lAnsOpts: "Варианты ответа", btnAddOpt: "➕ Добавить вариант", btnCancel: "Отмена", btnSave: "💾 Сохранить", lRightAns: "Верный", lOptText: "Текст варианта", lDel: "Удалить", lGameOver: "Результаты игры", btnRestart: "↻ Сыграть еще раз", lTeam: "Команда", btnPlay: "▶ Начать", btnReset: "Сброс", btnOK: "ОК", lCursor: "Прицел (курсор в игре)", oCrosshair: "Стандартный крестик", oSniper: "Снайперский (чёрный оптический)", oRedDot: "Коллиматор (красная точка)", lSizeOk: "Код в норме", lSizeWarn: "Почти лимит", lSizeErr: "ПРЕВЫШЕН ЛИМИТ",
+    btnResetProj: "🗑 Сбросить", confirmReset: "Точно удалить все вопросы и настройки? Это нельзя отменить.", btnCopy: "📋 Код", sLang: "Язык интерфейса", sName: "Название игры", sDesign: "Оформление", lBg: "Фон игры", lTarget: "Мишень", optCustom: "По ссылке...", lRadius: "Радиус движения", lSpeed: "Скорость", sGame: "Настройки игры", lTeams: "Команд (1-3)", lTeamColors: "Цвета рамок команд", lSound: "Выстрел", lVol: "Громкость", lPenaltyOn: "Штраф за промах (мимо мишени)", lPenaltyPts: "Вычитать очков", oOff: "Выкл", oOn: "Вкл", sStart: "Стартовый экран", lInstructionColor: "Цвет рамки", lGlow: "Свечение рамки", sEnd: "Финальный экран (Фидбек)", sQ: "Вопросы", btnAdd: "➕ Добавить", btnClr: "🧹 Очистить", previewTitle: "Просмотр", btnModeEdit: "✏️ Редактор", btnModePlay: "▶️ Тест", mTitle: "Редактировать вопрос", lQType: "Тип вопроса", oChoice: "Выбор ответа", oInput: "Ввод ответа", lPts: "Очки", lTimer: "Таймер", lSec: "Секунды", lImg: "🖼️ Картинка (URL)", lQText: "Текст вопроса", lFont: "Шрифт", lFontSize: "Размер шрифта", lAnsOpts: "Варианты ответа", btnAddOpt: "➕ Добавить вариант", btnCancel: "Отмена", btnSave: "💾 Сохранить", lRightAns: "Верный", lOptText: "Текст варианта", lDel: "Удалить", lGameOver: "Результаты игры", btnRestart: "↻ Сыграть еще раз", lTeam: "Команда", btnPlay: "▶ Начать", btnReset: "Сброс", btnOK: "ОК", lCursor: "Прицел (курсор в игре)", oCrosshair: "Стандартный крестик", oSniper: "Снайперский (чёрный)", oRedDot: "Коллиматор (красный)", lSizeOk: "Код в норме", lSizeWarn: "Почти лимит", lSizeErr: "ПРЕВЫШЕН ЛИМИТ",
     bg1: "🌌 Космические дали", bg2: "🌲 Сказочный лес", bg3: "🌊 Морское дно", bg4: "💧 Водный мир", bg5: "🌳 Старый парк", bg6: "🏜️ Древний Египет", bg7: "🏙️ Современный город", bg8: "🌵 Дикий Запад",
     tgt10: "🔘 Спортивная мишень", tgt11: "💠 Модерн", tgt12: "🛸 Космическая мишень", tgt13: "🎯 Классическая мишень", tgt14: "⭐ Золотая звезда"
   },
   en: {
-    btnResetProj: "🗑 Reset", confirmReset: "Are you sure you want to delete all questions and settings? This cannot be undone.", btnCopy: "📋 Copy Code", sLang: "Interface Language", sName: "Game Title", sDesign: "Design", lBg: "Background", lTarget: "Target", optCustom: "Custom URL...", lRadius: "Orbit Radius", lSpeed: "Speed", sGame: "Game Settings", lTeams: "Teams (1-3)", lTeamColors: "Team Colors", lSound: "Shot Sound", lVol: "Volume", lPenaltyOn: "Penalty for missing target", lPenaltyPts: "Points to Deduct", oOff: "Off", oOn: "On", sStart: "Start Screen", lInstructionColor: "Border Color", lGlow: "Border Glow", sEnd: "Feedback Screen", sQ: "Questions", btnAdd: "➕ Add", btnClr: "🧹 Clear", lDragHint: "💡 In preview, the cursor is normal for easy dragging. In the game, it becomes a crosshair!", previewTitle: "Preview", previewHint: "Live preview (coordinates are saved)", mTitle: "Edit Question", lQType: "Question Type", oChoice: "Multiple Choice", oInput: "Text Input", lPts: "Points", lTimer: "Timer", lSec: "Seconds", lImg: "🖼️ Image (URL)", lQText: "Question Text", lFont: "Font", lFontSize: "Font Size", lAnsOpts: "Answer Options", btnAddOpt: "➕ Add Option", btnCancel: "Cancel", btnSave: "💾 Save", lRightAns: "Correct", lOptText: "Option Text", lDel: "Delete", lGameOver: "Game Results", btnRestart: "↻ Play Again", lTeam: "Team", btnPlay: "▶ Play", btnReset: "Reset", btnOK: "OK", lCursor: "Crosshair (in-game cursor)", oCrosshair: "Standard Crosshair", oSniper: "Sniper (Black)", oRedDot: "Red Dot Sight", lSizeOk: "Code Size OK", lSizeWarn: "Close to Limit", lSizeErr: "LIMIT REACHED",
+    btnResetProj: "🗑 Reset", confirmReset: "Are you sure you want to delete all questions and settings? This cannot be undone.", btnCopy: "📋 Copy Code", sLang: "Interface Language", sName: "Game Title", sDesign: "Design", lBg: "Background", lTarget: "Target", optCustom: "Custom URL...", lRadius: "Orbit Radius", lSpeed: "Speed", sGame: "Game Settings", lTeams: "Teams (1-3)", lTeamColors: "Team Colors", lSound: "Shot Sound", lVol: "Volume", lPenaltyOn: "Penalty for missing target", lPenaltyPts: "Points to Deduct", oOff: "Off", oOn: "On", sStart: "Start Screen", lInstructionColor: "Border Color", lGlow: "Border Glow", sEnd: "Feedback Screen", sQ: "Questions", btnAdd: "➕ Add", btnClr: "🧹 Clear", previewTitle: "Preview", btnModeEdit: "✏️ Edit", btnModePlay: "▶️ Test", mTitle: "Edit Question", lQType: "Question Type", oChoice: "Multiple Choice", oInput: "Text Input", lPts: "Points", lTimer: "Timer", lSec: "Seconds", lImg: "🖼️ Image (URL)", lQText: "Question Text", lFont: "Font", lFontSize: "Font Size", lAnsOpts: "Answer Options", btnAddOpt: "➕ Add Option", btnCancel: "Cancel", btnSave: "💾 Save", lRightAns: "Correct", lOptText: "Option Text", lDel: "Delete", lGameOver: "Game Results", btnRestart: "↻ Play Again", lTeam: "Team", btnPlay: "▶ Play", btnReset: "Reset", btnOK: "OK", lCursor: "Crosshair (in-game cursor)", oCrosshair: "Standard Crosshair", oSniper: "Sniper (Black)", oRedDot: "Red Dot Sight", lSizeOk: "Code Size OK", lSizeWarn: "Close to Limit", lSizeErr: "LIMIT REACHED",
     bg1: "🌌 Deep Space", bg2: "🌲 Fairy Forest", bg3: "🌊 Ocean Floor", bg4: "💧 Water World", bg5: "🌳 Old Park", bg6: "🏜️ Ancient Egypt", bg7: "🏙️ Modern City", bg8: "🌵 Wild West",
     tgt10: "🔘 Sport Target", tgt11: "💠 Modern", tgt12: "🛸 Space Target", tgt13: "🎯 Classic Target", tgt14: "⭐ Golden Star"
   },
   de: {
-    btnResetProj: "🗑 Alles zurücksetzen", confirmReset: "Möchten Sie wirklich alle Fragen und Einstellungen löschen? Dies kann nicht rückgängig gemacht werden.", btnCopy: "📋 Code kopieren", sLang: "Sprache", sName: "Spieltitel", sDesign: "Design", lBg: "Hintergrund", lTarget: "Ziel", optCustom: "Eigene URL...", lRadius: "Orbit-Radius", lSpeed: "Geschwindigkeit", sGame: "Spieleinstellungen", lTeams: "Teams (1-3)", lTeamColors: "Teamfarben", lSound: "Schuss-Sound", lVol: "Lautstärke", lPenaltyOn: "Strafe bei Fehlschuss", lPenaltyPts: "Punkte abziehen", oOff: "Aus", oOn: "An", sStart: "Startbildschirm", lInstructionColor: "Randfarbe", lGlow: "Randleuchten", sEnd: "Endbildschirm", sQ: "Fragen", btnAdd: "➕ Hinzufügen", btnClr: "🧹 Leeren", lDragHint: "💡 In der Vorschau ist der Cursor normal zum einfachen Ziehen. Im Spiel wird er zum Fadenkreuz!", previewTitle: "Vorschau", previewHint: "Live-Vorschau (Koordinaten werden gespeichert)", mTitle: "Frage bearbeiten", lQType: "Fragetyp", oChoice: "Multiple Choice", oInput: "Texteingabe", lPts: "Punkte", lTimer: "Timer", lSec: "Sekunden", lImg: "🖼️ Bild (URL)", lQText: "Fragentext", lFont: "Schriftart", lFontSize: "Schriftgröße", lAnsOpts: "Antwortmöglichkeiten", btnAddOpt: "➕ Option hinzufügen", btnCancel: "Abbrechen", btnSave: "💾 Speichern", lRightAns: "Richtig", lOptText: "Optionstext", lDel: "Löschen", lGameOver: "Spielergebnisse", btnRestart: "↻ Nochmal spielen", lTeam: "Team", btnPlay: "▶ Start", btnReset: "Zurücksetzen", btnOK: "OK", lCursor: "Fadenkreuz (Spiel-Cursor)", oCrosshair: "Standard-Fadenkreuz", oSniper: "Scharfschütze (Schwarz)", oRedDot: "Leuchtpunktvisier", lSizeOk: "Code Size OK", lSizeWarn: "Close to Limit", lSizeErr: "LIMIT REACHED",
+    btnResetProj: "🗑 Alles zurücksetzen", confirmReset: "Möchten Sie wirklich alle Fragen und Einstellungen löschen? Dies kann nicht rückgängig gemacht werden.", btnCopy: "📋 Code kopieren", sLang: "Sprache", sName: "Spieltitel", sDesign: "Design", lBg: "Hintergrund", lTarget: "Ziel", optCustom: "Eigene URL...", lRadius: "Orbit-Radius", lSpeed: "Geschwindigkeit", sGame: "Spieleinstellungen", lTeams: "Teams (1-3)", lTeamColors: "Teamfarben", lSound: "Schuss-Sound", lVol: "Lautstärke", lPenaltyOn: "Strafe bei Fehlschuss", lPenaltyPts: "Punkte abziehen", oOff: "Aus", oOn: "An", sStart: "Startbildschirm", lInstructionColor: "Randfarbe", lGlow: "Randleuchten", sEnd: "Endbildschirm", sQ: "Fragen", btnAdd: "➕ Hinzufügen", btnClr: "🧹 Leeren", previewTitle: "Vorschau", btnModeEdit: "✏️ Bearbeiten", btnModePlay: "▶️ Testen", mTitle: "Frage bearbeiten", lQType: "Fragetyp", oChoice: "Multiple Choice", oInput: "Texteingabe", lPts: "Punkte", lTimer: "Timer", lSec: "Sekunden", lImg: "🖼️ Bild (URL)", lQText: "Fragentext", lFont: "Schriftart", lFontSize: "Schriftgröße", lAnsOpts: "Antwortmöglichkeiten", btnAddOpt: "➕ Option hinzufügen", btnCancel: "Abbrechen", btnSave: "💾 Speichern", lRightAns: "Richtig", lOptText: "Optionstext", lDel: "Löschen", lGameOver: "Spielergebnisse", btnRestart: "↻ Nochmal spielen", lTeam: "Team", btnPlay: "▶ Start", btnReset: "Zurücksetzen", btnOK: "OK", lCursor: "Fadenkreuz (Spiel-Cursor)", oCrosshair: "Standard-Fadenkreuz", oSniper: "Scharfschütze (Schwarz)", oRedDot: "Leuchtpunktvisier", lSizeOk: "Code Size OK", lSizeWarn: "Close to Limit", lSizeErr: "LIMIT REACHED",
     bg1: "🌌 Weltraum", bg2: "🌲 Märchenwald", bg3: "🌊 Meeresgrund", bg4: "💧 Wasserwelt", bg5: "🌳 Alter Park", bg6: "🏜️ Altes Ägypten", bg7: "🏙️ Moderne Stadt", bg8: "🌵 Wilder Westen",
     tgt10: "🔘 Sportziel", tgt11: "💠 Modern", tgt12: "🛸 Weltraumziel", tgt13: "🎯 Klassisches Ziel", tgt14: "⭐ Goldener Stern"
   },
   zh: {
-    btnResetProj: "🗑 重置全部", confirmReset: "您确定要删除所有问题和设置吗？此操作无法撤销。", btnCopy: "📋 复制代码", sLang: "界面语言", sName: "游戏名称", sDesign: "设计", lBg: "背景", lTarget: "目标", optCustom: "自定义 URL...", lRadius: "轨道半径", lSpeed: "速度", sGame: "游戏设置", lTeams: "队伍 (1-3)", lTeamColors: "队伍边框颜色", lSound: "射击声音", lVol: "音量", lPenaltyOn: "脱靶惩罚", lPenaltyPts: "扣除分数", oOff: "关", oOn: "开", sStart: "开始屏幕", lInstructionColor: "边框颜色", lGlow: "边框发光", sEnd: "反馈屏幕", sQ: "问题", btnAdd: "➕ 添加", btnClr: "🧹 清除", lDragHint: "💡 在预览中，光标正常以便拖动。在游戏中，它会变成十字准星！", previewTitle: "预览", previewHint: "实时预览（坐标已保存）", mTitle: "编辑问题", lQType: "问题类型", oChoice: "选择题", oInput: "填空题", lPts: "分数", lTimer: "计时器", lSec: "秒", lImg: "🖼️ 图片 (URL)", lQText: "问题文本", lFont: "字体", lFontSize: "字体大小", lAnsOpts: "答案选项", btnAddOpt: "➕ 添加选项", btnCancel: "取消", btnSave: "💾 保存", lRightAns: "正确", lOptText: "选项文本", lDel: "删除", lGameOver: "游戏结果", btnRestart: "↻ 再玩一次", lTeam: "队伍", btnPlay: "▶ 开始", btnReset: "重置", btnOK: "确定", lCursor: "准星（游戏内光标）", oCrosshair: "标准十字", oSniper: "狙击（黑色）", oRedDot: "红点瞄准镜", lSizeOk: "Code Size OK", lSizeWarn: "Close to Limit", lSizeErr: "LIMIT REACHED",
+    btnResetProj: "🗑 重置全部", confirmReset: "您确定要删除所有问题和设置吗？此操作无法撤销。", btnCopy: "📋 复制代码", sLang: "界面语言", sName: "游戏名称", sDesign: "设计", lBg: "背景", lTarget: "目标", optCustom: "自定义 URL...", lRadius: "轨道半径", lSpeed: "速度", sGame: "游戏设置", lTeams: "队伍 (1-3)", lTeamColors: "队伍边框颜色", lSound: "射击声音", lVol: "音量", lPenaltyOn: "脱靶惩罚", lPenaltyPts: "扣除分数", oOff: "关", oOn: "开", sStart: "开始屏幕", lInstructionColor: "边框颜色", lGlow: "边框发光", sEnd: "反馈屏幕", sQ: "问题", btnAdd: "➕ 添加", btnClr: "🧹 清除", previewTitle: "预览", btnModeEdit: "✏️ 编辑", btnModePlay: "▶️ 测试", mTitle: "编辑问题", lQType: "问题类型", oChoice: "选择题", oInput: "填空题", lPts: "分数", lTimer: "计时器", lSec: "秒", lImg: "🖼️ 图片 (URL)", lQText: "问题文本", lFont: "字体", lFontSize: "字体大小", lAnsOpts: "答案选项", btnAddOpt: "➕ 添加选项", btnCancel: "取消", btnSave: "💾 保存", lRightAns: "正确", lOptText: "选项文本", lDel: "删除", lGameOver: "游戏结果", btnRestart: "↻ 再玩一次", lTeam: "队伍", btnPlay: "▶ 开始", btnReset: "重置", btnOK: "确定", lCursor: "准星（游戏内光标）", oCrosshair: "标准十字", oSniper: "狙击（黑色）", oRedDot: "红点瞄准镜", lSizeOk: "Code Size OK", lSizeWarn: "Close to Limit", lSizeErr: "LIMIT REACHED",
     bg1: "🌌 深空", bg2: "🌲 童话森林", bg3: "🌊 海底", bg4: "💧 水世界", bg5: "🌳 老公园", bg6: "🏜️ 古埃及", bg7: "🏙️ 现代城市", bg8: "🌵 狂野西部",
     tgt10: "🔘 运动靶", tgt11: "💠 现代靶", tgt12: "🛸 太空靶", tgt13: "🎯 经典靶子", tgt14: "⭐ 金星"
   }
@@ -550,6 +555,8 @@ window.checkImgLink = (inp) => {
 /* ========================
    РЕЖИМ РЕДАКТОРА
    ======================== */
+let previewMode = 'edit'; // 'edit' или 'play'
+
 function bootEditor() {
   document.body.classList.add('editor-mode');
   document.getElementById('editorApp').style.display = 'grid';
@@ -591,6 +598,23 @@ function bootEditor() {
   document.getElementById('btnCopyCodeTop').onclick = () => {
     const url = location.origin + location.pathname + "?game=" + encodeURIComponent(b64e(cfg));
     navigator.clipboard.writeText(`<iframe src="${url}" style="width:100%;height:600px;border:0" allowfullscreen></iframe>`).then(()=>alert("Код скопирован!"));
+  };
+
+  document.getElementById('btnModeEdit').onclick = () => {
+    previewMode = 'edit';
+    document.getElementById('btnModeEdit').style.background = 'var(--neon-orange-base)';
+    document.getElementById('btnModeEdit').style.color = '#000';
+    document.getElementById('btnModePlay').style.background = 'transparent';
+    document.getElementById('btnModePlay').style.color = '#fff';
+    upd();
+  };
+  document.getElementById('btnModePlay').onclick = () => {
+    previewMode = 'play';
+    document.getElementById('btnModePlay').style.background = 'var(--neon-orange-base)';
+    document.getElementById('btnModePlay').style.color = '#000';
+    document.getElementById('btnModeEdit').style.background = 'transparent';
+    document.getElementById('btnModeEdit').style.color = '#fff';
+    upd();
   };
 
   window.addEventListener('message', e => {
@@ -637,7 +661,8 @@ function updateEditor() {
 
   if(_prevTid) clearTimeout(_prevTid);
   _prevTid = setTimeout(() => {
-    document.getElementById('previewFrame').src = location.origin + location.pathname + "?game=" + encodeURIComponent(data) + "&edit=1&lang=" + lang;
+    const isEditFlag = previewMode === 'edit' ? '1' : '0';
+    document.getElementById('previewFrame').src = location.origin + location.pathname + "?game=" + encodeURIComponent(data) + "&edit=" + isEditFlag + "&lang=" + lang;
   }, 400);
 }
 
@@ -706,6 +731,11 @@ function bootGame() {
   if(qs.get('game')) { try { gCfg = b64d(qs.get('game')); } catch(e){} }
   const isEdit = qs.get('edit') === '1';
 
+  // Разблокируем аудио на мобильных при любом клике по экрану (незаметно для пользователя)
+  window.addEventListener('pointerdown', () => { 
+    try { if(AudioSys.ctx && AudioSys.ctx.state === 'suspended') AudioSys.ctx.resume(); } catch(e){}
+  }, {once: true});
+
   const arenaEl = document.getElementById('gArena');
   const arenaBg = document.getElementById('gBg');
   const aimCursor = document.getElementById('aimCursor');
@@ -768,12 +798,11 @@ function bootGame() {
     setTimeout(() => el.remove(), 800);
   }
 
-  // Волшебный эффект взрыва
   function createExplosion(x, y, teamColor) {
     const wave = document.createElement('div');
     wave.className = 'hit-shockwave';
     wave.style.left = x + 'px'; wave.style.top = y + 'px';
-    wave.style.color = teamColor || '#ffae00';
+    wave.style.color = teamColor || '#d99a29';
     arenaEl.appendChild(wave);
     setTimeout(() => wave.remove(), 500);
 
@@ -781,8 +810,8 @@ function bootGame() {
     for(let i=0; i<count; i++) {
       const p = document.createElement('div');
       p.className = 'hit-particle';
-      p.style.backgroundColor = teamColor || '#ffae00';
-      p.style.color = teamColor || '#ffae00';
+      p.style.backgroundColor = teamColor || '#d99a29';
+      p.style.color = teamColor || '#d99a29';
       p.style.left = x + 'px'; p.style.top = y + 'px';
       const angle = (Math.PI * 2 / count) * i + (Math.random()*0.5);
       const dist = 50 + Math.random() * 70;
@@ -796,12 +825,13 @@ function bootGame() {
     }
   }
 
-  // Штраф ТОЛЬКО за промах
-  arenaEl.addEventListener('mousedown', (e) => {
+  // СТРОГИЙ ОБРАБОТЧИК ПРОМАХОВ (работает через onclick для максимальной стабильности)
+  arenaEl.onclick = (e) => {
     if(isEdit || !arenaEl.classList.contains('aiming')) return;
     if(e.target.closest('.target') || e.target.closest('.hud') || e.target.closest('.teams') || e.target.closest('.game-modal') || e.target.closest('.screen')) return;
     
-    AudioSys.play(gCfg.sound, gCfg.vol); 
+    try { AudioSys.play(gCfg.sound, gCfg.vol); } catch(err){}
+    
     if(gCfg.penalty && gCfg.penalty.enabled) {
       const p = Number(gCfg.penalty.points || 0);
       scores[curTeam] -= p;
@@ -809,7 +839,7 @@ function bootGame() {
       const r = arenaEl.getBoundingClientRect();
       popFloatText(e.clientX - r.left, e.clientY - r.top, `-${p}`, '#ff5b6b');
     }
-  });
+  };
 
   const tgtDiv = document.getElementById('gTargets');
   tgtDiv.className = isEdit ? "targets edit-mode" : "targets";
@@ -838,33 +868,42 @@ function bootGame() {
     }
 
     if(isEdit) {
-      el.onmousedown = (e) => {
+      // Для редактора оставляем mousedown/touchstart, чтобы можно было тянуть
+      const startDrag = (e) => {
         e.preventDefault(); e.stopPropagation();
         const rect = arenaEl.getBoundingClientRect();
         function move(ev) {
-          let nx = Math.round(((ev.clientX - rect.left) / rect.width) * 100);
-          let ny = Math.round(((ev.clientY - rect.top) / rect.height) * 100);
+          let cX = ev.clientX ?? (ev.touches ? ev.touches[0].clientX : 0);
+          let cY = ev.clientY ?? (ev.touches ? ev.touches[0].clientY : 0);
+          let nx = Math.round(((cX - rect.left) / rect.width) * 100);
+          let ny = Math.round(((cY - rect.top) / rect.height) * 100);
           nx = Math.max(0, Math.min(100, nx)); ny = Math.max(0, Math.min(100, ny));
           el.style.left = nx + "%"; el.style.top = ny + "%";
           window.parent.postMessage({ type: 'updPos', idx: i, x: nx, y: ny }, '*');
         }
-        function stop() { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', stop); }
-        window.addEventListener('mousemove', move); window.addEventListener('mouseup', stop);
+        function stop() { 
+          window.removeEventListener('mousemove', move); window.removeEventListener('touchmove', move);
+          window.removeEventListener('mouseup', stop); window.removeEventListener('touchend', stop);
+        }
+        window.addEventListener('mousemove', move, {passive: false}); window.addEventListener('touchmove', move, {passive: false});
+        window.addEventListener('mouseup', stop); window.addEventListener('touchend', stop);
       };
+      el.onmousedown = startDrag;
+      el.ontouchstart = startDrag;
     } else {
-      el.onmousedown = (e) => {
+      // ИГРА: Надежный onclick для выстрелов
+      el.onclick = (e) => {
         e.stopPropagation(); // Не промах!
         if(!arenaEl.classList.contains('aiming')) return;
-        AudioSys.play(gCfg.sound, gCfg.vol);
         
-        // --- ВЗРЫВ ---
+        try { AudioSys.play(gCfg.sound, gCfg.vol); } catch(err){}
+        
         const rArena = arenaEl.getBoundingClientRect();
         const rTarget = el.getBoundingClientRect();
         const cx = rTarget.left - rArena.left + rTarget.width/2;
         const cy = rTarget.top - rArena.top + rTarget.height/2;
-        const tCol = gCfg.teamCols[curTeam] || '#ffae00';
+        const tCol = gCfg.teamCols[curTeam] || '#d99a29';
         createExplosion(cx, cy, tCol);
-        // -------------
 
         el.classList.add('hit');
         openGameQuestion(q, () => {
@@ -897,7 +936,7 @@ function bootGame() {
     } else { timerEl.style.display = 'none'; }
 
     if(q.type === 'choice') {
-      inpWrap.style.display = 'none'; ansDiv.style.display = 'block';
+      inpWrap.style.display = 'none'; ansDiv.style.display = 'grid';
       let opts = [...q.opts].filter(o => o.t.trim() !== "").sort(() => Math.random() - 0.5);
       opts.forEach(o => {
         const b = document.createElement('button'); b.className = 'game-ans-btn'; b.innerText = o.t; b.style.fontFamily = q.font || 'Roboto';
@@ -930,7 +969,10 @@ function bootGame() {
     document.getElementById('gStartText').innerText = gCfg.start.text;
     sCard.style.borderColor = gCfg.start.color;
     if(gCfg.start.neon) sCard.style.boxShadow = `0 0 25px ${gCfg.start.color}, inset 0 0 10px ${gCfg.start.color}`;
-    document.getElementById('gBtnPlay').onclick = () => { AudioSys.init(); document.getElementById('gStartScreen').classList.remove('on'); arenaEl.classList.add('aiming'); };
+    document.getElementById('gBtnPlay').onclick = () => { try{ AudioSys.init(); }catch(e){} document.getElementById('gStartScreen').classList.remove('on'); arenaEl.classList.add('aiming'); };
+  } else if (!isEdit) {
+    // Если стартового экрана нет, просто включаем прицел
+    arenaEl.classList.add('aiming');
   }
 
   function showEndScreen() {
