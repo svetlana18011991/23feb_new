@@ -10,9 +10,10 @@
   <style>
     :root {
       --text: #eaf0ff; --muted: #a9b6e6;
-      --neon-orange-base: #ffae00;
-      --neon-orange-glow: rgba(255, 136, 0, 0.6);
-      --neon-box-shadow: 0 0 5px var(--neon-orange-glow), 0 0 15px var(--neon-orange-glow), inset 0 0 5px rgba(255, 136, 0, 0.2);
+      /* Приглушенный, более мягкий и благородный неон */
+      --neon-orange-base: #d99a29; 
+      --neon-orange-glow: rgba(217, 154, 41, 0.35);
+      --neon-box-shadow: 0 0 4px var(--neon-orange-glow), 0 0 12px var(--neon-orange-glow), inset 0 0 4px rgba(217, 154, 41, 0.15);
       --shadow: 0 14px 40px rgba(0,0,0,0.5);
       --qFont: 'Roboto'; --aFont: 'Roboto'; --qaSize: 18px;
     }
@@ -21,29 +22,29 @@
     html, body { height: 100%; margin: 0; background: #0a0f15; color: var(--text); overflow: hidden; }
     
     /* --- EDITOR UI --- */
-    body.editor-mode { background: radial-gradient(1100px 700px at 12% 18%, rgba(255, 170, 0, 0.15) 0%, rgba(5,8,22,0) 58%), #050816; }
+    body.editor-mode { background: radial-gradient(1100px 700px at 12% 18%, rgba(217, 154, 41, 0.12) 0%, rgba(5,8,22,0) 58%), #050816; }
     body.game-mode { background: #000; }
 
     .app { display: grid; grid-template-columns: 480px 1fr; gap: 14px; padding: 14px; height: 100vh; max-width: 1600px; margin: 0 auto; }
     @media (max-width: 1020px) { .app { grid-template-columns: 1fr; } }
     
     .panel {
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-      border: 1px solid var(--neon-orange-base); border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid rgba(217, 154, 41, 0.6); border-radius: 22px;
       box-shadow: var(--neon-box-shadow); backdrop-filter: blur(10px);
       display: flex; flex-direction: column; overflow: hidden;
     }
-    .panel-header { padding: 12px 14px; border-bottom: 1px solid rgba(255, 174, 0, 0.4); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .panel-header { padding: 12px 14px; border-bottom: 1px solid rgba(217, 154, 41, 0.3); display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap:wrap;}
     .panel-body { padding: 14px; overflow-y: auto; flex: 1; }
     .panel-body::-webkit-scrollbar { width: 6px; }
-    .panel-body::-webkit-scrollbar-thumb { background: rgba(255, 174, 0, 0.4); border-radius: 4px; }
+    .panel-body::-webkit-scrollbar-thumb { background: rgba(217, 154, 41, 0.4); border-radius: 4px; }
     
-    .section { background: rgba(20, 10, 0, 0.3); border: 1px solid rgba(255, 174, 0, 0.5); border-radius: 16px; padding: 12px; margin-bottom: 12px; }
+    .section { background: rgba(15, 10, 5, 0.4); border: 1px solid rgba(217, 154, 41, 0.3); border-radius: 16px; padding: 12px; margin-bottom: 12px; }
     .section .title { font-weight: 900; font-size: 14px; color: var(--neon-orange-base); margin-bottom: 10px; display: flex; justify-content: space-between; }
     
     label { display: block; font-size: 12px; color: rgba(255,255,255,.8); margin: 8px 0 4px; }
-    input[type="text"], input[type="number"], select, textarea { width: 100%; border-radius: 12px; padding: 10px; border: 1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.3); color: #fff; outline: none; }
-    input:focus, select:focus, textarea:focus { border-color: var(--neon-orange-base); box-shadow: 0 0 8px var(--neon-orange-glow); }
+    input[type="text"], input[type="number"], select, textarea { width: 100%; border-radius: 12px; padding: 10px; border: 1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.3); color: #fff; outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: var(--neon-orange-base); box-shadow: 0 0 6px var(--neon-orange-glow); }
     textarea { resize: vertical; min-height: 70px; }
     input[type="range"] { width: 100%; accent-color: var(--neon-orange-base); }
     input[type="color"] { width: 40px; height: 40px; padding: 2px; border-radius: 10px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); background: transparent; }
@@ -51,52 +52,55 @@
     .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     .row > * { flex: 1; min-width: 120px; }
     
-    .btn {
-      padding: 10px 14px; border-radius: 12px; border: 1px solid var(--neon-orange-base);
-      background: rgba(255, 136, 0, 0.1); color: #fff; cursor: pointer; font-weight: 900; font-size: 14px;
-      display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;
-    }
-    .btn:hover { background: rgba(255, 136, 0, 0.25); box-shadow: 0 0 10px var(--neon-orange-glow); }
-    .btn.primary { background: linear-gradient(90deg, rgba(255, 174, 0, 0.4), rgba(255, 136, 0, 0.3)); }
+    .btn { padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(217, 154, 41, 0.5); background: rgba(217, 154, 41, 0.1); color: #fff; cursor: pointer; font-weight: 900; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+    .btn:hover { background: rgba(217, 154, 41, 0.2); box-shadow: 0 0 8px var(--neon-orange-glow); }
+    .btn.primary { background: linear-gradient(90deg, rgba(217, 154, 41, 0.4), rgba(217, 120, 41, 0.3)); border-color: var(--neon-orange-base); }
     .btn.danger { border-color: #ff4d4d; background: rgba(255, 77, 77, 0.1); }
-    .btn.danger:hover { background: rgba(255, 77, 77, 0.25); box-shadow: 0 0 10px rgba(255,77,77,0.5); }
+    .btn.danger:hover { background: rgba(255, 77, 77, 0.25); box-shadow: 0 0 10px rgba(255,77,77,0.4); }
     .btn.small { padding: 6px 10px; font-size: 12px; border-radius: 10px; }
     
-    .preview-stage { flex: 1; background: rgba(0,0,0,.3); border-radius: 20px; overflow: hidden; position: relative; }
+    .preview-stage { flex: 1; background: #000; border-radius: 20px; overflow: hidden; position: relative; }
     iframe { width: 100%; height: 100%; border: 0; background: #000; }
     
     .q-list { display: flex; flex-direction: column; gap: 8px; }
     .q-item { padding: 10px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
-    .q-item:hover { border-color: rgba(255, 174, 0, 0.5); }
+    .q-item:hover { border-color: rgba(217, 154, 41, 0.4); }
     
     .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 9999; }
     .modal-backdrop.show { display: flex; }
     .modal { width: min(800px, 95%); background: #16110c; border: 1px solid var(--neon-orange-base); border-radius: 20px; box-shadow: var(--neon-box-shadow); max-height: 90vh; display: flex; flex-direction: column; }
-    .modal-head { padding: 14px 20px; border-bottom: 1px solid rgba(255, 174, 0, 0.3); display: flex; justify-content: space-between; align-items: center; font-weight: 900; font-size: 18px; }
+    .modal-head { padding: 14px 20px; border-bottom: 1px solid rgba(217, 154, 41, 0.3); display: flex; justify-content: space-between; align-items: center; font-weight: 900; font-size: 18px; }
     .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
-    .modal-foot { padding: 14px 20px; border-top: 1px solid rgba(255, 174, 0, 0.3); display: flex; justify-content: flex-end; gap: 10px; }
+    .modal-foot { padding: 14px 20px; border-top: 1px solid rgba(217, 154, 41, 0.3); display: flex; justify-content: flex-end; gap: 10px; }
     
     .topBrand { display: flex; align-items: center; gap: 10px; }
     .topBrand img { height: 36px; width: 36px; object-fit: contain; border-radius: 8px; }
     
     /* --- GAME UI --- */
-    .gameRoot { position: absolute; inset: 0; overflow: hidden; background: #000; font-family: 'Roboto', sans-serif; }
-    .arenaBg { position: absolute; inset: 0; background-size: cover; background-position: center; transform: scale(1.05); }
+    .gameRoot { position: absolute; inset: 0; overflow: hidden; background: #000; font-family: 'Roboto', sans-serif; cursor: var(--game-cursor, default); perspective: 1000px; }
+    
+    /* 3D Background effect */
+    .arenaBg { position: absolute; inset: -25px; background-size: cover; background-position: center; transition: transform 0.15s ease-out; will-change: transform; cursor: var(--game-cursor, default); }
+    
     .hud { position: absolute; top: 14px; left: 14px; right: 14px; pointer-events: none; z-index: 10; display:flex; justify-content:space-between; align-items:center; }
     .gameTitle { font-weight: 900; font-size: 24px; text-shadow: 0 4px 15px #000; color: #fff; }
-    .teams { display: grid; gap: 10px; margin-top: 54px; padding:0 14px; pointer-events: auto; position:relative; z-index:10; }
+    .teams { display: grid; gap: 10px; margin-top: 54px; padding:0 14px; pointer-events: auto; position:relative; z-index:10; cursor: default; }
     .teamCard { background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 10px; backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; transition: 0.3s; }
     .teamInput { background: transparent; border: none; outline: none; color: #fff; font-weight: 900; font-size: 16px; width: 100%; max-width: 150px; }
     
-    /* Targets & Drag */
-    .targets { position: absolute; inset: 0; pointer-events: none; }
-    .target { position: absolute; width: 90px; height: 90px; transform: translate(-50%, -50%) translate(var(--orbit-x, 0px), var(--orbit-y, 0px)); pointer-events: auto; z-index: 5; transition: transform 0.1s; }
+    /* Targets */
+    .targets { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+    .target { position: absolute; width: 90px; height: 90px; transform: translate(-50%, -50%) translate(var(--orbit-x, 0px), var(--orbit-y, 0px)); pointer-events: auto; transition: transform 0.1s; cursor: var(--game-cursor, pointer); }
     .target:hover { transform: translate(-50%, -50%) translate(var(--orbit-x, 0px), var(--orbit-y, 0px)) scale(1.1); }
     .target .img { position: absolute; inset: 0; background-image: var(--target-img); background-size: contain; background-repeat: no-repeat; background-position: center; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6)); }
     .target .num { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 900; font-size: 24px; color: #fff; text-shadow: 0 2px 8px #000; }
+    
+    /* Points Badge on Target */
+    .target .pts { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); border: 1px solid rgba(217,154,41,0.5); color: var(--neon-orange-base); padding: 2px 8px; border-radius: 8px; font-size: 12px; font-weight: 900; white-space: nowrap; pointer-events: none; backdrop-filter: blur(4px); text-shadow: 0 2px 4px #000; }
+    
     .target.hit { opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(0); transition: 0.3s ease; }
     
-    .edit-mode .target { cursor: move !important; border: 2px dashed rgba(255, 174, 0, 0.9); border-radius: 50%; }
+    .edit-mode .target { cursor: move !important; border: 2px dashed rgba(217, 154, 41, 0.8); border-radius: 50%; }
     .edit-mode .target:hover { transform: translate(-50%, -50%) translate(var(--orbit-x, 0px), var(--orbit-y, 0px)); }
 
     /* Crosshair logic */
@@ -105,13 +109,13 @@
     #gArena.aiming #aimCursor { display: block; }
 
     /* Modals & Screens in Game */
-    .game-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 50; }
+    .game-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 50; cursor: default; }
     .game-modal.on { display: flex; }
-    .game-modal-content { background: #0a0d12; border: 1px solid #ffae00; border-radius: 20px; padding: 24px; width: min(800px, 90%); box-shadow: 0 0 30px rgba(255,174,0,0.3); position:relative; max-height:90vh; overflow-y:auto; }
+    .game-modal-content { background: #0a0d12; border: 1px solid var(--neon-orange-base); border-radius: 20px; padding: 24px; width: min(800px, 90%); box-shadow: 0 0 30px rgba(217,154,41,0.25); position:relative; max-height:90vh; overflow-y:auto; }
     .game-ans-btn { width: 100%; text-align: left; padding: 14px; margin-top: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; color: #fff; font-size: 18px; cursor: pointer; transition: 0.2s; }
     .game-ans-btn:hover { background: rgba(255,255,255,0.1); }
     
-    .screen { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; text-align: center; }
+    .screen { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; text-align: center; cursor: default; }
     .screen.on { display: flex; }
     .screenCard { background: #111; border-radius: 20px; padding: 30px; border: 1px solid; max-width: 600px; width: 90%; }
     .resultRow { display:flex; justify-content:space-between; background:rgba(255,255,255,0.1); padding:12px 20px; border-radius:12px; margin-bottom:10px; font-size:18px; font-weight:bold; }
@@ -126,8 +130,14 @@
         <img src="63.png" alt="Logo" onerror="this.style.display='none'">
         <div style="font-weight:900; font-size:16px;">Светлана Быкова</div>
       </div>
-      <div style="display:flex; gap:10px;">
-        <button class="btn danger small" id="btnResetProject" data-i18n="btnResetProj">🗑 Сбросить всё</button>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; margin-right:5px;">
+           <span id="lblSizeText" style="font-size:11px; font-weight:900; color:#33d17a;" data-i18n="lSizeOk">🟢 Код в норме</span>
+           <div style="width:80px; background:rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.1); height:6px; border-radius:3px; overflow:hidden;">
+              <div id="barSize" style="width:0%; height:100%; background:#33d17a; transition: width 0.3s, background 0.3s;"></div>
+           </div>
+        </div>
+        <button class="btn danger small" id="btnResetProject" data-i18n="btnResetProj">🗑 Сбросить</button>
         <button class="btn primary small" id="btnCopyCodeTop" data-i18n="btnCopy">📋 Код</button>
       </div>
     </div>
@@ -203,7 +213,7 @@
           <div><label data-i18n="lVol">Громкость</label><input type="range" id="inpVol" min="0" max="1" step="0.1" value="0.7"></div>
         </div>
         <div class="row" style="margin-top:10px;">
-          <div><label data-i18n="lPenaltyOn">Штраф за промах (клик мимо мишени)</label><select id="inpPenaltyOn"><option value="false" data-i18n="oOff">Выкл</option><option value="true" data-i18n="oOn">Вкл</option></select></div>
+          <div><label data-i18n="lPenaltyOn">Штраф за промах (мимо мишени)</label><select id="inpPenaltyOn"><option value="false" data-i18n="oOff">Выкл</option><option value="true" data-i18n="oOn">Вкл</option></select></div>
           <div><label data-i18n="lPenaltyPts">Вычитать очков</label><input type="number" id="inpPenaltyPts" value="5"></div>
         </div>
         <label data-i18n="lTeamColors" style="margin-top:10px;">Цвета рамок команд</label>
@@ -214,7 +224,7 @@
         <div class="title" data-i18n="sStart">Стартовый экран</div>
         <div class="row">
           <div><label data-i18n="sStart">Стартовый экран</label><select id="startEnabled"><option value="false" data-i18n="oOff">Выключен</option><option value="true" data-i18n="oOn">Включен</option></select></div>
-          <div><label data-i18n="lInstructionColor">Цвет рамки</label><input type="color" id="inpStartColor" value="#ff8a2a"></div>
+          <div><label data-i18n="lInstructionColor">Цвет рамки</label><input type="color" id="inpStartColor" value="#d99a29"></div>
         </div>
         <label style="display:flex; align-items:center; gap:5px; margin-top:10px;"><input type="checkbox" id="chkStartGlow" checked> <span data-i18n="lGlow">Свечение рамки</span></label>
         <textarea id="inpStartText" style="margin-top:10px;" placeholder="Инструкция..."></textarea>
@@ -232,7 +242,7 @@
           <button class="btn primary" id="btnAddQ" data-i18n="btnAdd">➕ Добавить</button>
           <button class="btn" id="btnClearQ" data-i18n="btnClr">🧹 Очистить</button>
         </div>
-        <div style="font-size:11px; color:var(--neon-orange-base); margin-bottom:8px;" data-i18n="lDragHint">💡 В редакторе курсор обычный (чтобы перетаскивать мишени). В самой игре он станет прицелом везде!</div>
+        <div style="font-size:11px; color:var(--neon-orange-base); margin-bottom:8px;" data-i18n="lDragHint">💡 В редакторе курсор обычный (чтобы перетаскивать мишени). В самой игре он станет прицелом!</div>
         <div id="qList" class="q-list"></div>
       </div>
     </div>
@@ -273,19 +283,19 @@
       <div class="row" style="margin-top:10px;">
         <div>
           <label data-i18n="lFont">Шрифт</label>
-          <select id="modFont">
-            <option value="Roboto">Roboto</option>
-            <option value="Open Sans">Open Sans</option>
-            <option value="Montserrat">Montserrat</option>
-            <option value="Lato">Lato</option>
-            <option value="Oswald">Oswald</option>
-            <option value="Poppins">Poppins</option>
-            <option value="Merriweather">Merriweather</option>
-            <option value="Playfair Display">Playfair Display</option>
-            <option value="Lora">Lora</option>
-            <option value="Courier New">Courier New (Моноширинный)</option>
-            <option value="Caveat">Caveat (Рукописный)</option>
-            <option value="Neucha">Neucha (Рукописный)</option>
+          <select id="modFont" onchange="this.style.fontFamily=this.value">
+            <option value="Roboto" style="font-family: 'Roboto';">Roboto</option>
+            <option value="Open Sans" style="font-family: 'Open Sans';">Open Sans</option>
+            <option value="Montserrat" style="font-family: 'Montserrat';">Montserrat</option>
+            <option value="Lato" style="font-family: 'Lato';">Lato</option>
+            <option value="Oswald" style="font-family: 'Oswald';">Oswald</option>
+            <option value="Poppins" style="font-family: 'Poppins';">Poppins</option>
+            <option value="Merriweather" style="font-family: 'Merriweather';">Merriweather</option>
+            <option value="Playfair Display" style="font-family: 'Playfair Display';">Playfair Display</option>
+            <option value="Lora" style="font-family: 'Lora';">Lora</option>
+            <option value="Courier New" style="font-family: 'Courier New';">Courier New (Моноширинный)</option>
+            <option value="Caveat" style="font-family: 'Caveat';">Caveat (Рукописный)</option>
+            <option value="Neucha" style="font-family: 'Neucha';">Neucha (Рукописный)</option>
           </select>
         </div>
         <div><label data-i18n="lFontSize">Размер шрифта</label><input type="number" id="modFontSize" value="20"></div>
@@ -318,7 +328,7 @@
 
     <div class="game-modal" id="gModal">
       <div class="game-modal-content">
-        <div id="gTimer" style="position:absolute; top:10px; right:20px; font-weight:900; font-size:24px; color:#ffae00; display:none;">30</div>
+        <div id="gTimer" style="position:absolute; top:10px; right:20px; font-weight:900; font-size:24px; color:var(--neon-orange-base); display:none;">30</div>
         <h2 id="gQText" style="color:#fff; margin-top:0; padding-right:40px;"></h2>
         <div id="gQImgWrap" style="text-align:center; margin-bottom:15px; display:none;"><img id="gQImg" style="max-width:100%; max-height:300px; border-radius:10px;"></div>
         <div id="gAnswers"></div>
@@ -339,7 +349,7 @@
 
     <div class="screen" id="gEndScreen">
       <div class="screenCard">
-        <h1 style="color:#ffae00; margin-top:0;" data-i18n="lGameOver">Результаты игры</h1>
+        <h1 style="color:var(--neon-orange-base); margin-top:0;" data-i18n="lGameOver">Результаты игры</h1>
         <div id="gEndStats" style="width:100%; margin:20px 0;"></div>
         <p id="gEndText" style="color:#ccc; font-size:16px; white-space:pre-wrap;"></p>
         <button class="btn primary" id="gBtnRestart" style="margin-top:15px;" data-i18n="btnRestart">↻ Сыграть еще раз</button>
@@ -350,14 +360,19 @@
 
 <script>
 /* ========================
+   Сжатие LZString (Архиватор)
+   ======================== */
+var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-=$";var n={compressToEncodedURIComponent:function(r){return n.compress(r,6,function(r){return o.charAt(r)})},decompressFromEncodedURIComponent:function(r){return null==r?"":""==r?null:r.replace(/ /g,"+"),n.decompress(r.length,32,function(n){return o.indexOf(r.charAt(n))})},compress:function(o,n,t){if(null==o)return"";var e,i,u,s={},c={},a="",p="",f="",l=2,d=3,h=2,v=[],m=0,g=0,w;for(u=0;u<o.length;u+=1)if(a=o.charAt(u),Object.prototype.hasOwnProperty.call(s,a)||(s[a]=d++,c[a]=!0),p=f+a,Object.prototype.hasOwnProperty.call(s,p))f=p;else{if(Object.prototype.hasOwnProperty.call(c,f)){if(256>f.charCodeAt(0)){for(e=0;h>e;e++)m=m<<1,g==n-1?(g=0,v.push(t(m)),m=0):g++;for(i=f.charCodeAt(0),e=0;8>e;e++)m=m<<1|1&i,g==n-1?(g=0,v.push(t(m)),m=0):g++,i>>=1}else{for(i=1,e=0;h>e;e++)m=m<<1|i,g==n-1?(g=0,v.push(t(m)),m=0):g++,i=0;for(i=f.charCodeAt(0),e=0;16>e;e++)m=m<<1|1&i,g==n-1?(g=0,v.push(t(m)),m=0):g++,i>>=1}l--,0==l&&(l=Math.pow(2,h),h++),delete c[f]}else for(i=s[f],e=0;h>e;e++)m=m<<1|1&i,g==n-1?(g=0,v.push(t(m)),m=0):g++,i>>=1;l--,0==l&&(l=Math.pow(2,h),h++),s[p]=d++,f=String(a)}if(""!==f){if(Object.prototype.hasOwnProperty.call(c,f)){if(256>f.charCodeAt(0)){for(e=0;h>e;e++)m=m<<1,g==n-1?(g=0,v.push(t(m)),m=0):g++;for(i=f.charCodeAt(0),e=0;8>e;e++)m=m<<1|1&i,g==n-1?(g=0,v.push(t(m)),m=0):g++,i>>=1}else{for(i=1,e=0;h>e;e++)m=m<<1|i,g==n-1?(g=0,v.push(t(m)),m=0):g++,i=0;for(i=f.charCodeAt(0),e=0;16>e;e++)m=m<<1|1&i,g==n-1?(g=0,v.push(t(m)),m=0):g++,i>>=1}l--,0==l&&(l=Math.pow(2,h),h++),delete c[f]}else for(i=s[f],e=0;h>e;e++)m=m<<1|1&i,g==n-1?(g=0,v.push(t(m)),m=0):g++,i>>=1;l--,0==l&&(l=Math.pow(2,h),h++)}for(i=2,e=0;h>e;e++)m=m<<1|1&i,g==n-1?(g=0,v.push(t(m)),m=0):g++,i>>=1;for(;;)if(m<<=1,g==n-1){v.push(t(m));break}else g++;return v.join("")},decompress:function(o,n,t){var e,i,u,s,c,a,p,f=[],l=4,d=4,h=3,v="",m=[],g={val:t(0),position:n,index:1};for(e=0;3>e;e+=1)f[e]=e;for(u=0,c=Math.pow(2,2),a=1;a!=c;)s=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=t(g.index++)),u|=(s>0?1:0)*a,a<<=1;switch(u){case 0:for(u=0,c=Math.pow(2,8),a=1;a!=c;)s=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=t(g.index++)),u|=(s>0?1:0)*a,a<<=1;p=r(u);break;case 1:for(u=0,c=Math.pow(2,16),a=1;a!=c;)s=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=t(g.index++)),u|=(s>0?1:0)*a,a<<=1;p=r(u);break;case 2:return""}for(f[3]=p,i=p,m.push(p);;){if(g.index>o)return"";for(u=0,c=Math.pow(2,h),a=1;a!=c;)s=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=t(g.index++)),u|=(s>0?1:0)*a,a<<=1;switch(p=u){case 0:for(u=0,c=Math.pow(2,8),a=1;a!=c;)s=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=t(g.index++)),u|=(s>0?1:0)*a,a<<=1;f[d++]=r(u),p=d-1,l--;break;case 1:for(u=0,c=Math.pow(2,16),a=1;a!=c;)s=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=t(g.index++)),u|=(s>0?1:0)*a,a<<=1;f[d++]=r(u),p=d-1,l--;break;case 2:return m.join("")}if(0==l&&(l=Math.pow(2,h),h++),f[p])v=f[p];else{if(p!==d)return null;v=i+i.charAt(0)}m.push(v),f[d++]=i+v.charAt(0),l--,i=v,0==l&&(l=Math.pow(2,h),h++)}}};return n}();
+
+/* ========================
    Словарь (i18n)
    ======================== */
 const dict = {
   ru: {
-    btnResetProj: "🗑 Сбросить всё", confirmReset: "Точно удалить все вопросы и настройки? Это нельзя отменить.", btnCopy: "📋 Код для Genially", sLang: "Язык интерфейса", sName: "Название игры", sDesign: "Оформление", lBg: "Фон игры", lTarget: "Мишень", optCustom: "По ссылке...", lRadius: "Радиус движения", lSpeed: "Скорость", sGame: "Настройки игры", lTeams: "Команд (1-3)", lTeamColors: "Цвета рамок команд", lSound: "Выстрел", lVol: "Громкость", lPenaltyOn: "Штраф за промах (клик мимо мишени)", lPenaltyPts: "Вычитать очков", oOff: "Выкл", oOn: "Вкл", sStart: "Стартовый экран", lInstructionColor: "Цвет рамки", lGlow: "Свечение рамки", sEnd: "Финальный экран (Фидбек)", sQ: "Вопросы", btnAdd: "➕ Добавить", btnClr: "🧹 Очистить", lDragHint: "💡 В редакторе курсор обычный (чтобы перетаскивать мишени). В самой игре он станет прицелом везде!", previewTitle: "Просмотр", previewHint: "Живое превью (координаты сохраняются)", mTitle: "Редактировать вопрос", lQType: "Тип вопроса", oChoice: "Выбор ответа", oInput: "Ввод ответа", lPts: "Очки", lTimer: "Таймер", lSec: "Секунды", lImg: "🖼️ Картинка (URL)", lQText: "Текст вопроса", lFont: "Шрифт", lFontSize: "Размер шрифта", lAnsOpts: "Варианты ответа", btnAddOpt: "➕ Добавить вариант", btnCancel: "Отмена", btnSave: "💾 Сохранить", lRightAns: "Верный", lOptText: "Текст варианта", lDel: "Удалить", lGameOver: "Результаты игры", btnRestart: "↻ Сыграть еще раз", lTeam: "Команда", btnPlay: "▶ Начать", btnReset: "Сброс", btnOK: "ОК", lCursor: "Прицел (курсор в игре)", oCrosshair: "Стандартный крестик", oSniper: "Снайперский (чёрный оптический)", oRedDot: "Коллиматор (красная точка)"
+    btnResetProj: "🗑 Сбросить", confirmReset: "Точно удалить все вопросы и настройки? Это нельзя отменить.", btnCopy: "📋 Код", sLang: "Язык интерфейса", sName: "Название игры", sDesign: "Оформление", lBg: "Фон игры", lTarget: "Мишень", optCustom: "По ссылке...", lRadius: "Радиус движения", lSpeed: "Скорость", sGame: "Настройки игры", lTeams: "Команд (1-3)", lTeamColors: "Цвета рамок команд", lSound: "Выстрел", lVol: "Громкость", lPenaltyOn: "Штраф за промах (мимо мишени)", lPenaltyPts: "Вычитать очков", oOff: "Выкл", oOn: "Вкл", sStart: "Стартовый экран", lInstructionColor: "Цвет рамки", lGlow: "Свечение рамки", sEnd: "Финальный экран (Фидбек)", sQ: "Вопросы", btnAdd: "➕ Добавить", btnClr: "🧹 Очистить", lDragHint: "💡 В редакторе курсор обычный (чтобы перетаскивать мишени). В самой игре он станет прицелом везде!", previewTitle: "Просмотр", previewHint: "Живое превью (координаты сохраняются)", mTitle: "Редактировать вопрос", lQType: "Тип вопроса", oChoice: "Выбор ответа", oInput: "Ввод ответа", lPts: "Очки", lTimer: "Таймер", lSec: "Секунды", lImg: "🖼️ Картинка (URL)", lQText: "Текст вопроса", lFont: "Шрифт", lFontSize: "Размер шрифта", lAnsOpts: "Варианты ответа", btnAddOpt: "➕ Добавить вариант", btnCancel: "Отмена", btnSave: "💾 Сохранить", lRightAns: "Верный", lOptText: "Текст варианта", lDel: "Удалить", lGameOver: "Результаты игры", btnRestart: "↻ Сыграть еще раз", lTeam: "Команда", btnPlay: "▶ Начать", btnReset: "Сброс", btnOK: "ОК", lCursor: "Прицел (курсор в игре)", oCrosshair: "Стандартный крестик", oSniper: "Снайперский (чёрный оптический)", oRedDot: "Коллиматор (красная точка)", lSizeOk: "Код в норме", lSizeWarn: "Почти лимит", lSizeErr: "ПРЕВЫШЕН ЛИМИТ"
   },
   en: {
-    btnResetProj: "🗑 Reset All", confirmReset: "Are you sure you want to delete all questions and settings? This cannot be undone.", btnCopy: "📋 Copy Code", sLang: "Interface Language", sName: "Game Title", sDesign: "Design", lBg: "Background", lTarget: "Target", optCustom: "Custom URL...", lRadius: "Orbit Radius", lSpeed: "Speed", sGame: "Game Settings", lTeams: "Teams (1-3)", lTeamColors: "Team Colors", lSound: "Shot Sound", lVol: "Volume", lPenaltyOn: "Penalty for missing target", lPenaltyPts: "Points to Deduct", oOff: "Off", oOn: "On", sStart: "Start Screen", lInstructionColor: "Border Color", lGlow: "Border Glow", sEnd: "Feedback Screen", sQ: "Questions", btnAdd: "➕ Add", btnClr: "🧹 Clear", lDragHint: "💡 In preview, the cursor is normal for easy dragging. In the game, it becomes a crosshair!", previewTitle: "Preview", previewHint: "Live preview (coordinates are saved)", mTitle: "Edit Question", lQType: "Question Type", oChoice: "Multiple Choice", oInput: "Text Input", lPts: "Points", lTimer: "Timer", lSec: "Seconds", lImg: "🖼️ Image (URL)", lQText: "Question Text", lFont: "Font", lFontSize: "Font Size", lAnsOpts: "Answer Options", btnAddOpt: "➕ Add Option", btnCancel: "Cancel", btnSave: "💾 Save", lRightAns: "Correct", lOptText: "Option Text", lDel: "Delete", lGameOver: "Game Results", btnRestart: "↻ Play Again", lTeam: "Team", btnPlay: "▶ Play", btnReset: "Reset", btnOK: "OK", lCursor: "Crosshair (in-game cursor)", oCrosshair: "Standard Crosshair", oSniper: "Sniper (Black)", oRedDot: "Red Dot Sight"
+    btnResetProj: "🗑 Reset", confirmReset: "Are you sure you want to delete all questions and settings? This cannot be undone.", btnCopy: "📋 Copy Code", sLang: "Interface Language", sName: "Game Title", sDesign: "Design", lBg: "Background", lTarget: "Target", optCustom: "Custom URL...", lRadius: "Orbit Radius", lSpeed: "Speed", sGame: "Game Settings", lTeams: "Teams (1-3)", lTeamColors: "Team Colors", lSound: "Shot Sound", lVol: "Volume", lPenaltyOn: "Penalty for missing target", lPenaltyPts: "Points to Deduct", oOff: "Off", oOn: "On", sStart: "Start Screen", lInstructionColor: "Border Color", lGlow: "Border Glow", sEnd: "Feedback Screen", sQ: "Questions", btnAdd: "➕ Add", btnClr: "🧹 Clear", lDragHint: "💡 In preview, the cursor is normal for easy dragging. In the game, it becomes a crosshair!", previewTitle: "Preview", previewHint: "Live preview (coordinates are saved)", mTitle: "Edit Question", lQType: "Question Type", oChoice: "Multiple Choice", oInput: "Text Input", lPts: "Points", lTimer: "Timer", lSec: "Seconds", lImg: "🖼️ Image (URL)", lQText: "Question Text", lFont: "Font", lFontSize: "Font Size", lAnsOpts: "Answer Options", btnAddOpt: "➕ Add Option", btnCancel: "Cancel", btnSave: "💾 Save", lRightAns: "Correct", lOptText: "Option Text", lDel: "Delete", lGameOver: "Game Results", btnRestart: "↻ Play Again", lTeam: "Team", btnPlay: "▶ Play", btnReset: "Reset", btnOK: "OK", lCursor: "Crosshair (in-game cursor)", oCrosshair: "Standard Crosshair", oSniper: "Sniper (Black)", oRedDot: "Red Dot Sight", lSizeOk: "Code Size OK", lSizeWarn: "Close to Limit", lSizeErr: "LIMIT REACHED"
   },
   de: {
     btnResetProj: "🗑 Alles zurücksetzen", confirmReset: "Möchten Sie wirklich alle Fragen und Einstellungen löschen? Dies kann nicht rückgängig gemacht werden.", btnCopy: "📋 Code kopieren", sLang: "Sprache", sName: "Spieltitel", sDesign: "Design", lBg: "Hintergrund", lTarget: "Ziel", optCustom: "Eigene URL...", lRadius: "Orbit-Radius", lSpeed: "Geschwindigkeit", sGame: "Spieleinstellungen", lTeams: "Teams (1-3)", lTeamColors: "Teamfarben", lSound: "Schuss-Sound", lVol: "Lautstärke", lPenaltyOn: "Strafe bei Fehlschuss", lPenaltyPts: "Punkte abziehen", oOff: "Aus", oOn: "An", sStart: "Startbildschirm", lInstructionColor: "Randfarbe", lGlow: "Randleuchten", sEnd: "Endbildschirm", sQ: "Fragen", btnAdd: "➕ Hinzufügen", btnClr: "🧹 Leeren", lDragHint: "💡 In der Vorschau ist der Cursor normal zum einfachen Ziehen. Im Spiel wird er zum Fadenkreuz!", previewTitle: "Vorschau", previewHint: "Live-Vorschau (Koordinaten werden gespeichert)", mTitle: "Frage bearbeiten", lQType: "Fragetyp", oChoice: "Multiple Choice", oInput: "Texteingabe", lPts: "Punkte", lTimer: "Timer", lSec: "Sekunden", lImg: "🖼️ Bild (URL)", lQText: "Fragentext", lFont: "Schriftart", lFontSize: "Schriftgröße", lAnsOpts: "Antwortmöglichkeiten", btnAddOpt: "➕ Option hinzufügen", btnCancel: "Abbrechen", btnSave: "💾 Speichern", lRightAns: "Richtig", lOptText: "Optionstext", lDel: "Löschen", lGameOver: "Spielergebnisse", btnRestart: "↻ Nochmal spielen", lTeam: "Team", btnPlay: "▶ Start", btnReset: "Zurücksetzen", btnOK: "OK", lCursor: "Fadenkreuz (Spiel-Cursor)", oCrosshair: "Standard-Fadenkreuz", oSniper: "Scharfschütze (Schwarz)", oRedDot: "Leuchtpunktvisier"
@@ -376,38 +391,69 @@ function applyLang() {
     else el.innerText = t(k);
   });
   if(typeof window.renderQList === 'function') window.renderQList();
+  if(typeof window.forceCheckSize === 'function') window.forceCheckSize();
 }
 
 /* ========================
-   База данных (Config) & LocalStorage
+   База данных (Config) & LocalStorage & Сжатие
    ======================== */
-const LS_KEY = 'mathShooterSave_v2';
+const LS_KEY = 'mathShooterSave_v3';
 function defaultCfg() {
   return {
     title: "Математический тир", bg: "2.png", bgUrl: "", target: "13.png", targetUrl: "",
     cursor: "crosshair", cursorUrl: "",
     radius: 0, speed: 0, teams: 2, teamCols: ["#ffae00", "#33d17a", "#ff5b6b"], sound: "pif", vol: 0.7,
     penalty: { enabled: false, points: 5 },
-    start: { enabled: false, text: "ИНСТРУКЦИЯ\n\n1) Выберите команду\n2) Кликните по мишени\n3) Ответьте на вопрос\n\nЗа правильный ответ команда получает очки.", color: "#ffae00", neon: true },
+    start: { enabled: false, text: "ИНСТРУКЦИЯ\n\n1) Выберите команду\n2) Кликните по мишени\n3) Ответьте на вопрос\n\nЗа правильный ответ команда получает очки.", color: "#d99a29", neon: true },
     end: { enabled: true, text: "Отличная работа! Спасибо за игру." },
     questions: []
   };
 }
-let cfg = null;
-try {
-  const saved = localStorage.getItem(LS_KEY);
-  if(saved) cfg = JSON.parse(saved);
-} catch(e) {}
-if(!cfg) cfg = defaultCfg();
 
-function saveCfg() {
-  try { localStorage.setItem(LS_KEY, JSON.stringify(cfg)); } catch(e) {}
+function packCfg(c) {
+  return {
+    t: c.title, b: c.bg, bu: c.bgUrl, tg: c.target, tu: c.targetUrl, cu: c.cursor, cur: c.cursorUrl,
+    r: c.radius, sp: c.speed, tm: c.teams, tc: c.teamCols, sd: c.sound, v: c.vol,
+    pe: c.penalty.enabled?1:0, pp: c.penalty.points,
+    se: c.start.enabled?1:0, st: c.start.text, sc: c.start.color, sn: c.start.neon?1:0,
+    fe: c.end.enabled?1:0, ft: c.end.text,
+    q: c.questions.map(q => ({
+      ty: q.type==='input'?1:0, pt: q.pts, tm: q.timer?1:0, s: q.sec,
+      i: q.img, p: q.text, f: q.font, fs: q.size, x: Math.round((q.x??50)*10)/10, y: Math.round((q.y??50)*10)/10,
+      o: q.opts ? q.opts.map(o=>({t:o.t, c:o.c?1:0})) : undefined, a: q.acc
+    }))
+  };
 }
+function unpackCfg(p) {
+  if(!p || typeof p !== 'object') return defaultCfg();
+  if(p.questions) return p; 
+  return {
+    title: p.t || "Математический тир", bg: p.b || "2.png", bgUrl: p.bu || "",
+    target: p.tg || "13.png", targetUrl: p.tu || "", cursor: p.cu || "crosshair", cursorUrl: p.cur || "",
+    radius: p.r || 0, speed: p.sp || 0, teams: p.tm || 2, teamCols: p.tc || ["#ffae00", "#33d17a", "#ff5b6b"],
+    sound: p.sd || "pif", vol: p.v ?? 0.7, penalty: { enabled: !!p.pe, points: p.pp || 5 },
+    start: { enabled: !!p.se, text: p.st || "", color: p.sc || "#d99a29", neon: !!p.sn },
+    end: { enabled: !!p.fe, text: p.ft || "" },
+    questions: (p.q || []).map(q => ({
+      type: q.ty===1 ? 'input' : 'choice', pts: q.pt || 10, timer: !!q.tm, sec: q.s || 30,
+      img: q.i || "", text: q.p || "", font: q.f || "Roboto", size: q.fs || 20, x: q.x ?? 50, y: q.y ?? 50,
+      opts: q.o ? q.o.map(o=>({t:o.t, c:!!o.c})) : [{t:"", c:true},{t:"", c:false}], acc: q.a || [""]
+    }))
+  };
+}
+
+let cfg = null;
+try { const saved = localStorage.getItem(LS_KEY); if(saved) cfg = JSON.parse(saved); } catch(e) {}
+if(!cfg) cfg = defaultCfg();
+function saveCfg() { try { localStorage.setItem(LS_KEY, JSON.stringify(cfg)); } catch(e) {} }
 
 let editIdx = null;
 
-const b64e = (o) => btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-const b64d = (s) => JSON.parse(decodeURIComponent(escape(atob(s.replace(/-/g,'+').replace(/_/g,'/')))));
+const b64e = (o) => "~" + LZString.compressToEncodedURIComponent(JSON.stringify(packCfg(o)));
+const b64d = (s) => {
+  if(s.startsWith("~")) return unpackCfg(JSON.parse(LZString.decompressFromEncodedURIComponent(s.slice(1))));
+  return unpackCfg(JSON.parse(decodeURIComponent(escape(atob(s.replace(/-/g,'+').replace(/_/g,'/'))))));
+};
 
 /* ========================
    Звуковой движок
@@ -428,6 +474,30 @@ const AudioSys = (() => {
 })();
 
 /* ========================
+   Индикатор длины
+   ======================== */
+function checkLinkSize(data) {
+  const maxLen = 1800;
+  const curLen = data.length;
+  const pct = Math.min(100, (curLen / maxLen) * 100);
+  const bar = document.getElementById("barSize");
+  const lblText = document.getElementById("lblSizeText");
+  
+  if (bar) bar.style.width = pct + "%";
+  if (curLen < maxLen * 0.75) {
+      if(bar) bar.style.background = "#33d17a";
+      if(lblText) { lblText.textContent = "🟢 " + t("lSizeOk"); lblText.style.color = "#33d17a"; }
+  } else if (curLen <= maxLen) {
+      if(bar) bar.style.background = "#ffae00";
+      if(lblText) { lblText.textContent = "🟡 " + t("lSizeWarn"); lblText.style.color = "#ffae00"; }
+  } else {
+      if(bar) bar.style.background = "#ff5b6b";
+      if(lblText) { lblText.textContent = "🔴 " + t("lSizeErr"); lblText.style.color = "#ff5b6b"; }
+  }
+}
+window.forceCheckSize = () => { try { checkLinkSize(b64e(cfg)); } catch(e){} };
+
+/* ========================
    РЕЖИМ РЕДАКТОРА
    ======================== */
 function bootEditor() {
@@ -436,15 +506,10 @@ function bootEditor() {
 
   const upd = () => updateEditor();
   
-  // Кнопка полного сброса
   document.getElementById('btnResetProject').onclick = () => {
-    if(confirm(t('confirmReset'))) {
-      localStorage.removeItem(LS_KEY);
-      location.reload();
-    }
+    if(confirm(t('confirmReset'))) { localStorage.removeItem(LS_KEY); location.reload(); }
   };
 
-  // Привязка UI
   document.getElementById('inpTitle').value = cfg.title;
   document.getElementById('selBg').value = cfg.bg; document.getElementById('inpBgCustom').value = cfg.bgUrl;
   document.getElementById('inpBgCustom').style.display = cfg.bg === 'custom' ? 'block' : 'none';
@@ -459,7 +524,6 @@ function bootEditor() {
   document.getElementById('chkStartGlow').checked = cfg.start.neon; document.getElementById('inpStartText').value = cfg.start.text;
   document.getElementById('feedEnabled').value = cfg.end.enabled ? 'true' : 'false'; document.getElementById('inpEndText').value = cfg.end.text;
 
-  // Ивенты
   document.getElementById('selLang').onchange = (e) => { lang = e.target.value; applyLang(); upd(); };
   document.getElementById('selBg').onchange = (e) => { document.getElementById('inpBgCustom').style.display = e.target.value === 'custom' ? 'block' : 'none'; upd(); };
   document.getElementById('selTarget').onchange = (e) => { document.getElementById('inpTargetCustom').style.display = e.target.value === 'custom' ? 'block' : 'none'; upd(); };
@@ -475,15 +539,14 @@ function bootEditor() {
   document.getElementById('btnClearQ').onclick = () => { cfg.questions=[]; upd(); };
   document.getElementById('btnSaveQ').onclick = saveMod;
   document.getElementById('btnCopyCodeTop').onclick = () => {
-    const url = location.origin + location.pathname + "?game=" + b64e(cfg);
+    const url = location.origin + location.pathname + "?game=" + encodeURIComponent(b64e(cfg));
     navigator.clipboard.writeText(`<iframe src="${url}" style="width:100%;height:600px;border:0" allowfullscreen></iframe>`).then(()=>alert("Код скопирован!"));
   };
 
   window.addEventListener('message', e => {
     if(e.data && e.data.type==='updPos' && cfg.questions[e.data.idx]) {
       cfg.questions[e.data.idx].x = e.data.x; cfg.questions[e.data.idx].y = e.data.y;
-      saveCfg();
-      window.renderQList();
+      saveCfg(); window.renderQList(); window.forceCheckSize();
     }
   });
 
@@ -500,9 +563,7 @@ function renderTeamColsUI() {
     const col = cfg.teamCols[i] || ['#ffae00', '#33d17a', '#ff5b6b'][i];
     wrap.innerHTML += `<input type="color" id="tc_${i}" value="${col}">`;
   }
-  for(let i=0; i<c; i++){
-    document.getElementById(`tc_${i}`).oninput = (e) => { cfg.teamCols[i] = e.target.value; updateEditor(); };
-  }
+  for(let i=0; i<c; i++){ document.getElementById(`tc_${i}`).oninput = (e) => { cfg.teamCols[i] = e.target.value; updateEditor(); }; }
 }
 
 let _prevTid = null;
@@ -519,19 +580,21 @@ function updateEditor() {
 
   document.getElementById('qCount').innerText = cfg.questions.length;
   window.renderQList();
-  saveCfg(); // Сохраняем при любом изменении
+  saveCfg(); 
+
+  const data = b64e(cfg);
+  checkLinkSize(data);
 
   if(_prevTid) clearTimeout(_prevTid);
   _prevTid = setTimeout(() => {
-    const data = b64e(cfg);
-    document.getElementById('previewFrame').src = location.origin + location.pathname + "?game=" + data + "&edit=1&lang=" + lang;
+    document.getElementById('previewFrame').src = location.origin + location.pathname + "?game=" + encodeURIComponent(data) + "&edit=1&lang=" + lang;
   }, 400);
 }
 
 window.renderQList = function() {
   document.getElementById('qList').innerHTML = cfg.questions.map((q, i) => `
     <div class="q-item">
-      <div><b>#${i+1}</b> ${q.text.substring(0,25)}... <div style="font-size:11px; color:#aaa">x:${q.x ?? 50}%, y:${q.y ?? 50}%</div></div>
+      <div><b>#${i+1}</b> ${q.text.substring(0,25)}... <div style="font-size:11px; color:#aaa">x:${Math.round(q.x ?? 50)}%, y:${Math.round(q.y ?? 50)}%</div></div>
       <div><button class="btn small" onclick="openMod(${i})">⚙️</button> <button class="btn small danger" onclick="delQ(${i})">🗑️</button></div>
     </div>
   `).join('');
@@ -545,7 +608,12 @@ function openMod(idx = null) {
   document.getElementById('modType').value = q.type; document.getElementById('modPts').value = q.pts;
   document.getElementById('modTimerOn').value = q.timer ? "true" : "false"; document.getElementById('modTimerSec').value = q.sec;
   document.getElementById('modImg').value = q.img || ""; document.getElementById('modPrompt').value = q.text;
-  document.getElementById('modFont').value = q.font || "Roboto"; document.getElementById('modFontSize').value = q.size || 20;
+  
+  const fSel = document.getElementById('modFont');
+  fSel.value = q.font || "Roboto";
+  fSel.style.fontFamily = fSel.value; // Устанавливаем шрифт селекту
+  
+  document.getElementById('modFontSize').value = q.size || 20;
   syncModType(); document.getElementById('modType').onchange = syncModType;
   function syncModType() { if(document.getElementById('modType').value === 'choice') renderOpts(q.opts || [{t:"", c:true}, {t:"", c:false}]); else renderAccs(q.acc || [""]); }
   document.getElementById('modalBackdrop').classList.add('show');
@@ -588,9 +656,10 @@ function bootGame() {
   if(qs.get('game')) { try { gCfg = b64d(qs.get('game')); } catch(e){} }
   const isEdit = qs.get('edit') === '1';
 
-  // Логика DOM-прицела
   const arenaEl = document.getElementById('gArena');
+  const arenaBg = document.getElementById('gBg');
   const aimCursor = document.getElementById('aimCursor');
+  
   if(!isEdit) {
     let curHtml = '';
     if(gCfg.cursor === 'sniper') curHtml = `<svg width="46" height="46" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="rgba(255,255,255,0.1)" stroke="black" stroke-width="3"/><line x1="20" y1="0" x2="20" y2="40" stroke="black" stroke-width="2"/><line x1="0" y1="20" x2="40" y2="20" stroke="black" stroke-width="2"/><circle cx="20" cy="20" r="2" fill="red"/></svg>`;
@@ -609,8 +678,18 @@ function bootGame() {
     arenaEl.addEventListener('mouseleave', () => aimCursor.style.display = 'none');
   }
 
+  arenaEl.addEventListener('mousemove', e => {
+      const r = arenaEl.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      arenaBg.style.transform = `scale(1.05) perspective(1000px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translate(${x * -20}px, ${y * -20}px)`;
+  });
+  arenaEl.addEventListener('mouseleave', () => {
+      arenaBg.style.transform = `scale(1.05) perspective(1000px) rotateY(0deg) rotateX(0deg) translate(0px, 0px)`;
+  });
+
   const bgImg = gCfg.bg === 'custom' ? gCfg.bgUrl : gCfg.bg;
-  document.getElementById('gBg').style.backgroundImage = `url("${bgImg}")`;
+  arenaBg.style.backgroundImage = `url("${bgImg}")`;
   const tgtImg = gCfg.target === 'custom' ? gCfg.targetUrl : gCfg.target;
   document.getElementById('gTitle').innerText = gCfg.title;
 
@@ -639,19 +718,25 @@ function bootGame() {
     setTimeout(() => el.remove(), 800);
   }
 
-  // Логика промаха (клик по фону)
-  document.getElementById('gBg').onclick = (e) => {
+  // Строгий штраф ТОЛЬКО за клик мимо мишени по фону
+  arenaEl.addEventListener('mousedown', (e) => {
     if(isEdit || !arenaEl.classList.contains('aiming')) return;
-    AudioSys.play(gCfg.sound, gCfg.vol); // Звук выстрела при промахе
+    
+    // Если клик пришелся на мишень, интерфейс или модальное окно - игнорируем (это не промах)
+    if(e.target.closest('.target') || e.target.closest('.hud') || e.target.closest('.teams') || e.target.closest('.game-modal') || e.target.closest('.screen')) {
+      return;
+    }
+    
+    // Иначе это промах
+    AudioSys.play(gCfg.sound, gCfg.vol); 
     if(gCfg.penalty && gCfg.penalty.enabled) {
       const p = Number(gCfg.penalty.points || 0);
       scores[curTeam] -= p;
       drawTeams();
-      
       const r = arenaEl.getBoundingClientRect();
       popFloatText(e.clientX - r.left, e.clientY - r.top, `-${p}`, '#ff5b6b');
     }
-  };
+  });
 
   const tgtDiv = document.getElementById('gTargets');
   tgtDiv.className = isEdit ? "targets edit-mode" : "targets";
@@ -664,7 +749,11 @@ function bootGame() {
     if(q.y === undefined) q.y = 30 + Math.floor(i / 5) * 20;
 
     el.style.left = q.x + '%'; el.style.top = q.y + '%';
-    el.innerHTML = `<div class="img" style="background-image:url('${tgtImg}')"></div><div class="num">${i+1}</div>`;
+    el.innerHTML = `
+      <div class="img" style="background-image:url('${tgtImg}')"></div>
+      <div class="num">${i+1}</div>
+      <div class="pts">⭐ ${q.pts || 10}</div>
+    `;
     
     if(gCfg.radius > 0 && gCfg.speed > 0) {
       let ang = (i / Math.max(1, gCfg.questions.length)) * Math.PI * 2;
@@ -690,7 +779,7 @@ function bootGame() {
         window.addEventListener('mousemove', move); window.addEventListener('mouseup', stop);
       };
     } else {
-      el.onclick = (e) => {
+      el.onmousedown = (e) => {
         e.stopPropagation(); // Не промах!
         if(!arenaEl.classList.contains('aiming')) return;
         AudioSys.play(gCfg.sound, gCfg.vol);
@@ -706,7 +795,7 @@ function bootGame() {
 
   let timerId = null;
   function openGameQuestion(q, onDone) {
-    arenaEl.classList.remove('aiming'); aimCursor.style.display = 'none'; // Убираем прицел, возвращаем мышь
+    arenaEl.classList.remove('aiming'); aimCursor.style.display = 'none'; // Убираем прицел
     document.getElementById('gModal').classList.add('on');
     
     const txt = document.getElementById('gQText');
@@ -726,7 +815,7 @@ function bootGame() {
 
     if(q.type === 'choice') {
       inpWrap.style.display = 'none'; ansDiv.style.display = 'block';
-      let opts = [...q.opts].filter(o => o.t.trim() !== "").sort(() => Math.random() - 0.5); // убираем пустые
+      let opts = [...q.opts].filter(o => o.t.trim() !== "").sort(() => Math.random() - 0.5);
       opts.forEach(o => {
         const b = document.createElement('button'); b.className = 'game-ans-btn'; b.innerText = o.t; b.style.fontFamily = q.font || 'Roboto';
         b.onclick = () => finishTurn(o.c);
@@ -746,9 +835,9 @@ function bootGame() {
       arenaEl.classList.add('aiming'); // Возвращаем прицел
       if(isCorrect) {
         scores[curTeam] += Number(q.pts || 10);
-      } else {
-        if(gCfg.penalty && gCfg.penalty.enabled) scores[curTeam] -= Number(gCfg.penalty.points || 0);
       }
+      // Очки больше не вычитаются за неверный ответ, только за промах (в mousedown)
+      
       curTeam = (curTeam + 1) % gCfg.teams;
       drawTeams(); onDone();
     }
@@ -773,7 +862,7 @@ function bootGame() {
     document.getElementById('gEndStats').innerHTML = scores.map((s,i) => `
       <div class="resultRow">
         <span>${tNames[i] || 'Команда '+(i+1)}</span>
-        <span style="color:#ffae00">${s}</span>
+        <span style="color:var(--neon-orange-base)">${s}</span>
       </div>
     `).join('');
     document.getElementById('gBtnRestart').onclick = () => location.reload();
