@@ -4,231 +4,543 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Математический тир — editor+game</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Pacifico&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Pacifico&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg0:#0b0f14; --card:rgba(20,28,38,.72); --text:#e8eef7; --muted:rgba(232,238,247,.70);
-      --gold: #caa24d; --neon:#ff8a2a; --danger:#ff5b6b; --ok:#33d17a;
-      --shadow: 0 14px 55px rgba(0,0,0,.55); --r:18px;
+      --bg0:#0b0f14;
+      --card:rgba(20,28,38,.72);
+      --card2:rgba(15,22,30,.62);
+      --stroke:rgba(255,255,255,.10);
+      --stroke2:rgba(255,255,255,.14);
+      --text:#e8eef7;
+      --muted:rgba(232,238,247,.70);
+      --gold: #caa24d;
+      --gold2:#f1d089;
+      --neon:#ff8a2a;
+      --neon2:#ffb24d;
+      --neonSoft: rgba(255,138,42,.18);
+      --neonLine: rgba(255,138,42,.38);
+      --danger:#ff5b6b;
+      --ok:#33d17a;
+      --shadow: 0 14px 55px rgba(0,0,0,.55);
+      --r:18px;
+      --qFont:'Roboto';
+      --aFont:'Roboto';
+      --qaSize:18px;
     }
     *{box-sizing:border-box}
-    html,body{height:100%; margin:0; font-family: system-ui, -apple-system, sans-serif; background: #0a0f15; color:var(--text); overflow:hidden;}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1100px 600px at 12% 12%, rgba(90,140,190,.16), transparent 60%),
+                  radial-gradient(900px 520px at 70% 18%, rgba(255,190,90,.08), transparent 60%),
+                  linear-gradient(180deg, #0a0f15, #080b10);
+      color:var(--text);
+      overflow:hidden;
+    }
+
+    /* ====== Layout (editor) ====== */
+    .app{
+      height:100vh;
+      display:grid;
+      grid-template-columns: 480px 1fr;
+      gap:16px;
+      padding:16px;
+    }
+    @media (max-width: 1100px){
+      body{overflow:auto}
+      .app{grid-template-columns:1fr; height:auto; min-height:100%;}
+    }
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--neonLine);
+      border-radius: 22px;
+      box-shadow: var(--shadow), 0 0 0 1px rgba(255,138,42,.20), 0 0 26px var(--neonSoft);
+      overflow:hidden;
+      position:relative;
+      height: 100%;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+    .panel::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: radial-gradient(700px 420px at 0% 0%, rgba(255,255,255,.10), transparent 60%),
+                  radial-gradient(700px 420px at 100% 0%, rgba(255,215,120,.07), transparent 65%),
+                  repeating-linear-gradient(135deg, rgba(255,255,255,.03) 0 2px, transparent 2px 12px);
+      opacity:.35;
+      pointer-events:none;
+    }
+    .panel > *{position:relative; z-index:1}
+
+    .panelHeader{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 18px 12px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .title{
+      font-weight:800;
+      font-size:22px;
+      line-height:1.15;
+      letter-spacing:.2px;
+    }
+    .btn{
+      display:inline-flex;
+      gap:10px;
+      align-items:center;
+      justify-content:center;
+      padding:10px 14px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.13);
+      background: rgba(25,35,46,.55);
+      color:var(--text);
+      cursor:pointer;
+      user-select:none;
+      transition: transform .08s ease, background .15s ease, border-color .15s ease;
+    }
+    .btnGold{
+      background: linear-gradient(180deg, rgba(202,162,77,.26), rgba(202,162,77,.13));
+      border-color: rgba(202,162,77,.45);
+    }
+    .btnDanger{
+      background: linear-gradient(180deg, rgba(255,91,107,.24), rgba(255,91,107,.12));
+      border-color: rgba(255,91,107,.38);
+    }
+
+    .scroll{
+      flex: 1;
+      min-height: 0;
+      overflow:auto;
+      padding: 14px 18px 18px 18px;
+    }
+    .section{
+      background: rgba(10,14,20,.22);
+      border: 1px solid rgba(255,138,42,.28);
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .section h3{
+      margin:0 0 10px 0;
+      font-size:14px;
+      color: rgba(255,255,255,.92);
+    }
+    .row{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .row1{display:grid; grid-template-columns: 1fr; gap:10px;}
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+    input[type="text"], input[type="number"], select, textarea{
+      width:100%;
+      padding:11px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(10,14,18,.55);
+      color: var(--text);
+    }
     
-    .app{ height:100vh; display:grid; grid-template-columns: 480px 1fr; gap:16px; padding:16px; }
-    .panel{ background: rgba(255,255,255,.05); border:1px solid rgba(255,138,42,.3); border-radius: 22px; display:flex; flex-direction:column; overflow:hidden; }
-    .panelHeader{ padding:18px; border-bottom: 1px solid rgba(255,255,255,.08); display:flex; justify-content:space-between; align-items:center; }
-    .scroll{ flex: 1; overflow:auto; padding: 18px; }
-    .section{ background: rgba(10,14,20,.22); border: 1px solid rgba(255,138,42,.2); border-radius: 18px; padding: 14px; margin-bottom: 14px; }
+    .section .row > div,
+    .section .row1 > div{
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,0));
+      border:1px solid rgba(255,138,42,.22);
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .qList{display:flex; flex-direction:column; gap:10px;}
+    .qItem{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:10px;
+      padding:10px 12px;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(10,14,18,.48);
+      align-items:center;
+    }
+    .iconBtn{
+      width:38px; height:38px;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(25,35,46,.45);
+      color:var(--text);
+      cursor:pointer;
+      display:grid; place-items:center;
+    }
+    .iconBtn.danger{ border-color: rgba(255,91,107,.45); background: rgba(255,91,107,.12)}
+
+    .previewWrap{
+      display:flex;
+      flex-direction:column;
+    }
+    .previewFrame{
+      flex:1;
+      min-height: 420px;
+      border:0;
+      width:100%;
+    }
+
+    /* ====== GAME MODE ====== */
+    .gameRoot{
+      position:fixed;
+      inset:0;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      background:#000;
+    }
+    .arena{
+      position:relative;
+      flex:1;
+      border-radius: 22px;
+      overflow:hidden;
+      margin: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: #0b0f14;
+    }
+    .arenaBg{
+      position:absolute;
+      inset:0;
+      background-size: cover;
+      background-position: center;
+      transform: scale(1.10);
+    }
+
+    .hud{
+      position:absolute;
+      top:14px; left:14px; right:14px;
+      display:flex; align-items:center; justify-content:space-between;
+      pointer-events:none;
+    }
+    .gameTitle{ font-weight:900; font-size:22px; text-shadow: 0 6px 25px #000; }
     
-    .btn{ padding:10px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.1); background:rgba(25,35,46,.6); color:#fff; cursor:pointer; }
-    .btnGold{ background: rgba(202,162,77,.3); border-color: #caa24d; }
+    .teams{
+      position:absolute;
+      top:78px; left:14px; right:14px;
+      display:grid; gap:10px;
+      pointer-events:none;
+    }
+    .teamCard{
+      pointer-events:auto;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.30);
+      backdrop-filter: blur(10px);
+      padding:10px;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .teamNameInput{
+      background:transparent; border:none; color:#fff; font-weight:800; font-size:14px;
+    }
+    .target{
+      position:absolute;
+      width: 92px; height: 92px;
+      transform: translate(-50%, -50%);
+      cursor:pointer;
+      z-index:10;
+    }
+    .target .tImg{
+      position:absolute; inset:0;
+      background-image: var(--target-img);
+      background-size: contain; background-repeat: no-repeat;
+    }
+    .target .tNum{
+      position:absolute; inset:0;
+      display:grid; place-items:center;
+      font-weight:800; font-size:22px; color:#fff;
+      text-shadow: 0 2px 10px #000;
+    }
+    /* Визуальный индикатор перетаскивания в режиме редактора */
+    .edit-mode .target { cursor: move; border: 2px dashed rgba(255,138,42,0.5); border-radius: 50%; }
+
+    .modalBackdrop{
+      position:absolute; inset:0;
+      background: rgba(0,0,0,.62);
+      backdrop-filter: blur(10px);
+      display:none; align-items:center; justify-content:center;
+      z-index: 40;
+    }
+    .modalBackdrop.on{ display:flex; }
+    .modal{
+      width: min(980px, 96vw);
+      border-radius: 22px;
+      background: #0a0d12;
+      border:1px solid var(--neonLine);
+      padding: 20px;
+      position:relative;
+    }
+    .ansBtn{
+      width:100%; text-align:left; padding:14px; margin-top:10px;
+      border-radius: 18px; background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12); color:#fff; cursor:pointer;
+    }
     
-    input, select, textarea { width:100%; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,.1); background:#000; color:#fff; margin-top:5px; }
-    label { font-size:12px; color:var(--muted); }
-
-    .previewWrap{ display:flex; flex-direction:column; }
-    .previewFrame{ flex:1; border:0; width:100%; background: #000; border-radius:18px; }
-
-    /* Перетаскивание */
-    .qItem { display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,.03); padding:10px; border-radius:12px; margin-bottom:8px; border:1px solid rgba(255,255,255,.05); }
-    .iconBtn { background:none; border:none; color:var(--muted); cursor:pointer; font-size:18px; }
-
-    .topBrand{position:fixed;left:18px;top:14px;z-index:9999; display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:14px;background:rgba(18,24,33,.6);border:1px solid rgba(255,255,255,.1);backdrop-filter: blur(8px);}
-    .topBrand img{height:30px; border-radius:5px;}
-
-    /* Стили мишеней в превью (когда в режиме редактора) */
-    .mode-edit-pos .target { cursor: move !important; border: 2px dashed #ff8a2a !important; }
+    .topBrand{position:fixed;left:18px;top:14px;z-index:9999;display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:14px;background:rgba(18,24,33,.58);border:1px solid rgba(255,255,255,.12);backdrop-filter: blur(8px);}
+    .topBrand img{height:34px;border-radius:10px;}
+    .topBrand span{font-weight:800;font-size:13px;color:#fff;}
   </style>
 </head>
 <body>
-
-<div class="topBrand">
-  <img src="63.png" onerror="this.style.display='none'"/>
-  <span>Светлана Быкова</span>
-</div>
-
+  <div class="topBrand">
+    <img src="63.png" onerror="this.style.display='none'"/>
+    <span>Светлана Быкова</span>
+  </div>
 <div id="root"></div>
 
 <script>
-const VERSION = "25-Drag";
-const params = new URLSearchParams(location.search);
-const isGame = params.has('game');
+const VERSION = 25;
+const $ = (sel, el=document)=> el.querySelector(sel);
+const $$ = (sel, el=document)=> Array.from(el.querySelectorAll(sel));
 
-function b64uEncode(obj){ return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
-function b64uDecode(str){ return JSON.parse(decodeURIComponent(escape(atob(str.replace(/-/g,'+').replace(/_/g,'/'))))); }
+/* base64url */
+function b64uEncode(obj){
+  return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function b64uDecode(str){
+  str = str.replace(/-/g,'+').replace(/_/g,'/');
+  while(str.length % 4) str += '=';
+  return JSON.parse(decodeURIComponent(escape(atob(str))));
+}
 
-/* --- EDITOR --- */
-if (!isGame) {
-  let cfg = {
+function defaultCfg(){
+  return {
     title: "Математический тир",
+    teamsCount: 2,
+    autoNextTeam: true,
+    latex: false,
     bg: "2.png",
     targetFile: "13.png",
     questions: [],
-    teamsCount: 2
+    qFont: 'Roboto',
+    aFont: 'Roboto',
+    fontSize: 18,
+    startScreen: { enabled: false, text: "Инструкция...", color: "#ff8a2a", neon: true },
+    feedbackScreen: { enabled: true, extraText: "Спасибо за игру!" },
+    shot: { variant:"pif", volume:0.7 }
   };
-
-  function renderEditor() {
-    document.getElementById('root').innerHTML = `
-      <div class="app">
-        <div class="panel">
-          <div class="panelHeader">
-            <div style="font-weight:900">РЕДАКТОР</div>
-            <button class="btn btnGold" id="copyCode">📋 Код для Genially</button>
-          </div>
-          <div class="scroll">
-            <div class="section">
-              <label>Заголовок</label>
-              <input type="text" id="edTitle" value="${cfg.title}">
-              <label style="margin-top:10px; display:block">Фон (URL или 1.png - 8.png)</label>
-              <input type="text" id="edBg" value="${cfg.bg}">
-              <label style="margin-top:10px; display:block">Мишень (URL или 10.png - 14.png)</label>
-              <input type="text" id="edTarget" value="${cfg.targetFile}">
-            </div>
-            <div class="section">
-              <div style="display:flex; justify-content:space-between; align-items:center">
-                <h3 style="margin:0">Вопросы</h3>
-                <button class="btn" id="addQ">＋ Добавить</button>
-              </div>
-              <p style="font-size:11px; color:orange">💡 Теперь мишени можно двигать мышкой прямо в превью справа!</p>
-              <div id="qList" style="margin-top:15px"></div>
-            </div>
-          </div>
-        </div>
-        <div class="previewWrap">
-          <iframe id="pFrame" class="previewFrame"></iframe>
-        </div>
-      </div>
-    `;
-
-    document.getElementById('edTitle').oninput = e => { cfg.title = e.target.value; updatePreview(); };
-    document.getElementById('edBg').onchange = e => { cfg.bg = e.target.value; updatePreview(); };
-    document.getElementById('edTarget').onchange = e => { cfg.targetFile = e.target.value; updatePreview(); };
-    document.getElementById('addQ').onclick = () => {
-      cfg.questions.push({ text: "Новый вопрос", x: 50, y: 50, points: 10, options: [{text:"Да", correct:true}] });
-      renderQList();
-      updatePreview();
-    };
-    document.getElementById('copyCode').onclick = () => {
-      const url = location.origin + location.pathname + "?game=" + b64uEncode(cfg);
-      const code = `<iframe src="${url}" style="width:100%;height:600px;border:0" allowfullscreen></iframe>`;
-      navigator.clipboard.writeText(code);
-      alert("Код скопирован!");
-    };
-
-    renderQList();
-    updatePreview();
-  }
-
-  function renderQList() {
-    const list = document.getElementById('qList');
-    list.innerHTML = "";
-    cfg.questions.forEach((q, i) => {
-      const div = document.createElement('div');
-      div.className = 'qItem';
-      div.innerHTML = `
-        <span style="font-size:13px">${i+1}. ${q.text.substring(0,15)}... (${q.x}%, ${q.y}%)</span>
-        <button class="iconBtn" onclick="removeQ(${i})">🗑️</button>
-      `;
-      list.appendChild(div);
-    });
-  }
-
-  window.removeQ = (i) => { cfg.questions.splice(i, 1); renderQList(); updatePreview(); };
-
-  function updatePreview() {
-    const frame = document.getElementById('pFrame');
-    const data = b64uEncode(cfg);
-    frame.src = location.origin + location.pathname + "?game=" + data + "&editMode=1";
-  }
-
-  // Слушаем сообщения от iframe о смене координат
-  window.addEventListener('message', e => {
-    if (e.data.type === 'updatePos') {
-      const { index, x, y } = e.data;
-      if (cfg.questions[index]) {
-        cfg.questions[index].x = Math.round(x);
-        cfg.questions[index].y = Math.round(y);
-        renderQList();
-      }
-    }
-  });
-
-  renderEditor();
 }
 
-/* --- GAME / PREVIEW --- */
-if (isGame) {
-  const gameCfg = b64uDecode(params.get('game'));
-  const editMode = params.has('editMode');
+const params = new URLSearchParams(location.search);
+const isGame = params.has('game');
+const isEditMode = params.has('edit'); // Флаг для превью в редакторе
 
-  document.body.innerHTML = `
-    <div id="gameArena" style="position:relative; width:100vw; height:100vh; background: #000; overflow:hidden">
-      <div id="bg" style="position:absolute; inset:0; background-size:cover; background-position:center"></div>
-      <div id="targets"></div>
-      <div id="ui" style="position:absolute; top:20px; left:20px; pointer-events:none">
-        <h1 style="margin:0; text-shadow: 0 2px 10px #000">${gameCfg.title}</h1>
+/* ===========================
+   GAME / PREVIEW MODE
+   =========================== */
+function mountGame(cfg){
+  const root = document.getElementById('root');
+  root.innerHTML = `
+    <div class="gameRoot ${isEditMode ? 'edit-mode' : ''}">
+      <div class="arena" id="arena">
+        <div class="arenaBg" id="arenaBg"></div>
+        <div class="hud">
+          <div class="gameTitle">${cfg.title}</div>
+          <div style="color:#fff; pointer-events:auto;">
+            <button class="btn" id="btnReset">Сброс</button>
+          </div>
+        </div>
+        <div class="teams" id="teams"></div>
+        <div class="targets" id="targets"></div>
+
+        <div class="modalBackdrop" id="modalBack">
+          <div class="modal">
+            <h2 id="qText"></h2>
+            <div id="answers"></div>
+            <button class="btn" style="margin-top:20px" onclick="document.getElementById('modalBack').classList.remove('on')">Закрыть</button>
+          </div>
+        </div>
       </div>
     </div>
   `;
 
-  const bg = document.getElementById('bg');
-  bg.style.backgroundImage = `url(${gameCfg.bg})`;
-  if (editMode) document.body.classList.add('mode-edit-pos');
+  const arena = $('#arena');
+  const targetsEl = $('#targets');
+  const bgEl = $('#arenaBg');
+  bgEl.style.backgroundImage = `url("${cfg.bg}")`;
 
-  const targetsCont = document.getElementById('targets');
+  let currentTeam = 0;
+  const scores = Array(Number(cfg.teamsCount)).fill(0);
 
-  function renderTargets() {
-    targetsCont.innerHTML = "";
-    gameCfg.questions.forEach((q, i) => {
-      const t = document.createElement('div');
-      t.className = 'target';
-      t.style.cssText = `
-        position:absolute; width:80px; height:80px; left:${q.x}%; top:${q.y}%;
-        transform: translate(-50%,-50%); cursor:pointer;
-        background: url(${gameCfg.targetFile}) no-repeat center/contain;
-        display:flex; align-items:center; justify-content:center;
-        color:#fff; font-weight:900; font-size:20px; text-shadow:0 2px 4px #000;
-        z-index: 10;
-      `;
-      t.innerHTML = i + 1;
+  function renderTeams(){
+    const tEl = $('#teams');
+    tEl.style.gridTemplateColumns = `repeat(${cfg.teamsCount}, 1fr)`;
+    tEl.innerHTML = scores.map((s, i) => `
+      <div class="teamCard">
+        <span>Команда ${i+1}</span>
+        <b id="score_${i}">${s}</b>
+      </div>
+    `).join('');
+  }
 
-      if (editMode) {
-        // Логика перетаскивания (Drag)
-        t.onmousedown = (e) => {
-          e.preventDefault();
-          const arena = document.getElementById('gameArena');
+  function renderTargets(){
+    targetsEl.innerHTML = '';
+    cfg.questions.forEach((q, i) => {
+      const el = document.createElement('div');
+      el.className = 'target';
+      el.style.left = (q.x || 50) + '%';
+      el.style.top = (q.y || 40) + '%';
+      el.style.setProperty('--target-img', `url("${cfg.targetFile}")`);
+      el.innerHTML = `<div class="tImg"></div><div class="tNum">${i+1}</div>`;
+
+      if(isEditMode) {
+        // Логика перетаскивания
+        el.onmousedown = function(e) {
           const rect = arena.getBoundingClientRect();
-
           function move(ev) {
-            let px = ((ev.clientX - rect.left) / rect.width) * 100;
-            let py = ((ev.clientY - rect.top) / rect.height) * 100;
-            px = Math.max(0, Math.min(100, px));
-            py = Math.max(0, Math.min(100, py));
-            
-            t.style.left = px + "%";
-            t.style.top = py + "%";
-
-            // Отправляем родителю новые координаты
-            window.parent.postMessage({ type: 'updatePos', index: i, x: px, y: py }, "*");
+            let x = ((ev.clientX - rect.left) / rect.width) * 100;
+            let y = ((ev.clientY - rect.top) / rect.height) * 100;
+            q.x = Math.round(x * 10) / 10;
+            q.y = Math.round(y * 10) / 10;
+            el.style.left = q.x + '%';
+            el.style.top = q.y + '%';
+            // Передаем координаты в редактор
+            window.parent.postMessage({type: 'updateCoords', index: i, x: q.x, y: q.y}, '*');
           }
-
           function stop() {
             window.removeEventListener('mousemove', move);
             window.removeEventListener('mouseup', stop);
           }
-
           window.addEventListener('mousemove', move);
           window.addEventListener('mouseup', stop);
         };
+      } else {
+        el.onclick = () => openQuestion(i);
       }
-
-      targetsCont.appendChild(t);
+      targetsEl.appendChild(el);
     });
   }
 
+  function openQuestion(i){
+    const q = cfg.questions[i];
+    $('#qText').textContent = q.text;
+    const ans = $('#answers');
+    ans.innerHTML = '';
+    (q.options || []).forEach(opt => {
+      const b = document.createElement('button');
+      b.className = 'ansBtn';
+      b.textContent = opt.text;
+      b.onclick = () => {
+        if(opt.correct) {
+          scores[currentTeam] += Number(q.points);
+          $(`#score_${currentTeam}`).textContent = scores[currentTeam];
+        }
+        if(cfg.autoNextTeam) currentTeam = (currentTeam + 1) % cfg.teamsCount;
+        $('#modalBack').classList.remove('on');
+      };
+      ans.appendChild(b);
+    });
+    $('#modalBack').classList.add('on');
+  }
+
+  $('#btnReset').onclick = () => { scores.fill(0); renderTeams(); };
+
+  renderTeams();
   renderTargets();
+}
+
+/* ===========================
+   EDITOR MODE
+   =========================== */
+function mountEditor(){
+  const root = document.getElementById('root');
+  let cfg = defaultCfg();
+
+  root.innerHTML = `
+    <div class="app">
+      <div class="panel">
+        <div class="panelHeader">
+          <div class="title">Редактор</div>
+          <button class="btn btnGold" id="copyCode">📋 Код</button>
+        </div>
+        <div class="scroll">
+          <div class="section">
+            <h3>Настройки</h3>
+            <div class="row1">
+              <div><label>Заголовок</label><input id="inpTitle" type="text" value="${cfg.title}"/></div>
+              <div><label>Фон (URL)</label><input id="inpBg" type="text" value="${cfg.bg}"/></div>
+              <div><label>Мишень (URL)</label><input id="inpTarget" type="text" value="${cfg.targetFile}"/></div>
+            </div>
+          </div>
+          <div class="section">
+            <div style="display:flex; justify-content:space-between; align-items:center">
+              <h3>Вопросы</h3>
+              <button class="btn" id="btnAdd">＋ Добавить</button>
+            </div>
+            <p style="font-size:11px; color:var(--neon)">💡 Мишени в превью справа можно двигать мышкой!</p>
+            <div class="qList" id="qList"></div>
+          </div>
+        </div>
+      </div>
+      <div class="previewWrap">
+        <iframe class="previewFrame" id="previewFrame"></iframe>
+      </div>
+    </div>
+  `;
+
+  function updatePreview(){
+    cfg.title = $('#inpTitle').value;
+    cfg.bg = $('#inpBg').value;
+    cfg.targetFile = $('#inpTarget').value;
+    const data = b64uEncode(cfg);
+    $('#previewFrame').src = location.origin + location.pathname + '?game=' + data + '&edit=1';
+  }
+
+  window.addEventListener('message', (e) => {
+    if(e.data.type === 'updateCoords'){
+      const q = cfg.questions[e.data.index];
+      if(q) { q.x = e.data.x; q.y = e.data.y; }
+    }
+  });
+
+  $('#btnAdd').onclick = () => {
+    cfg.questions.push({text: "Новый вопрос", points: 10, x: 50, y: 50, options: [{text: "Да", correct: true}]});
+    renderList();
+    updatePreview();
+  };
+
+  function renderList(){
+    const list = $('#qList');
+    list.innerHTML = '';
+    cfg.questions.forEach((q, i) => {
+      const el = document.createElement('div');
+      el.className = 'qItem';
+      el.innerHTML = `<span>${i+1}. ${q.text}</span><button class="iconBtn danger" onclick="delQ(${i})">🗑️</button>`;
+      list.appendChild(el);
+    });
+  }
+
+  window.delQ = (i) => { cfg.questions.splice(i, 1); renderList(); updatePreview(); };
+  $('#copyCode').onclick = () => {
+    const url = location.origin + location.pathname + '?game=' + b64uEncode(cfg);
+    navigator.clipboard.writeText(`<iframe src="${url}" style="width:100%;height:600px;border:0" allowfullscreen></iframe>`);
+    alert("Скопировано!");
+  };
+
+  $('#inpTitle').oninput = updatePreview;
+  $('#inpBg').onchange = updatePreview;
+  $('#inpTarget').onchange = updatePreview;
+
+  updatePreview();
+}
+
+if(isGame){
+  let cfg = defaultCfg();
+  try { cfg = b64uDecode(params.get('game')); } catch(e){}
+  mountGame(cfg);
+} else {
+  mountEditor();
 }
 </script>
 </body>
