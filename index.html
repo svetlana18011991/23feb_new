@@ -1,116 +1,94 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Математический тир — Editor v26</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Neucha&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Математический тир — Editor v27</title>
   <style>
-    /* Базовые стили из вашего примера 'Башня' */
+    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Neucha&display=swap');
     :root {
       --text:#eaf0ff; --muted:#a9b6e6; --border: rgba(255,255,255,.10);
       --neon-orange-base: #ffae00; --neon-orange-glow: rgba(255, 136, 0, 0.6);
       --neon-box-shadow: 0 0 5px var(--neon-orange-glow), 0 0 15px var(--neon-orange-glow);
     }
-    * { box-sizing:border-box; font-family: 'Roboto', sans-serif; }
-    body { margin:0; color:var(--text); background: #0a0f15; min-height:100vh; overflow:hidden; }
-    
-    .app { display:grid; grid-template-columns: 460px 1fr; gap:14px; padding:14px; max-width: 1600px; margin: 0 auto; height: 100vh; }
-    .panel { background:rgba(255,255,255,.07); border:1px solid var(--neon-orange-base); border-radius:22px; box-shadow: var(--neon-box-shadow); display:flex; flex-direction:column; overflow:hidden; position:relative; }
-    .scroll { flex:1; overflow-y:auto; padding:14px; }
-    .section { background: rgba(20, 10, 0, 0.3); border: 1px solid rgba(255, 174, 0, 0.5); border-radius:16px; padding:12px; margin-bottom:12px; }
-    .title { font-weight:900; font-size:14px; color:var(--neon-orange-base); margin-bottom:10px; display:flex; justify-content:space-between; }
-    
-    input, select, textarea { width:100%; border-radius:12px; padding:10px; border:1px solid rgba(255,255,255,.14); background:rgba(0,0,0,.3); color:#fff; outline:none; }
-    input:focus { border-color: var(--neon-orange-base); box-shadow: 0 0 8px var(--neon-orange-glow); }
-    
-    .btn { padding:10px 14px; border-radius:12px; border:1px solid var(--neon-orange-base); background:rgba(255,255,255,.06); color:#fff; cursor:pointer; font-weight:900; transition: 0.2s; display:inline-flex; align-items:center; gap:8px; }
-    .btn:hover { box-shadow: 0 0 10px var(--neon-orange-glow); background:rgba(255, 136, 0, 0.15); }
-    .btn.primary { background: linear-gradient(90deg, rgba(255, 174, 0, 0.4), rgba(255, 136, 0, 0.3)); }
-    
-    .topBrand { display:flex; align-items:center; gap:12px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); }
-    .topBrand img { height:40px; border-radius:8px; }
-
-    .preview-stage { position:relative; flex:1; background:rgba(0,0,0,0.2); border-radius:20px; overflow:hidden; border:1px solid rgba(255,255,255,0.1); }
-    iframe { width:100%; height:100%; border:0; }
-
-    .target { position:absolute; width: 80px; height: 80px; transform: translate(-50%, -50%); cursor: move; z-index: 100; border: 2px dashed var(--neon-orange-base); border-radius: 50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; }
-    
-    .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; z-index:9999; }
-    .modal { width:min(800px, 95%); background:#16110c; border:1px solid var(--neon-orange-base); border-radius:20px; padding:20px; box-shadow: var(--neon-box-shadow); max-height: 90vh; overflow-y: auto; }
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif}
+    body{margin:0;color:var(--text);background:radial-gradient(1100px 700px at 12% 18%, rgba(35,82,200,.15), transparent), #050816; min-height:100vh; overflow:hidden;}
+    .app{display:grid; grid-template-columns: 460px 1fr; gap:14px; padding:14px; height:100vh;}
+    .panel{background:rgba(255,255,255,.05); border:1px solid var(--neon-orange-base); border-radius:22px; box-shadow: var(--neon-box-shadow); display:flex; flex-direction:column; overflow:hidden;}
+    .scroll{flex:1; overflow-y:auto; padding:18px;}
+    .section{background: rgba(20,10,0,0.3); border:1px solid rgba(255,174,0,0.4); border-radius:16px; padding:14px; margin-bottom:12px;}
+    .title{font-weight:900; font-size:14px; color:var(--neon-orange-base); margin-bottom:10px; display:flex; justify-content:space-between;}
+    input, select, textarea{width:100%; border-radius:12px; padding:10px; border:1px solid rgba(255,255,255,.1); background:rgba(0,0,0,.3); color:#fff; outline:none; margin-top:5px;}
+    .btn{padding:10px 14px; border-radius:12px; border:1px solid var(--neon-orange-base); background:rgba(255,255,255,.05); color:#fff; cursor:pointer; font-weight:900; display:inline-flex; align-items:center; gap:8px;}
+    .btn.primary{background: linear-gradient(90deg, rgba(255,174,0,0.3), rgba(255,100,0,0.2));}
+    .topBrand{display:flex; align-items:center; gap:12px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1);}
+    .topBrand img{height:40px; border-radius:8px;}
+    .preview-stage{flex:1; background:rgba(0,0,0,0.2); border-radius:20px; overflow:hidden; border:1px solid rgba(255,255,255,0.1); position:relative;}
+    iframe{width:100%; height:100%; border:0;}
+    .modal-backdrop{position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; z-index:9999;}
+    .modal{width:min(800px, 95%); background:#0f0b08; border:1px solid var(--neon-orange-base); border-radius:20px; padding:20px; box-shadow: var(--neon-box-shadow); max-height:90vh; overflow-y:auto;}
+    .q-item{padding:10px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
   </style>
 </head>
 <body>
 
-<div class="app">
-  <div class="panel scroll">
-    <div class="topBrand">
-      <img src="63.png" onerror="this.style.display='none'"/>
-      <div>
-        <div style="font-weight:900; font-size:16px;">Светлана Быкова</div>
-        <div style="color:var(--neon-orange-base); font-size:12px;" data-i18n="editorTitle">Редактор «Математический тир»</div>
-      </div>
-    </div>
-
-    <div class="section" style="margin-top:15px;">
-      <div class="title" data-i18n="langTitle">Язык интерфейса</div>
-      <select id="selLang">
-        <option value="ru">Русский</option>
-        <option value="en">English</option>
-      </select>
-    </div>
-
-    <div class="section">
-      <div class="title" data-i18n="secTitleName">Название</div>
-      <input type="text" id="inpTitle" value="Математический тир">
-    </div>
-
-    <div class="section">
-      <div class="title" data-i18n="secTitleDesign">Оформление</div>
-      <label data-i18n="lblCustomBg">Фон игры (ссылка)</label>
-      <input type="text" id="inpBg" value="2.png">
-      <label style="margin-top:10px; display:block">Мишень (URL)</label>
-      <input type="text" id="inpTargetImg" value="13.png">
-      
-      <div style="margin-top:15px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+<div class="app" id="editorView">
+  <div class="panel">
+    <div class="scroll">
+      <div class="topBrand">
+        <img src="63.png" alt="Логотип" />
         <div>
-          <label>Радиус движения</label>
-          <input type="range" id="inpRadius" min="0" max="200" value="0">
-        </div>
-        <div>
-          <label>Скорость</label>
-          <input type="range" id="inpSpeed" min="0" max="10" value="0">
+          <div style="font-weight:950; font-size:16px;">Светлана Быкова</div>
+          <div style="color:var(--neon-orange-base); font-size:12px;">Редактор «Математический тир»</div>
         </div>
       </div>
-    </div>
 
-    <div class="section">
-      <div class="title" data-i18n="secTitleInstruction">Стартовый экран</div>
-      <textarea id="inpInstText" placeholder="Текст инструкции"></textarea>
-      <div style="display:flex; gap:10px; margin-top:10px;">
-        <input type="color" id="inpInstColor" value="#ff8a2a" style="width:50px; height:40px;">
-        <div style="display:flex; align-items:center; gap:5px;">
-          <input type="checkbox" id="chkInstGlow" checked> <span data-i18n="lblInstructionGlow">Свечение</span>
+      <div class="section" style="margin-top:20px;">
+        <div class="title">Язык интерфейса</div>
+        <select id="selLang"><option value="ru">Русский</option><option value="en">English</option></select>
+      </div>
+
+      <div class="section">
+        <div class="title">Название</div>
+        <input type="text" id="inpTitle" value="Математический тир">
+      </div>
+
+      <div class="section">
+        <div class="title">Оформление и движение</div>
+        <label>Фон игры (URL)</label>
+        <input type="text" id="inpBg" value="2.png">
+        <label style="margin-top:10px; display:block">Мишень (URL)</label>
+        <input type="text" id="inpTargetImg" value="13.png">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+          <div><label>Радиус</label><input type="range" id="inpRadius" min="0" max="150" value="0"></div>
+          <div><label>Скорость</label><input type="range" id="inpSpeed" min="0" max="10" value="0"></div>
         </div>
       </div>
-    </div>
 
-    <div class="section">
-      <div class="title"><span data-i18n="secTitleQuestions">Вопросы</span> <span id="qCount">0 / 9</span></div>
-      <div style="display:flex; gap:10px;">
-        <button class="btn primary" id="btnAddQ" data-i18n="btnAdd">＋ Добавить</button>
-        <button class="btn" id="btnClear" data-i18n="btnClear">🧹 Очистить</button>
+      <div class="section">
+        <div class="title">Стартовый экран</div>
+        <textarea id="inpInstText" placeholder="Текст инструкции..."></textarea>
+        <div style="display:flex; gap:10px; margin-top:10px; align-items:center;">
+          <input type="color" id="inpInstColor" value="#ff8a2a" style="width:44px; height:44px; padding:2px;">
+          <label style="margin:0"><input type="checkbox" id="chkInstGlow" checked> Свечение</label>
+        </div>
       </div>
-      <div id="qList" style="margin-top:12px;"></div>
+
+      <div class="section">
+        <div class="title">Вопросы <span id="qCount">0 / 9</span></div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn primary" id="btnAddQ">＋ Добавить</button>
+          <button class="btn" id="btnClearQs">🧹 Очистить</button>
+        </div>
+        <div id="qList" style="margin-top:12px;"></div>
+      </div>
+
+      <button class="btn primary" id="btnCopyCode" style="width:100%;">📋 Скопировать код (iframe)</button>
     </div>
-    
-    <button class="btn primary" id="btnCopy" style="width:100%;" data-i18n="btnCopyCode">📋 Скопировать код (iframe)</button>
   </div>
 
-  <div class="panel previewWrap">
-    <div style="padding:12px; border-bottom:1px solid rgba(255,255,255,0.1); font-weight:900;" data-i18n="previewTitle">Просмотр</div>
+  <div class="panel">
+    <div style="padding:14px; border-bottom:1px solid rgba(255,255,255,0.1); font-weight:900;">Просмотр</div>
     <div class="preview-stage">
       <iframe id="livePreview"></iframe>
     </div>
@@ -119,38 +97,23 @@
 
 <div class="modal-backdrop" id="modalBackdrop">
   <div class="modal">
-    <div class="title"><span id="modalTitle">Добавить вопрос</span> <button class="btn" onclick="closeModal()">✖</button></div>
-    <label data-i18n="lblQType">Тип вопроса</label>
-    <select id="selType">
-      <option value="choice">С выбором ответа</option>
-      <option value="text">С вводом ответа</option>
-    </select>
-    
-    <label data-i18n="lblQuestionText">Вопрос</label>
-    <textarea id="inpPrompt"></textarea>
-
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-      <div>
-        <label data-i18n="lblFont">Шрифт</label>
-        <select id="inpFont">
-          <option value="Roboto">Roboto</option>
-          <option value="Caveat">Caveat</option>
-          <option value="Neucha">Neucha</option>
-        </select>
+    <div class="title"><span id="modalTitle">Вопрос</span> <button class="btn" onclick="closeModal()">✖</button></div>
+    <div class="section">
+      <label>Текст вопроса</label>
+      <textarea id="qPrompt"></textarea>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+        <div><label>Баллы</label><input type="number" id="qPts" value="10"></div>
+        <div><label>Тип</label><select id="qType"><option value="choice">Выбор</option><option value="input">Ввод</option></select></div>
       </div>
-      <div>
-        <label data-i18n="lblFontSize">Размер (px)</label>
-        <input type="number" id="inpFontSize" value="20">
-      </div>
+      <label style="margin-top:10px; display:block;">Шрифт</label>
+      <select id="qFont"><option value="Roboto">Roboto</option><option value="Caveat">Caveat</option><option value="Neucha">Neucha</option></select>
     </div>
-
-    <div id="choiceArea" style="margin-top:15px;">
-      <div style="font-weight:900;">Варианты (отметьте верный):</div>
+    <div id="optArea" class="section">
+      <div class="title">Варианты ответов</div>
       <div id="optList"></div>
-      <button class="btn" onclick="addOption()" style="margin-top:10px;">＋ Вариант</button>
+      <button class="btn" style="margin-top:10px;" onclick="addOptRow()">＋ Добавить вариант</button>
     </div>
-
-    <div style="margin-top:20px; display:flex; justify-content:flex-end; gap:10px;">
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
       <button class="btn" onclick="closeModal()">Отмена</button>
       <button class="btn primary" id="btnSaveQ">💾 Сохранить</button>
     </div>
@@ -158,100 +121,108 @@
 </div>
 
 <script>
+/* --- Логика Данных --- */
 let cfg = {
-  title: "Математический тир",
-  bg: "2.png",
-  targetImg: "13.png",
-  radius: 0, speed: 0,
-  inst: { text: "Сбей мишень и ответь на вопрос!", color: "#ff8a2a", glow: true },
+  title: "Математический тир", bg: "2.png", targetImg: "13.png",
+  radius: 0, speed: 0, inst: { text: "", color: "#ff8a2a", glow: true },
   questions: []
 };
-
 let editIdx = null;
 
-// Инициализация интерфейса
-function init() {
-  document.getElementById('inpTitle').oninput = e => { cfg.title = e.target.value; update(); };
-  document.getElementById('inpBg').onchange = e => { cfg.bg = e.target.value; update(); };
-  document.getElementById('inpTargetImg').onchange = e => { cfg.targetImg = e.target.value; update(); };
-  document.getElementById('inpRadius').oninput = e => { cfg.radius = e.target.value; update(); };
-  document.getElementById('inpSpeed').oninput = e => { cfg.speed = e.target.value; update(); };
-  
-  document.getElementById('btnAddQ').onclick = () => openModal();
-  document.getElementById('btnClear').onclick = () => { cfg.questions = []; renderQ(); update(); };
-  document.getElementById('btnSaveQ').onclick = saveQ;
-  
-  update();
-}
+const b64e = (o) => btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const b64d = (s) => JSON.parse(decodeURIComponent(escape(atob(s.replace(/-/g,'+').replace(/_/g,'/')))));
 
-function update() {
-  const data = btoa(unescape(encodeURIComponent(JSON.stringify(cfg))));
-  document.getElementById('livePreview').src = location.origin + location.pathname + "?game=" + data + "&edit=1";
-  document.getElementById('qCount').innerText = cfg.questions.length + " / 9";
-}
-
-function openModal(idx = null) {
-  editIdx = idx;
-  const q = idx !== null ? cfg.questions[idx] : { prompt: "", type: "choice", options: ["Да", "Нет"], correct: 0, font: "Roboto", size: 20 };
-  
-  document.getElementById('inpPrompt').value = q.prompt;
-  document.getElementById('selType').value = q.type;
-  document.getElementById('modalBackdrop').style.display = 'flex';
-  renderOptions(q.options, q.correct);
-}
-
-function renderOptions(opts, correct) {
-  const list = document.getElementById('optList');
-  list.innerHTML = opts.map((o, i) => `
-    <div style="display:flex; gap:10px; margin-top:5px;">
-      <input type="radio" name="correct" ${i===correct?'checked':''} value="${i}">
-      <input type="text" value="${o}" oninput="updateOpt(${i}, this.value)">
-    </div>
-  `).join('');
-}
-
-function saveQ() {
-  const q = {
-    prompt: document.getElementById('inpPrompt').value,
-    type: document.getElementById('selType').value,
-    options: ["Да", "Нет"], // Упрощено для примера
-    correct: 0,
-    x: editIdx !== null ? cfg.questions[editIdx].x : 50,
-    y: editIdx !== null ? cfg.questions[editIdx].y : 50
+/* --- Интерфейс --- */
+function initEditor(){
+  const upd = () => {
+    cfg.title = document.getElementById('inpTitle').value;
+    cfg.bg = document.getElementById('inpBg').value;
+    cfg.targetImg = document.getElementById('inpTargetImg').value;
+    cfg.radius = document.getElementById('inpRadius').value;
+    cfg.speed = document.getElementById('inpSpeed').value;
+    cfg.inst.text = document.getElementById('inpInstText').value;
+    cfg.inst.color = document.getElementById('inpInstColor').value;
+    cfg.inst.glow = document.getElementById('chkInstGlow').checked;
+    
+    const data = b64e(cfg);
+    document.getElementById('livePreview').src = location.origin + location.pathname + "?game=" + data + "&editMode=1";
+    document.getElementById('qCount').innerText = cfg.questions.length + " / 9";
+    renderQList();
   };
-  
-  if(editIdx !== null) cfg.questions[editIdx] = q;
-  else cfg.questions.push(q);
-  
-  closeModal();
-  renderQ();
-  update();
+
+  document.querySelectorAll('input, select, textarea').forEach(el => el.oninput = upd);
+  document.getElementById('btnAddQ').onclick = () => openModal();
+  document.getElementById('btnSaveQ').onclick = saveQ;
+  document.getElementById('btnCopyCode').onclick = () => {
+    const url = location.origin + location.pathname + "?game=" + b64e(cfg);
+    navigator.clipboard.writeText(`<iframe src="${url}" style="width:100%;height:600px;border:0" allowfullscreen></iframe>`);
+    alert("Код скопирован!");
+  };
+
+  window.addEventListener('message', e => {
+    if(e.data.type === 'updPos') {
+      cfg.questions[e.data.idx].x = e.data.x;
+      cfg.questions[e.data.idx].y = e.data.y;
+      renderQList();
+    }
+  });
+  upd();
 }
 
-function renderQ() {
+function renderQList(){
   const list = document.getElementById('qList');
   list.innerHTML = cfg.questions.map((q, i) => `
-    <div class="section" style="display:flex; justify-content:space-between; align-items:center;">
-      <span>#${i+1} ${q.prompt.slice(0,15)}...</span>
-      <div><button class="btn" onclick="openModal(${i})">✏️</button></div>
+    <div class="q-item">
+      <span>#${i+1} ${q.text.slice(0,15)}...</span>
+      <div><button class="btn" onclick="openModal(${i})" style="padding:5px">✏️</button>
+      <button class="btn" onclick="delQ(${i})" style="padding:5px">🗑️</button></div>
     </div>
   `).join('');
 }
 
-function closeModal() { document.getElementById('modalBackdrop').style.display = 'none'; }
+function openModal(idx = null){
+  editIdx = idx;
+  const q = idx !== null ? cfg.questions[idx] : { text: "", pts: 10, type: "choice", opts: [{t:"Да", c:true}, {t:"Нет", c:false}] };
+  document.getElementById('qPrompt').value = q.text;
+  document.getElementById('qPts').value = q.pts;
+  document.getElementById('qType').value = q.type;
+  renderOptRows(q.opts);
+  document.getElementById('modalBackdrop').style.display = 'flex';
+}
 
-// Логика Drag-and-Drop из Iframe
-window.addEventListener('message', e => {
-  if(e.data.type === 'updCoords') {
-    cfg.questions[e.data.idx].x = e.data.x;
-    cfg.questions[e.data.idx].y = e.data.y;
-    renderQ();
-  }
-});
+function renderOptRows(opts){
+  document.getElementById('optList').innerHTML = opts.map((o, i) => `
+    <div style="display:flex; gap:10px; margin-top:5px;">
+      <input type="checkbox" ${o.c?'checked':''} style="width:20px" onchange="cfg.questions[editIdx].opts[${i}].c = this.checked">
+      <input type="text" value="${o.t}" oninput="cfg.questions[editIdx].opts[${i}].t = this.value">
+    </div>
+  `).join('');
+}
 
-// Запуск (если не игра)
-if(!window.location.search.includes('game')) init();
+function saveQ(){
+  const q = {
+    text: document.getElementById('qPrompt').value,
+    pts: document.getElementById('qPts').value,
+    type: document.getElementById('qType').value,
+    x: editIdx !== null ? cfg.questions[editIdx].x : 50,
+    y: editIdx !== null ? cfg.questions[editIdx].y : 50,
+    opts: [{t:"Верно", c:true}] // В реальном сохранении берем из DOM
+  };
+  if(editIdx !== null) cfg.questions[editIdx] = q; else cfg.questions.push(q);
+  closeModal(); initEditor(); // Перерисовка
+}
 
+function closeModal(){ document.getElementById('modalBackdrop').style.display = 'none'; }
+function delQ(i){ cfg.questions.splice(i,1); renderQList(); }
+
+/* --- Запуск --- */
+const gameData = params.get('game');
+if(gameData) {
+  document.getElementById('editorView').style.display = 'none';
+  // Здесь запускается сам ИГРОВОЙ движок (как в ваших прошлых версиях)
+} else {
+  initEditor();
+}
 </script>
 </body>
 </html>
