@@ -6,7 +6,8 @@
   <title>Математический тир — Editor + Game</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Neucha&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Lato:wght@400;700&family=Lora:wght@400;700&family=Merriweather:wght@400;700&family=Montserrat:wght@400;700&family=Neucha&family=Open+Sans:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Poppins:wght@400;700&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+  
   <style>
     :root {
       --text: #eaf0ff; --muted: #a9b6e6;
@@ -22,7 +23,7 @@
     
     /* --- EDITOR UI --- */
     body.editor-mode { background: radial-gradient(1100px 700px at 12% 18%, rgba(255, 170, 0, 0.15) 0%, rgba(5,8,22,0) 58%), #050816; }
-    body.game-mode { background: #000; }
+    body.game-mode { background: #000; cursor: var(--game-cursor, default); }
 
     .app { display: grid; grid-template-columns: 460px 1fr; gap: 14px; padding: 14px; height: 100vh; max-width: 1600px; margin: 0 auto; }
     @media (max-width: 1020px) { .app { grid-template-columns: 1fr; } }
@@ -76,21 +77,19 @@
     .modal-foot { padding: 14px 20px; border-top: 1px solid rgba(255, 174, 0, 0.3); display: flex; justify-content: flex-end; gap: 10px; }
     
     .topBrand { display: flex; align-items: center; gap: 10px; }
-    /* Исправлен логотип */
     .topBrand img { height: 36px; width: 36px; object-fit: contain; border-radius: 8px; }
     
     /* --- GAME UI --- */
-    .gameRoot { position: absolute; inset: 0; overflow: hidden; background: #000; font-family: 'Roboto', sans-serif; }
-    .arenaBg { position: absolute; inset: 0; background-size: cover; background-position: center; transform: scale(1.05); }
+    .gameRoot { position: absolute; inset: 0; overflow: hidden; background: #000; font-family: 'Roboto', sans-serif; cursor: var(--game-cursor, default); }
+    .arenaBg { position: absolute; inset: 0; background-size: cover; background-position: center; transform: scale(1.05); cursor: var(--game-cursor, default); }
     .hud { position: absolute; top: 14px; left: 14px; right: 14px; pointer-events: none; z-index: 10; display:flex; justify-content:space-between; align-items:center; }
     .gameTitle { font-weight: 900; font-size: 24px; text-shadow: 0 4px 15px #000; color: #fff; }
-    .teams { display: grid; gap: 10px; margin-top: 54px; padding:0 14px; pointer-events: auto; position:relative; z-index:10;}
+    .teams { display: grid; gap: 10px; margin-top: 54px; padding:0 14px; pointer-events: auto; position:relative; z-index:10; cursor: default; }
     .teamCard { background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 10px; backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; transition: 0.3s; }
     .teamInput { background: transparent; border: none; outline: none; color: #fff; font-weight: 900; font-size: 16px; width: 100%; max-width: 150px; }
     
-    /* Targets & Drag */
     .targets { position: absolute; inset: 0; pointer-events: none; }
-    .target { position: absolute; width: 90px; height: 90px; transform: translate(-50%, -50%) translate(var(--orbit-x, 0px), var(--orbit-y, 0px)); cursor: pointer; pointer-events: auto; z-index: 5; transition: transform 0.1s; }
+    .target { position: absolute; width: 90px; height: 90px; transform: translate(-50%, -50%) translate(var(--orbit-x, 0px), var(--orbit-y, 0px)); pointer-events: auto; z-index: 5; transition: transform 0.1s; cursor: var(--game-cursor, pointer); }
     .target:hover { transform: translate(-50%, -50%) translate(var(--orbit-x, 0px), var(--orbit-y, 0px)) scale(1.1); }
     .target .img { position: absolute; inset: 0; background-image: var(--target-img); background-size: contain; background-repeat: no-repeat; background-position: center; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6)); }
     .target .num { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 900; font-size: 24px; color: #fff; text-shadow: 0 2px 8px #000; }
@@ -99,15 +98,13 @@
     .edit-mode .target { cursor: move !important; border: 2px dashed rgba(255, 174, 0, 0.9); border-radius: 50%; }
     .edit-mode .target:hover { transform: translate(-50%, -50%) translate(var(--orbit-x, 0px), var(--orbit-y, 0px)); }
 
-    /* Modals & Screens in Game */
-    .game-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 50; }
+    .game-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 50; cursor: default; }
     .game-modal.on { display: flex; }
     .game-modal-content { background: #0a0d12; border: 1px solid #ffae00; border-radius: 20px; padding: 24px; width: min(800px, 90%); box-shadow: 0 0 30px rgba(255,174,0,0.3); position:relative; max-height:90vh; overflow-y:auto; }
     .game-ans-btn { width: 100%; text-align: left; padding: 14px; margin-top: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; color: #fff; font-size: 18px; cursor: pointer; transition: 0.2s; }
     .game-ans-btn:hover { background: rgba(255,255,255,0.1); }
     
-    /* Улучшен фон для экранов старта и финиша (эффект размытия) */
-    .screen { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; text-align: center; }
+    .screen { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; text-align: center; cursor: default; }
     .screen.on { display: flex; }
     .screenCard { background: #111; border-radius: 20px; padding: 30px; border: 1px solid; max-width: 600px; width: 90%; }
     .resultRow { display:flex; justify-content:space-between; background:rgba(255,255,255,0.1); padding:12px 20px; border-radius:12px; margin-bottom:10px; font-size:18px; font-weight:bold; }
@@ -143,30 +140,44 @@
 
       <div class="section">
         <div class="title" data-i18n="sDesign">Оформление и движение</div>
-        <label data-i18n="lBg">Фон игры</label>
-        <select id="selBg">
-          <option value="1.png">Фон 1</option>
-          <option value="2.png" selected>Фон 2</option>
-          <option value="3.png">Фон 3</option>
-          <option value="4.png">Фон 4</option>
-          <option value="5.png">Фон 5</option>
-          <option value="6.png">Фон 6</option>
-          <option value="7.png">Фон 7</option>
-          <option value="8.png">Фон 8</option>
+        <div class="row">
+          <div>
+            <label data-i18n="lBg">Фон игры</label>
+            <select id="selBg">
+              <option value="1.png">Фон 1</option>
+              <option value="2.png" selected>Фон 2</option>
+              <option value="3.png">Фон 3</option>
+              <option value="4.png">Фон 4</option>
+              <option value="5.png">Фон 5</option>
+              <option value="6.png">Фон 6</option>
+              <option value="7.png">Фон 7</option>
+              <option value="8.png">Фон 8</option>
+              <option value="custom" data-i18n="optCustom">По ссылке...</option>
+            </select>
+            <input type="text" id="inpBgCustom" placeholder="https://..." style="display:none; margin-top:8px;">
+          </div>
+          <div>
+            <label data-i18n="lTarget">Мишень</label>
+            <select id="selTarget">
+              <option value="10.png">Мишень 10</option>
+              <option value="11.png">Мишень 11</option>
+              <option value="12.png">Мишень 12</option>
+              <option value="13.png" selected>Мишень 13</option>
+              <option value="14.png">Мишень 14</option>
+              <option value="custom" data-i18n="optCustom">По ссылке...</option>
+            </select>
+            <input type="text" id="inpTargetCustom" placeholder="https://..." style="display:none; margin-top:8px;">
+          </div>
+        </div>
+        
+        <label data-i18n="lCursor" style="margin-top:10px;">Прицел (курсор в игре)</label>
+        <select id="selCursor">
+          <option value="crosshair" data-i18n="oCrosshair">Стандартный крестик</option>
+          <option value="sniper" data-i18n="oSniper">Снайперский (чёрный)</option>
+          <option value="reddot" data-i18n="oRedDot">Коллиматор (красный)</option>
           <option value="custom" data-i18n="optCustom">По ссылке...</option>
         </select>
-        <input type="text" id="inpBgCustom" placeholder="https://..." style="display:none; margin-top:8px;">
-
-        <label data-i18n="lTarget" style="margin-top:10px;">Мишень</label>
-        <select id="selTarget">
-          <option value="10.png">Мишень 10</option>
-          <option value="11.png">Мишень 11</option>
-          <option value="12.png">Мишень 12</option>
-          <option value="13.png" selected>Мишень 13</option>
-          <option value="14.png">Мишень 14</option>
-          <option value="custom" data-i18n="optCustom">По ссылке...</option>
-        </select>
-        <input type="text" id="inpTargetCustom" placeholder="https://..." style="display:none; margin-top:8px;">
+        <input type="text" id="inpCursorCustom" placeholder="https://... (.png)" style="display:none; margin-top:8px;">
 
         <div class="row" style="margin-top:10px;">
           <div><label data-i18n="lRadius">Радиус движения</label><input type="range" id="inpRadius" min="0" max="250" value="0"></div>
@@ -182,7 +193,7 @@
           <div><label data-i18n="lVol">Громкость</label><input type="range" id="inpVol" min="0" max="1" step="0.1" value="0.7"></div>
         </div>
         <div class="row" style="margin-top:10px;">
-          <div><label data-i18n="lPenaltyOn">Штраф за ошибку</label><select id="inpPenaltyOn"><option value="false" data-i18n="oOff">Выкл</option><option value="true" data-i18n="oOn">Вкл</option></select></div>
+          <div><label data-i18n="lPenaltyOn">Штраф за промах (мимо мишени)</label><select id="inpPenaltyOn"><option value="false" data-i18n="oOff">Выкл</option><option value="true" data-i18n="oOn">Вкл</option></select></div>
           <div><label data-i18n="lPenaltyPts">Вычитать очков</label><input type="number" id="inpPenaltyPts" value="5"></div>
         </div>
         <label data-i18n="lTeamColors" style="margin-top:10px;">Цвета рамок команд</label>
@@ -211,7 +222,7 @@
           <button class="btn primary" id="btnAddQ" data-i18n="btnAdd">➕ Добавить</button>
           <button class="btn" id="btnClearQ" data-i18n="btnClr">🧹 Очистить</button>
         </div>
-        <div style="font-size:11px; color:var(--neon-orange-base); margin-bottom:8px;" data-i18n="lDragHint">💡 Двигайте мишени прямо в превью справа!</div>
+        <div style="font-size:11px; color:var(--neon-orange-base); margin-bottom:8px;" data-i18n="lDragHint">💡 В превью курсор мыши обычный для удобного перетаскивания. В самой игре он станет прицелом!</div>
         <div id="qList" class="q-list"></div>
       </div>
     </div>
@@ -250,7 +261,23 @@
       <label data-i18n="lQText">Текст вопроса</label>
       <textarea id="modPrompt"></textarea>
       <div class="row" style="margin-top:10px;">
-        <div><label data-i18n="lFont">Шрифт</label><select id="modFont"><option value="Roboto">Roboto</option><option value="Caveat">Caveat (рукописный)</option><option value="Neucha">Neucha (рукописный)</option></select></div>
+        <div>
+          <label data-i18n="lFont">Шрифт</label>
+          <select id="modFont">
+            <option value="Roboto">Roboto</option>
+            <option value="Open Sans">Open Sans</option>
+            <option value="Montserrat">Montserrat</option>
+            <option value="Lato">Lato</option>
+            <option value="Oswald">Oswald</option>
+            <option value="Poppins">Poppins</option>
+            <option value="Merriweather">Merriweather</option>
+            <option value="Playfair Display">Playfair Display</option>
+            <option value="Lora">Lora</option>
+            <option value="Courier New">Courier New</option>
+            <option value="Caveat">Caveat (Рукописный)</option>
+            <option value="Neucha">Neucha (Рукописный)</option>
+          </select>
+        </div>
         <div><label data-i18n="lFontSize">Размер шрифта</label><input type="number" id="modFontSize" value="20"></div>
       </div>
 
@@ -315,16 +342,16 @@
    ======================== */
 const dict = {
   ru: {
-    btnCopy: "📋 Код для Genially", sLang: "Язык интерфейса", sName: "Название игры", sDesign: "Оформление", lBg: "Фон игры", lTarget: "Мишень", optCustom: "По ссылке...", lRadius: "Радиус движения", lSpeed: "Скорость", sGame: "Настройки игры", lTeams: "Команд (1-3)", lTeamColors: "Цвета рамок команд", lSound: "Выстрел", lVol: "Громкость", lPenaltyOn: "Штраф за ошибку", lPenaltyPts: "Вычитать очков", oOff: "Выкл", oOn: "Вкл", sStart: "Стартовый экран", lInstructionColor: "Цвет рамки", lGlow: "Свечение рамки", sEnd: "Финальный экран (Фидбек)", sQ: "Вопросы", btnAdd: "➕ Добавить", btnClr: "🧹 Очистить", lDragHint: "💡 Двигайте мишени прямо в превью справа!", previewTitle: "Просмотр", previewHint: "Живое превью (координаты сохраняются)", mTitle: "Редактировать вопрос", lQType: "Тип вопроса", oChoice: "Выбор ответа", oInput: "Ввод ответа", lPts: "Очки", lTimer: "Таймер", lSec: "Секунды", lImg: "🖼️ Картинка (URL)", lQText: "Текст вопроса", lFont: "Шрифт", lFontSize: "Размер шрифта", lAnsOpts: "Варианты ответа", btnAddOpt: "➕ Добавить вариант", btnCancel: "Отмена", btnSave: "💾 Сохранить", lRightAns: "Верный", lOptText: "Текст варианта", lDel: "Удалить", lGameOver: "Результаты игры", btnRestart: "↻ Сыграть еще раз", lTeam: "Команда", btnPlay: "▶ Начать", btnReset: "Сброс", btnOK: "ОК"
+    btnCopy: "📋 Код для Genially", sLang: "Язык интерфейса", sName: "Название игры", sDesign: "Оформление", lBg: "Фон игры", lTarget: "Мишень", optCustom: "По ссылке...", lRadius: "Радиус движения", lSpeed: "Скорость", sGame: "Настройки игры", lTeams: "Команд (1-3)", lTeamColors: "Цвета рамок команд", lSound: "Выстрел", lVol: "Громкость", lPenaltyOn: "Штраф за промах (мимо мишени)", lPenaltyPts: "Вычитать очков", oOff: "Выкл", oOn: "Вкл", sStart: "Стартовый экран", lInstructionColor: "Цвет рамки", lGlow: "Свечение рамки", sEnd: "Финальный экран (Фидбек)", sQ: "Вопросы", btnAdd: "➕ Добавить", btnClr: "🧹 Очистить", lDragHint: "💡 В превью курсор мыши обычный для удобного перетаскивания. В самой игре он станет прицелом!", previewTitle: "Просмотр", previewHint: "Живое превью (координаты сохраняются)", mTitle: "Редактировать вопрос", lQType: "Тип вопроса", oChoice: "Выбор ответа", oInput: "Ввод ответа", lPts: "Очки", lTimer: "Таймер", lSec: "Секунды", lImg: "🖼️ Картинка (URL)", lQText: "Текст вопроса", lFont: "Шрифт", lFontSize: "Размер шрифта", lAnsOpts: "Варианты ответа", btnAddOpt: "➕ Добавить вариант", btnCancel: "Отмена", btnSave: "💾 Сохранить", lRightAns: "Верный", lOptText: "Текст варианта", lDel: "Удалить", lGameOver: "Результаты игры", btnRestart: "↻ Сыграть еще раз", lTeam: "Команда", btnPlay: "▶ Начать", btnReset: "Сброс", btnOK: "ОК", lCursor: "Прицел (курсор в игре)", oCrosshair: "Стандартный крестик", oSniper: "Снайперский (чёрный)", oRedDot: "Коллиматор (красный)"
   },
   en: {
-    btnCopy: "📋 Copy Code", sLang: "Interface Language", sName: "Game Title", sDesign: "Design", lBg: "Background", lTarget: "Target", optCustom: "Custom URL...", lRadius: "Orbit Radius", lSpeed: "Speed", sGame: "Game Settings", lTeams: "Teams (1-3)", lTeamColors: "Team Colors", lSound: "Shot Sound", lVol: "Volume", lPenaltyOn: "Penalty for Miss", lPenaltyPts: "Points to Deduct", oOff: "Off", oOn: "On", sStart: "Start Screen", lInstructionColor: "Border Color", lGlow: "Border Glow", sEnd: "Feedback Screen", sQ: "Questions", btnAdd: "➕ Add", btnClr: "🧹 Clear", lDragHint: "💡 Drag targets directly in the preview on the right!", previewTitle: "Preview", previewHint: "Live preview (coordinates are saved)", mTitle: "Edit Question", lQType: "Question Type", oChoice: "Multiple Choice", oInput: "Text Input", lPts: "Points", lTimer: "Timer", lSec: "Seconds", lImg: "🖼️ Image (URL)", lQText: "Question Text", lFont: "Font", lFontSize: "Font Size", lAnsOpts: "Answer Options", btnAddOpt: "➕ Add Option", btnCancel: "Cancel", btnSave: "💾 Save", lRightAns: "Correct", lOptText: "Option Text", lDel: "Delete", lGameOver: "Game Results", btnRestart: "↻ Play Again", lTeam: "Team", btnPlay: "▶ Play", btnReset: "Reset", btnOK: "OK"
+    btnCopy: "📋 Copy Code", sLang: "Interface Language", sName: "Game Title", sDesign: "Design", lBg: "Background", lTarget: "Target", optCustom: "Custom URL...", lRadius: "Orbit Radius", lSpeed: "Speed", sGame: "Game Settings", lTeams: "Teams (1-3)", lTeamColors: "Team Colors", lSound: "Shot Sound", lVol: "Volume", lPenaltyOn: "Penalty for missing target", lPenaltyPts: "Points to Deduct", oOff: "Off", oOn: "On", sStart: "Start Screen", lInstructionColor: "Border Color", lGlow: "Border Glow", sEnd: "Feedback Screen", sQ: "Questions", btnAdd: "➕ Add", btnClr: "🧹 Clear", lDragHint: "💡 In preview, the cursor is normal for easy dragging. In the game, it becomes a crosshair!", previewTitle: "Preview", previewHint: "Live preview (coordinates are saved)", mTitle: "Edit Question", lQType: "Question Type", oChoice: "Multiple Choice", oInput: "Text Input", lPts: "Points", lTimer: "Timer", lSec: "Seconds", lImg: "🖼️ Image (URL)", lQText: "Question Text", lFont: "Font", lFontSize: "Font Size", lAnsOpts: "Answer Options", btnAddOpt: "➕ Add Option", btnCancel: "Cancel", btnSave: "💾 Save", lRightAns: "Correct", lOptText: "Option Text", lDel: "Delete", lGameOver: "Game Results", btnRestart: "↻ Play Again", lTeam: "Team", btnPlay: "▶ Play", btnReset: "Reset", btnOK: "OK", lCursor: "Crosshair (in-game cursor)", oCrosshair: "Standard Crosshair", oSniper: "Sniper (Black)", oRedDot: "Red Dot Sight"
   },
   de: {
-    btnCopy: "📋 Code kopieren", sLang: "Sprache", sName: "Spieltitel", sDesign: "Design", lBg: "Hintergrund", lTarget: "Ziel", optCustom: "Eigene URL...", lRadius: "Orbit-Radius", lSpeed: "Geschwindigkeit", sGame: "Spieleinstellungen", lTeams: "Teams (1-3)", lTeamColors: "Teamfarben", lSound: "Schuss-Sound", lVol: "Lautstärke", lPenaltyOn: "Strafe bei Fehler", lPenaltyPts: "Punkte abziehen", oOff: "Aus", oOn: "An", sStart: "Startbildschirm", lInstructionColor: "Randfarbe", lGlow: "Randleuchten", sEnd: "Endbildschirm", sQ: "Fragen", btnAdd: "➕ Hinzufügen", btnClr: "🧹 Leeren", lDragHint: "💡 Ziehen Sie die Ziele direkt in der Vorschau rechts!", previewTitle: "Vorschau", previewHint: "Live-Vorschau (Koordinaten werden gespeichert)", mTitle: "Frage bearbeiten", lQType: "Fragetyp", oChoice: "Multiple Choice", oInput: "Texteingabe", lPts: "Punkte", lTimer: "Timer", lSec: "Sekunden", lImg: "🖼️ Bild (URL)", lQText: "Fragentext", lFont: "Schriftart", lFontSize: "Schriftgröße", lAnsOpts: "Antwortmöglichkeiten", btnAddOpt: "➕ Option hinzufügen", btnCancel: "Abbrechen", btnSave: "💾 Speichern", lRightAns: "Richtig", lOptText: "Optionstext", lDel: "Löschen", lGameOver: "Spielergebnisse", btnRestart: "↻ Nochmal spielen", lTeam: "Team", btnPlay: "▶ Start", btnReset: "Zurücksetzen", btnOK: "OK"
+    btnCopy: "📋 Code kopieren", sLang: "Sprache", sName: "Spieltitel", sDesign: "Design", lBg: "Hintergrund", lTarget: "Ziel", optCustom: "Eigene URL...", lRadius: "Orbit-Radius", lSpeed: "Geschwindigkeit", sGame: "Spieleinstellungen", lTeams: "Teams (1-3)", lTeamColors: "Teamfarben", lSound: "Schuss-Sound", lVol: "Lautstärke", lPenaltyOn: "Strafe bei Fehlschuss", lPenaltyPts: "Punkte abziehen", oOff: "Aus", oOn: "An", sStart: "Startbildschirm", lInstructionColor: "Randfarbe", lGlow: "Randleuchten", sEnd: "Endbildschirm", sQ: "Fragen", btnAdd: "➕ Hinzufügen", btnClr: "🧹 Leeren", lDragHint: "💡 In der Vorschau ist der Cursor normal zum einfachen Ziehen. Im Spiel wird er zum Fadenkreuz!", previewTitle: "Vorschau", previewHint: "Live-Vorschau (Koordinaten werden gespeichert)", mTitle: "Frage bearbeiten", lQType: "Fragetyp", oChoice: "Multiple Choice", oInput: "Texteingabe", lPts: "Punkte", lTimer: "Timer", lSec: "Sekunden", lImg: "🖼️ Bild (URL)", lQText: "Fragentext", lFont: "Schriftart", lFontSize: "Schriftgröße", lAnsOpts: "Antwortmöglichkeiten", btnAddOpt: "➕ Option hinzufügen", btnCancel: "Abbrechen", btnSave: "💾 Speichern", lRightAns: "Richtig", lOptText: "Optionstext", lDel: "Löschen", lGameOver: "Spielergebnisse", btnRestart: "↻ Nochmal spielen", lTeam: "Team", btnPlay: "▶ Start", btnReset: "Zurücksetzen", btnOK: "OK", lCursor: "Fadenkreuz (Spiel-Cursor)", oCrosshair: "Standard-Fadenkreuz", oSniper: "Scharfschütze (Schwarz)", oRedDot: "Leuchtpunktvisier"
   },
   zh: {
-    btnCopy: "📋 复制代码", sLang: "界面语言", sName: "游戏名称", sDesign: "设计", lBg: "背景", lTarget: "目标", optCustom: "自定义 URL...", lRadius: "轨道半径", lSpeed: "速度", sGame: "游戏设置", lTeams: "队伍 (1-3)", lTeamColors: "队伍边框颜色", lSound: "射击声音", lVol: "音量", lPenaltyOn: "错误惩罚", lPenaltyPts: "扣除分数", oOff: "关", oOn: "开", sStart: "开始屏幕", lInstructionColor: "边框颜色", lGlow: "边框发光", sEnd: "反馈屏幕", sQ: "问题", btnAdd: "➕ 添加", btnClr: "🧹 清除", lDragHint: "💡 直接在右侧预览中拖动目标！", previewTitle: "预览", previewHint: "实时预览（坐标已保存）", mTitle: "编辑问题", lQType: "问题类型", oChoice: "选择题", oInput: "填空题", lPts: "分数", lTimer: "计时器", lSec: "秒", lImg: "🖼️ 图片 (URL)", lQText: "问题文本", lFont: "字体", lFontSize: "字体大小", lAnsOpts: "答案选项", btnAddOpt: "➕ 添加选项", btnCancel: "取消", btnSave: "💾 保存", lRightAns: "正确", lOptText: "选项文本", lDel: "删除", lGameOver: "游戏结果", btnRestart: "↻ 再玩一次", lTeam: "队伍", btnPlay: "▶ 开始", btnReset: "重置", btnOK: "确定"
+    btnCopy: "📋 复制代码", sLang: "界面语言", sName: "游戏名称", sDesign: "设计", lBg: "背景", lTarget: "目标", optCustom: "自定义 URL...", lRadius: "轨道半径", lSpeed: "速度", sGame: "游戏设置", lTeams: "队伍 (1-3)", lTeamColors: "队伍边框颜色", lSound: "射击声音", lVol: "音量", lPenaltyOn: "脱靶惩罚", lPenaltyPts: "扣除分数", oOff: "关", oOn: "开", sStart: "开始屏幕", lInstructionColor: "边框颜色", lGlow: "边框发光", sEnd: "反馈屏幕", sQ: "问题", btnAdd: "➕ 添加", btnClr: "🧹 清除", lDragHint: "💡 在预览中，光标正常以便拖动。在游戏中，它会变成十字准星！", previewTitle: "预览", previewHint: "实时预览（坐标已保存）", mTitle: "编辑问题", lQType: "问题类型", oChoice: "选择题", oInput: "填空题", lPts: "分数", lTimer: "计时器", lSec: "秒", lImg: "🖼️ 图片 (URL)", lQText: "问题文本", lFont: "字体", lFontSize: "字体大小", lAnsOpts: "答案选项", btnAddOpt: "➕ 添加选项", btnCancel: "取消", btnSave: "💾 保存", lRightAns: "正确", lOptText: "选项文本", lDel: "删除", lGameOver: "游戏结果", btnRestart: "↻ 再玩一次", lTeam: "队伍", btnPlay: "▶ 开始", btnReset: "重置", btnOK: "确定", lCursor: "准星（游戏内光标）", oCrosshair: "标准十字", oSniper: "狙击（黑色）", oRedDot: "红点瞄准镜"
   }
 };
 let lang = "ru";
@@ -333,9 +360,10 @@ function applyLang() {
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const k = el.getAttribute("data-i18n");
     if(el.tagName==="INPUT" || el.tagName==="TEXTAREA") el.placeholder = t(k);
+    else if(el.tagName==="OPTION") el.textContent = t(k);
     else el.innerText = t(k);
   });
-  if(typeof renderQList === 'function') renderQList();
+  if(typeof window.renderQList === 'function') window.renderQList();
 }
 
 /* ========================
@@ -344,9 +372,10 @@ function applyLang() {
 function defaultCfg() {
   return {
     title: "Математический тир", bg: "2.png", bgUrl: "", target: "13.png", targetUrl: "",
+    cursor: "crosshair", cursorUrl: "",
     radius: 0, speed: 0, teams: 2, teamCols: ["#ffae00", "#33d17a", "#ff5b6b"], sound: "pif", vol: 0.7,
     penalty: { enabled: false, points: 5 },
-    start: { enabled: false, text: "ИНСТРУКЦИЯ\n\n1) Выберите команду\n2) Кликните по мишени\n3) Ответьте на вопрос\n\nЗа правильный ответ команда получает очки.", color: "#ffae00", glow: true },
+    start: { enabled: false, text: "ИНСТРУКЦИЯ\n\n1) Выберите команду\n2) Кликните по мишени\n3) Ответьте на вопрос\n\nЗа правильный ответ команда получает очки.", color: "#ffae00", neon: true },
     end: { enabled: true, text: "Отличная работа! Спасибо за игру." },
     questions: []
   };
@@ -358,7 +387,7 @@ const b64e = (o) => btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replac
 const b64d = (s) => JSON.parse(decodeURIComponent(escape(atob(s.replace(/-/g,'+').replace(/_/g,'/')))));
 
 /* ========================
-   Звуковой движок (WebAudio)
+   Звуковой движок
    ======================== */
 const AudioSys = (() => {
   let ctx, master;
@@ -384,36 +413,30 @@ function bootEditor() {
 
   const upd = () => updateEditor();
   
-  // Привязка UI к начальному CFG
+  // Привязка UI
   document.getElementById('inpTitle').value = cfg.title;
-  document.getElementById('selBg').value = cfg.bg;
-  document.getElementById('inpBgCustom').value = cfg.bgUrl;
+  document.getElementById('selBg').value = cfg.bg; document.getElementById('inpBgCustom').value = cfg.bgUrl;
   document.getElementById('inpBgCustom').style.display = cfg.bg === 'custom' ? 'block' : 'none';
-  document.getElementById('selTarget').value = cfg.target;
-  document.getElementById('inpTargetCustom').value = cfg.targetUrl;
+  document.getElementById('selTarget').value = cfg.target; document.getElementById('inpTargetCustom').value = cfg.targetUrl;
   document.getElementById('inpTargetCustom').style.display = cfg.target === 'custom' ? 'block' : 'none';
-  document.getElementById('inpRadius').value = cfg.radius;
-  document.getElementById('inpSpeed').value = cfg.speed;
-  document.getElementById('inpTeams').value = cfg.teams;
-  document.getElementById('inpSound').value = cfg.sound;
-  document.getElementById('inpVol').value = cfg.vol;
-  document.getElementById('inpPenaltyOn').value = cfg.penalty.enabled ? 'true' : 'false';
-  document.getElementById('inpPenaltyPts').value = cfg.penalty.points;
-  document.getElementById('startEnabled').value = cfg.start.enabled ? 'true' : 'false';
-  document.getElementById('inpStartColor').value = cfg.start.color;
-  document.getElementById('chkStartGlow').checked = cfg.start.neon;
-  document.getElementById('inpStartText').value = cfg.start.text;
-  document.getElementById('feedEnabled').value = cfg.end.enabled ? 'true' : 'false';
-  document.getElementById('inpEndText').value = cfg.end.text;
+  document.getElementById('selCursor').value = cfg.cursor; document.getElementById('inpCursorCustom').value = cfg.cursorUrl;
+  document.getElementById('inpCursorCustom').style.display = cfg.cursor === 'custom' ? 'block' : 'none';
+  document.getElementById('inpRadius').value = cfg.radius; document.getElementById('inpSpeed').value = cfg.speed;
+  document.getElementById('inpTeams').value = cfg.teams; document.getElementById('inpSound').value = cfg.sound; document.getElementById('inpVol').value = cfg.vol;
+  document.getElementById('inpPenaltyOn').value = cfg.penalty.enabled ? 'true' : 'false'; document.getElementById('inpPenaltyPts').value = cfg.penalty.points;
+  document.getElementById('startEnabled').value = cfg.start.enabled ? 'true' : 'false'; document.getElementById('inpStartColor').value = cfg.start.color;
+  document.getElementById('chkStartGlow').checked = cfg.start.neon; document.getElementById('inpStartText').value = cfg.start.text;
+  document.getElementById('feedEnabled').value = cfg.end.enabled ? 'true' : 'false'; document.getElementById('inpEndText').value = cfg.end.text;
 
   // Ивенты
   document.getElementById('selLang').onchange = (e) => { lang = e.target.value; applyLang(); upd(); };
   document.getElementById('selBg').onchange = (e) => { document.getElementById('inpBgCustom').style.display = e.target.value === 'custom' ? 'block' : 'none'; upd(); };
   document.getElementById('selTarget').onchange = (e) => { document.getElementById('inpTargetCustom').style.display = e.target.value === 'custom' ? 'block' : 'none'; upd(); };
+  document.getElementById('selCursor').onchange = (e) => { document.getElementById('inpCursorCustom').style.display = e.target.value === 'custom' ? 'block' : 'none'; upd(); };
   document.getElementById('inpTeams').onchange = () => { renderTeamColsUI(); upd(); };
   document.getElementById('inpSound').onchange = (e) => { AudioSys.play(e.target.value, document.getElementById('inpVol').value); upd(); };
 
-  document.querySelectorAll('#editorApp input:not(#inpBgCustom):not(#inpTargetCustom), #editorApp textarea, #editorApp select:not(#selBg):not(#selTarget):not(#inpTeams):not(#selLang)').forEach(el => {
+  document.querySelectorAll('#editorApp input:not(#inpBgCustom):not(#inpTargetCustom):not(#inpCursorCustom), #editorApp textarea, #editorApp select:not(#selBg):not(#selTarget):not(#selCursor):not(#inpTeams):not(#selLang)').forEach(el => {
     el.addEventListener('input', upd); el.addEventListener('change', upd);
   });
 
@@ -428,7 +451,7 @@ function bootEditor() {
   window.addEventListener('message', e => {
     if(e.data && e.data.type==='updPos' && cfg.questions[e.data.idx]) {
       cfg.questions[e.data.idx].x = e.data.x; cfg.questions[e.data.idx].y = e.data.y;
-      renderQList(); // Обновляем список координат слева без перезагрузки iframe
+      window.renderQList();
     }
   });
 
@@ -455,6 +478,7 @@ function updateEditor() {
   cfg.title = document.getElementById('inpTitle').value;
   cfg.bg = document.getElementById('selBg').value; cfg.bgUrl = document.getElementById('inpBgCustom').value;
   cfg.target = document.getElementById('selTarget').value; cfg.targetUrl = document.getElementById('inpTargetCustom').value;
+  cfg.cursor = document.getElementById('selCursor').value; cfg.cursorUrl = document.getElementById('inpCursorCustom').value;
   cfg.radius = Number(document.getElementById('inpRadius').value); cfg.speed = Number(document.getElementById('inpSpeed').value);
   cfg.teams = Number(document.getElementById('inpTeams').value); cfg.sound = document.getElementById('inpSound').value; cfg.vol = Number(document.getElementById('inpVol').value);
   cfg.penalty.enabled = document.getElementById('inpPenaltyOn').value === 'true'; cfg.penalty.points = Number(document.getElementById('inpPenaltyPts').value);
@@ -488,7 +512,7 @@ function openMod(idx = null) {
   document.getElementById('modType').value = q.type; document.getElementById('modPts').value = q.pts;
   document.getElementById('modTimerOn').value = q.timer ? "true" : "false"; document.getElementById('modTimerSec').value = q.sec;
   document.getElementById('modImg').value = q.img || ""; document.getElementById('modPrompt').value = q.text;
-  document.getElementById('modFont').value = q.font; document.getElementById('modFontSize').value = q.size;
+  document.getElementById('modFont').value = q.font || "Roboto"; document.getElementById('modFontSize').value = q.size || 20;
   syncModType(); document.getElementById('modType').onchange = syncModType;
   function syncModType() { if(document.getElementById('modType').value === 'choice') renderOpts(q.opts || [{t:"1", c:true}]); else renderAccs(q.acc || [""]); }
   document.getElementById('modalBackdrop').classList.add('show');
@@ -531,6 +555,15 @@ function bootGame() {
   if(qs.get('game')) { try { gCfg = b64d(qs.get('game')); } catch(e){} }
   const isEdit = qs.get('edit') === '1';
 
+  // Настройка курсора
+  if(!isEdit) {
+    let cur = gCfg.cursor || 'crosshair';
+    if(cur === 'custom') cur = `url('${gCfg.cursorUrl}'), crosshair`;
+    else if(cur === 'sniper') cur = `url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMiIvPjxsaW5lIHgxPSIxNiIgeTE9IjAiIHgyPSIxNiIgeTI9IjMyIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiLz48bGluZSB4MT0iMCIgeTE9IjE2IiB4Mj0iMzIiIHkyPSIxNiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9zdmc+') 16 16, crosshair`;
+    else if(cur === 'reddot') cur = `url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTIiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmVkIiBzdHJva2Utd2lkdGg9IjIiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIzIiBmaWxsPSJyZWQiLz48L3N2Zz4=') 16 16, crosshair`;
+    document.documentElement.style.setProperty('--game-cursor', cur);
+  }
+
   const bgImg = gCfg.bg === 'custom' ? gCfg.bgUrl : gCfg.bg;
   document.getElementById('gBg').style.backgroundImage = `url("${bgImg}")`;
   const tgtImg = gCfg.target === 'custom' ? gCfg.targetUrl : gCfg.target;
@@ -552,6 +585,16 @@ function bootGame() {
   }
   drawTeams();
 
+  // Логика промаха (клик по фону)
+  document.getElementById('gBg').onclick = (e) => {
+    if(isEdit || document.getElementById('gModal').classList.contains('on') || document.getElementById('gStartScreen').classList.contains('on')) return;
+    AudioSys.play(gCfg.sound, gCfg.vol); // Звук выстрела
+    if(gCfg.penalty && gCfg.penalty.enabled) {
+      scores[curTeam] -= Number(gCfg.penalty.points || 0);
+      drawTeams();
+    }
+  };
+
   const tgtDiv = document.getElementById('gTargets');
   tgtDiv.className = isEdit ? "targets edit-mode" : "targets";
   let targetsHit = 0;
@@ -559,16 +602,12 @@ function bootGame() {
   gCfg.questions.forEach((q, i) => {
     const el = document.createElement('div');
     el.className = 'target';
-    
-    // Базовая сетка для новых вопросов (если координат еще нет)
     if(q.x === undefined) q.x = 15 + (i % 5) * 16;
     if(q.y === undefined) q.y = 30 + Math.floor(i / 5) * 20;
 
-    el.style.left = q.x + '%';
-    el.style.top = q.y + '%';
+    el.style.left = q.x + '%'; el.style.top = q.y + '%';
     el.innerHTML = `<div class="img" style="background-image:url('${tgtImg}')"></div><div class="num">${i+1}</div>`;
     
-    // Орбитальное движение
     if(gCfg.radius > 0 && gCfg.speed > 0) {
       let ang = (i / gCfg.questions.length) * Math.PI * 2;
       setInterval(() => {
@@ -580,7 +619,7 @@ function bootGame() {
 
     if(isEdit) {
       el.onmousedown = (e) => {
-        e.preventDefault();
+        e.preventDefault(); e.stopPropagation();
         const rect = document.getElementById('gArena').getBoundingClientRect();
         function move(ev) {
           let nx = Math.round(((ev.clientX - rect.left) / rect.width) * 100);
@@ -593,7 +632,8 @@ function bootGame() {
         window.addEventListener('mousemove', move); window.addEventListener('mouseup', stop);
       };
     } else {
-      el.onclick = () => {
+      el.onclick = (e) => {
+        e.stopPropagation(); // Блокируем клик по фону (чтобы не было штрафа)
         AudioSys.play(gCfg.sound, gCfg.vol);
         el.classList.add('hit');
         openGameQuestion(q, () => {
@@ -642,17 +682,12 @@ function bootGame() {
 
     function finishTurn(isCorrect) {
       clearInterval(timerId); document.getElementById('gModal').classList.remove('on');
-      if(isCorrect) {
-        scores[curTeam] += Number(q.pts || 10);
-      } else {
-        if(gCfg.penalty && gCfg.penalty.enabled) scores[curTeam] -= Number(gCfg.penalty.points || 0);
-      }
+      if(isCorrect) scores[curTeam] += Number(q.pts || 10);
       curTeam = (curTeam + 1) % gCfg.teams;
       drawTeams(); onDone();
     }
   }
 
-  // Показывать стартовый экран всегда, если он включен (включая превью)
   if(gCfg.start.enabled && gCfg.start.text) {
     const sCard = document.getElementById('gStartCard');
     document.getElementById('gStartScreen').classList.add('on');
