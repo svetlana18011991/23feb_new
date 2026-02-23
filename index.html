@@ -120,7 +120,7 @@
     .game-modal-content {
       background: linear-gradient(135deg, rgba(20, 25, 30, 0.85), rgba(10, 12, 15, 0.95));
       border-radius: 30px;
-      padding: 40px;
+      padding: 50px 40px;
       width: min(850px, 100%);
       box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 50px var(--team-color-alpha, rgba(217, 154, 41, 0.15));
       position: relative;
@@ -681,7 +681,7 @@ const b64d = (s) => {
    Индикатор длины
    ======================== */
 function checkLinkSize(data) {
-  const maxLen = 2000;
+  const maxLen = 25000; // Браузерный лимит через хеш огромен, ставим безопасные 25к
   const curLen = data.length;
   const pct = Math.min(100, (curLen / maxLen) * 100);
   const bar = document.getElementById("barSize");
@@ -810,7 +810,8 @@ function bootEditor() {
   document.getElementById('btnClearQ').onclick = () => { cfg.questions=[]; upd(); };
   document.getElementById('btnSaveQ').onclick = saveMod;
   document.getElementById('btnCopyCodeTop').onclick = () => {
-    const url = location.origin + location.pathname + "?game=" + encodeURIComponent(b64e(cfg));
+    // ВАЖНО: теперь используем #game= вместо ?game=
+    const url = location.origin + location.pathname + "#game=" + encodeURIComponent(b64e(cfg));
     navigator.clipboard.writeText(`<iframe src="${url}" allow="autoplay; fullscreen" style="width:100%;height:600px;border:0" allowfullscreen></iframe>`).then(()=>alert("Код скопирован!"));
   };
 
@@ -878,7 +879,8 @@ function updateEditor() {
   if(_prevTid) clearTimeout(_prevTid);
   _prevTid = setTimeout(() => {
     const isEditFlag = previewMode === 'edit' ? '1' : '0';
-    document.getElementById('previewFrame').src = location.origin + location.pathname + "?game=" + encodeURIComponent(data) + "&edit=" + isEditFlag + "&lang=" + lang;
+    // Для превью локально используем ?t= чтобы фрейм перезагрузился, а данные в хеше
+    document.getElementById('previewFrame').src = location.origin + location.pathname + "?t=" + Date.now() + "&edit=" + isEditFlag + "&lang=" + lang + "#game=" + encodeURIComponent(data);
   }, 400);
 }
 
@@ -942,14 +944,27 @@ window.closeModal = () => document.getElementById('modalBackdrop').classList.rem
    РЕЖИМ ИГРЫ (И ПРЕВЬЮ)
    ======================== */
 function bootGame() {
-  const qs = new URLSearchParams(location.search);
+  const getParam = (k) => {
+    let p = new URLSearchParams(location.search).get(k);
+    if(!p && location.hash) {
+      let h = location.hash.substring(1);
+      if(h.startsWith('game=')) return h.substring(5);
+      p = new URLSearchParams(h).get(k);
+    }
+    return p;
+  };
+
   document.body.classList.add('game-mode');
   document.getElementById('gameRoot').style.display = 'block';
-  lang = qs.get('lang') || 'ru'; applyLang();
+  lang = getParam('lang') || 'ru'; applyLang();
   
   let gCfg = cfg;
-  if(qs.get('game')) { try { gCfg = b64d(qs.get('game')); } catch(e){} }
-  const isEdit = qs.get('edit') === '1';
+  let gameData = getParam('game');
+  if(gameData) { try { gCfg = b64d(gameData); } catch(e){} }
+  const isEdit = getParam('edit') === '1';
+
+  // Разблокируем аудио на мобильных
+  window.addEventListener('pointerdown', () => { try { if(AudioSys.ctx && AudioSys.ctx.state === 'suspended') AudioSys.ctx.resume(); } catch(e){} }, {once: true});
 
   const arenaEl = document.getElementById('gArena');
   const arenaBg = document.getElementById('gBg');
@@ -1018,7 +1033,6 @@ function bootGame() {
     wave.className = 'fx-ring';
     wave.style.left = x + 'px'; wave.style.top = y + 'px';
     wave.style.borderColor = teamColor || '#d99a29';
-    // Масштаб волны зависит от мишени
     wave.style.setProperty('--explosion-size', (targetSize * 2) + 'px');
     arenaEl.appendChild(wave);
     setTimeout(() => wave.remove(), 500);
@@ -1040,7 +1054,6 @@ function bootGame() {
     }
   }
 
-  // Штраф ТОЛЬКО за промах
   arenaEl.onclick = (e) => {
     if(isEdit || !arenaEl.classList.contains('aiming')) return;
     if(e.target.closest('.target') || e.target.closest('.hud') || e.target.closest('.teams') || e.target.closest('.game-modal') || e.target.closest('.screen')) return;
@@ -1075,7 +1088,6 @@ function bootGame() {
     else finalTgtImg = gCfg.target === 'custom' ? gCfg.targetUrl : gCfg.target;
 
     el.style.left = q.x + '%'; el.style.top = q.y + '%';
-    // Номера удалены из HTML мишени
     el.innerHTML = `
       <div class="img" style="background-image:url('${finalTgtImg}')"></div>
       <div class="pts">⭐ ${q.pts || 10}</div>
@@ -1114,7 +1126,7 @@ function bootGame() {
       el.ontouchstart = startDrag;
     } else {
       el.onclick = (e) => {
-        e.stopPropagation(); // Не промах!
+        e.stopPropagation(); 
         if(!arenaEl.classList.contains('aiming')) return;
         
         try { AudioSys.play(gCfg.sound, gCfg.vol); } catch(err){}
@@ -1227,9 +1239,18 @@ function bootGame() {
 }
 
 /* --- Запуск --- */
-const p = new URLSearchParams(location.search);
-if(p.has('game') && p.get('edit') !== '1') bootGame();
-else { bootEditor(); if(p.get('edit') === '1') bootGame(); }
+const getParamMain = (k) => {
+    let p = new URLSearchParams(location.search).get(k);
+    if(!p && location.hash) {
+      let h = location.hash.substring(1);
+      if(h.startsWith('game=')) return h.substring(5);
+      p = new URLSearchParams(h).get(k);
+    }
+    return p;
+};
+
+if(getParamMain('game') && getParamMain('edit') !== '1') bootGame();
+else { bootEditor(); if(getParamMain('edit') === '1') bootGame(); }
 </script>
 </body>
 </html>
