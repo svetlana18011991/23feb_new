@@ -681,7 +681,7 @@ const b64d = (s) => {
    Индикатор длины
    ======================== */
 function checkLinkSize(data) {
-  const maxLen = 25000; // Браузерный лимит через хеш огромен, ставим безопасные 25к
+  const maxLen = 25000;
   const curLen = data.length;
   const pct = Math.min(100, (curLen / maxLen) * 100);
   const bar = document.getElementById("barSize");
@@ -810,7 +810,6 @@ function bootEditor() {
   document.getElementById('btnClearQ').onclick = () => { cfg.questions=[]; upd(); };
   document.getElementById('btnSaveQ').onclick = saveMod;
   document.getElementById('btnCopyCodeTop').onclick = () => {
-    // ВАЖНО: теперь используем #game= вместо ?game=
     const url = location.origin + location.pathname + "#game=" + encodeURIComponent(b64e(cfg));
     navigator.clipboard.writeText(`<iframe src="${url}" allow="autoplay; fullscreen" style="width:100%;height:600px;border:0" allowfullscreen></iframe>`).then(()=>alert("Код скопирован!"));
   };
@@ -879,7 +878,6 @@ function updateEditor() {
   if(_prevTid) clearTimeout(_prevTid);
   _prevTid = setTimeout(() => {
     const isEditFlag = previewMode === 'edit' ? '1' : '0';
-    // Для превью локально используем ?t= чтобы фрейм перезагрузился, а данные в хеше
     document.getElementById('previewFrame').src = location.origin + location.pathname + "?t=" + Date.now() + "&edit=" + isEditFlag + "&lang=" + lang + "#game=" + encodeURIComponent(data);
   }, 400);
 }
@@ -963,7 +961,6 @@ function bootGame() {
   if(gameData) { try { gCfg = b64d(gameData); } catch(e){} }
   const isEdit = getParam('edit') === '1';
 
-  // Разблокируем аудио на мобильных
   window.addEventListener('pointerdown', () => { try { if(AudioSys.ctx && AudioSys.ctx.state === 'suspended') AudioSys.ctx.resume(); } catch(e){} }, {once: true});
 
   const arenaEl = document.getElementById('gArena');
@@ -1202,6 +1199,8 @@ function bootGame() {
     function finishTurn(isCorrect) {
       clearInterval(timerId); document.getElementById('gModal').classList.remove('on');
       arenaEl.classList.add('aiming'); 
+      aimCursor.style.display = 'block'; // Фикс невидимой мышки
+      
       if(isCorrect) { scores[curTeam] += Number(q.pts || 10); }
       curTeam = (curTeam + 1) % gCfg.teams;
       drawTeams(); onDone();
@@ -1216,9 +1215,16 @@ function bootGame() {
     document.getElementById('gStartText').innerText = gCfg.start.text;
     sCard.style.borderColor = gCfg.start.color;
     if(gCfg.start.neon) sCard.style.boxShadow = `0 0 25px ${gCfg.start.color}, inset 0 0 10px ${gCfg.start.color}`;
-    document.getElementById('gBtnPlay').onclick = () => { try{ AudioSys.init(); }catch(e){} document.getElementById('gStartScreen').classList.remove('on'); arenaEl.classList.add('aiming'); };
+    
+    document.getElementById('gBtnPlay').onclick = () => { 
+      try{ AudioSys.init(); }catch(e){} 
+      document.getElementById('gStartScreen').classList.remove('on'); 
+      arenaEl.classList.add('aiming'); 
+      aimCursor.style.display = 'block'; // Фикс невидимой мышки
+    };
   } else if (!isEdit) {
     arenaEl.classList.add('aiming');
+    aimCursor.style.display = 'block'; // Фикс невидимой мышки
   }
 
   function showEndScreen() {
