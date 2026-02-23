@@ -74,7 +74,7 @@
     .arenaBg { position: absolute; inset: -25px; background-size: cover; background-position: center; transition: transform 0.15s ease-out; will-change: transform; cursor: var(--game-cursor, default); }
     
     .hud { position: absolute; top: 14px; left: 14px; right: 14px; pointer-events: none; z-index: 10; display:flex; justify-content:space-between; align-items:center; }
-    .gameTitle { font-weight: 900; font-size: 24px; text-shadow: 0 4px 15px #000; color: #fff; }
+    .gameTitle { font-weight: 900; text-shadow: 0 4px 15px #000; color: #fff; }
     .teams { display: grid; gap: 10px; margin-top: 54px; padding:0 14px; pointer-events: auto; position:relative; z-index:10; cursor: default; }
     .teamCard { background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 10px; backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
     .teamInput { background: transparent; border: none; outline: none; color: #fff; font-weight: 900; font-size: 16px; width: 100%; max-width: 150px; }
@@ -162,22 +162,8 @@
     }
     @keyframes floatSparkle { 0% { transform: translateY(0) scale(1); opacity: 0.4; } 100% { transform: translateY(-20px) scale(1.5); opacity: 0.9; box-shadow: 0 0 15px var(--team-color); } }
 
-    #gTimerContainer { 
-      display: flex; 
-      justify-content: center; 
-      margin-bottom: 24px; 
-      position: relative; 
-      z-index: 30; 
-    }
-    #gTimerWrap { 
-      background: var(--team-color); 
-      color: #000; 
-      padding: 6px 30px; 
-      border-radius: 30px; 
-      box-shadow: 0 5px 25px var(--team-color); 
-      display: flex; align-items: center; gap: 8px; 
-      border: 2px solid rgba(255,255,255,0.5); 
-    }
+    #gTimerContainer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); display: flex; justify-content: center; z-index: 30; }
+    #gTimerWrap { background: var(--team-color); color: #000; padding: 6px 30px; border-radius: 30px; box-shadow: 0 5px 25px var(--team-color); display: flex; align-items: center; gap: 8px; border: 2px solid rgba(255,255,255,0.5); transition: 0.3s; }
     #gTimer { font-weight: 900; font-size: 28px; text-shadow: 0 2px 4px rgba(255,255,255,0.5); }
     .timer-icon { font-size: 22px; color: #000; }
 
@@ -193,20 +179,36 @@
       border: 1px solid rgba(255,255,255,0.15); border-radius: 20px;
       color: #fff; font-size: 20px; font-weight: bold; cursor: pointer;
       transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2); word-wrap: break-word;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2); word-wrap: break-word; position: relative; z-index:10;
     }
-    .game-ans-btn:hover {
+    .game-ans-btn:hover:not(:disabled) {
       background: linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
       border-color: var(--team-color); transform: translateY(-4px);
       box-shadow: 0 12px 25px rgba(0,0,0,0.4), 0 0 25px var(--team-color-alpha, rgba(217, 154, 41, 0.3));
     }
-    .game-ans-btn:active { transform: translateY(0); }
+    .game-ans-btn:active:not(:disabled) { transform: translateY(0); }
 
     #gInputWrap { display: flex; gap: 12px; margin-top: 10px; justify-content: center; position: relative; z-index: 10; }
     #gInput { width: 100%; max-width: 450px; font-size: 24px; padding: 18px 24px; border-radius: 20px; background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.15); color: #fff; text-align: center; outline: none; transition: 0.3s; box-shadow: inset 0 4px 10px rgba(0,0,0,0.5); }
     #gInput:focus { border-color: var(--team-color); background: rgba(0,0,0,0.7); box-shadow: 0 0 25px var(--team-color-alpha, rgba(217, 154, 41, 0.3)), inset 0 4px 10px rgba(0,0,0,0.5); }
     #gSubmitBtn { border-radius: 20px; padding: 0 40px; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; background: var(--team-color); color: #000; border: none; font-weight: 900; box-shadow: 0 4px 15px var(--team-color); cursor:pointer;}
-    #gSubmitBtn:hover { filter: brightness(1.2); transform: translateY(-2px); }
+    #gSubmitBtn:hover:not(:disabled) { filter: brightness(1.2); transform: translateY(-2px); }
+
+    /* КЛАССЫ ОБРАТНОЙ СВЯЗИ (ПРАВИЛЬНО/НЕПРАВИЛЬНО) */
+    .ans-correct {
+      background: #33d17a !important; border-color: #33d17a !important; color: #000 !important;
+      box-shadow: 0 0 30px rgba(51,209,122,0.8) !important; transform: scale(1.05) !important; z-index: 20;
+    }
+    .ans-wrong {
+      background: #ff5b6b !important; border-color: #ff5b6b !important; color: #fff !important;
+      box-shadow: 0 0 30px rgba(255,91,107,0.8) !important; z-index: 20;
+    }
+    @keyframes shakeErr {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+    .shake-err { animation: shakeErr 0.25s ease-in-out 2; }
 
     .screen { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(15px); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; text-align: center; cursor: default; }
     .screen.on { display: flex; }
@@ -249,6 +251,29 @@
       <div class="section">
         <div class="title" data-i18n="sName">Название игры</div>
         <input type="text" id="inpTitle" value="Математический тир">
+        <div class="row" style="margin-top:10px;">
+          <div>
+            <label data-i18n="lFont">Шрифт</label>
+            <select id="inpTitleFont" onchange="this.style.fontFamily=this.value">
+              <option value="Roboto" style="font-family: 'Roboto';">Roboto</option>
+              <option value="Open Sans" style="font-family: 'Open Sans';">Open Sans</option>
+              <option value="Montserrat" style="font-family: 'Montserrat';">Montserrat</option>
+              <option value="Lato" style="font-family: 'Lato';">Lato</option>
+              <option value="Oswald" style="font-family: 'Oswald';">Oswald</option>
+              <option value="Poppins" style="font-family: 'Poppins';">Poppins</option>
+              <option value="Merriweather" style="font-family: 'Merriweather';">Merriweather</option>
+              <option value="Playfair Display" style="font-family: 'Playfair Display';">Playfair Display</option>
+              <option value="Lora" style="font-family: 'Lora';">Lora</option>
+              <option value="Courier New" style="font-family: 'Courier New';">Courier New (Моноширинный)</option>
+              <option value="Caveat" style="font-family: 'Caveat', cursive;">Caveat (Рукописный)</option>
+              <option value="Neucha" style="font-family: 'Neucha', cursive;">Neucha (Рукописный)</option>
+            </select>
+          </div>
+          <div>
+            <label data-i18n="lFontSize">Размер шрифта</label>
+            <input type="number" id="inpTitleSize" value="24">
+          </div>
+        </div>
       </div>
 
       <div class="section">
@@ -558,7 +583,8 @@ function applyLang() {
 const LS_KEY = 'mathShooterSave_v4';
 function defaultCfg() {
   return {
-    title: "Математический тир", bg: "2.png", bgUrl: "", target: "13.png", targetUrl: "",
+    title: "Математический тир", titleFont: "Roboto", titleSize: 24,
+    bg: "2.png", bgUrl: "", target: "13.png", targetUrl: "",
     targetSize: 90, cursorSize: 40,
     cursor: "crosshair", cursorUrl: "",
     radius: 0, speed: 0, teams: 2, teamCols: ["#ffae00", "#33d17a", "#ff5b6b"], sound: "pif", vol: 0.7,
@@ -569,11 +595,12 @@ function defaultCfg() {
   };
 }
 
-// Упаковка в массивы для максимального сжатия
 function packCfg(c) {
   const d = defaultCfg();
   let p = {};
   if(c.title !== d.title) p.t = c.title;
+  if(c.titleFont !== d.titleFont) p.tfn = c.titleFont;
+  if(c.titleSize !== d.titleSize) p.tsz = c.titleSize;
   if(c.bg !== d.bg) p.b = c.bg;
   if(c.bgUrl) p.bu = c.bgUrl;
   if(c.target !== d.target) p.tg = c.target;
@@ -628,7 +655,10 @@ function unpackCfg(p) {
   if(!p || typeof p !== 'object') return d;
   
   return {
-    title: p.t ?? d.title, bg: p.b ?? d.bg, bgUrl: p.bu || "",
+    title: p.t ?? d.title, 
+    titleFont: p.tfn ?? d.titleFont,
+    titleSize: p.tsz ?? d.titleSize,
+    bg: p.b ?? d.bg, bgUrl: p.bu || "",
     target: p.tg ?? d.target, targetUrl: p.tu || "",
     targetSize: p.ts ?? d.targetSize,
     cursor: p.cu ?? d.cursor, cursorUrl: p.cur || "", cursorSize: p.cs ?? d.cursorSize,
@@ -705,7 +735,7 @@ window.checkImgLink = (inp) => {
 };
 
 /* ========================
-   Звуковой движок
+   Звуковой движок (Глобальный + Надежный)
    ======================== */
 const AudioSys = (() => {
   let ctx, master;
@@ -748,6 +778,28 @@ const AudioSys = (() => {
         g2.gain.setValueAtTime(0, t); g2.gain.linearRampToValueAtTime(0.6, t + 0.01); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
         osc.connect(g2).connect(master); osc.start(t); osc.stop(t + 0.85);
       }
+      else if (type === 'correct') {
+        const osc = ctx.createOscillator(); const g2 = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, t);
+        osc.frequency.exponentialRampToValueAtTime(880, t + 0.1);
+        g2.gain.setValueAtTime(0, t);
+        g2.gain.linearRampToValueAtTime(0.5, t + 0.05);
+        g2.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+        osc.connect(g2).connect(master);
+        osc.start(t); osc.stop(t + 0.35);
+      }
+      else if (type === 'wrong') {
+        const osc = ctx.createOscillator(); const g2 = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(200, t);
+        osc.frequency.exponentialRampToValueAtTime(100, t + 0.2);
+        g2.gain.setValueAtTime(0, t);
+        g2.gain.linearRampToValueAtTime(0.5, t + 0.05);
+        g2.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+        osc.connect(g2).connect(master);
+        osc.start(t); osc.stop(t + 0.35);
+      }
       else if(type==='boom'){ 
         const osc = ctx.createOscillator(), g = ctx.createGain();
         osc.type='sine'; osc.frequency.setValueAtTime(90,t); osc.frequency.exponentialRampToValueAtTime(40,t+0.2); g.gain.setValueAtTime(0.8,t); g.gain.exponentialRampToValueAtTime(0.01,t+0.2); osc.connect(g).connect(master); osc.start(t); osc.stop(t+0.25); 
@@ -780,6 +832,10 @@ function bootEditor() {
   };
 
   document.getElementById('inpTitle').value = cfg.title;
+  document.getElementById('inpTitleFont').value = cfg.titleFont || 'Roboto';
+  document.getElementById('inpTitleFont').style.fontFamily = cfg.titleFont || 'Roboto';
+  document.getElementById('inpTitleSize').value = cfg.titleSize || 24;
+  
   document.getElementById('selBg').value = cfg.bg; document.getElementById('inpBgCustom').value = cfg.bgUrl;
   document.getElementById('inpBgCustom').style.display = cfg.bg === 'custom' ? 'block' : 'none';
   document.getElementById('selTarget').value = cfg.target; document.getElementById('inpTargetCustom').value = cfg.targetUrl;
@@ -857,6 +913,8 @@ function renderTeamColsUI() {
 let _prevTid = null;
 function updateEditor() {
   cfg.title = document.getElementById('inpTitle').value;
+  cfg.titleFont = document.getElementById('inpTitleFont').value;
+  cfg.titleSize = Number(document.getElementById('inpTitleSize').value);
   cfg.bg = document.getElementById('selBg').value; cfg.bgUrl = document.getElementById('inpBgCustom').value;
   cfg.target = document.getElementById('selTarget').value; cfg.targetUrl = document.getElementById('inpTargetCustom').value;
   cfg.targetSize = Number(document.getElementById('inpTargetSize').value);
@@ -998,7 +1056,11 @@ function bootGame() {
 
   const bgImg = gCfg.bg === 'custom' ? gCfg.bgUrl : gCfg.bg;
   arenaBg.style.backgroundImage = `url("${bgImg}")`;
-  document.getElementById('gTitle').innerText = gCfg.title;
+  
+  const gTitleEl = document.getElementById('gTitle');
+  gTitleEl.innerText = gCfg.title;
+  gTitleEl.style.fontFamily = gCfg.titleFont || 'Roboto';
+  gTitleEl.style.fontSize = (gCfg.titleSize || 24) + 'px';
 
   const tDiv = document.getElementById('gTeams');
   tDiv.style.gridTemplateColumns = `repeat(${gCfg.teams}, 1fr)`;
@@ -1174,36 +1236,67 @@ function bootGame() {
     
     const timerContainer = document.getElementById('gTimerContainer');
     const timerElText = document.getElementById('gTimer');
+    const timerWrap = document.getElementById('gTimerWrap');
+    timerWrap.classList.remove('shake-err');
+    timerElText.style.color = '#000';
+
     if(q.timer && q.sec > 0) {
       timerContainer.style.display = 'flex'; let timeLeft = q.sec; timerElText.innerText = timeLeft;
-      timerId = setInterval(() => { timeLeft--; timerElText.innerText = timeLeft; if(timeLeft <= 0) finishTurn(false); }, 1000);
+      timerId = setInterval(() => { 
+        timeLeft--; timerElText.innerText = timeLeft; 
+        if(timeLeft <= 0) {
+          timerElText.style.color = '#ff5b6b';
+          finishTurn(false, null, true);
+        }
+      }, 1000);
     } else { timerContainer.style.display = 'none'; }
+
+    const inp = document.getElementById('gInput');
+    const subBtn = document.getElementById('gSubmitBtn');
 
     if(q.type === 'choice') {
       inpWrap.style.display = 'none'; ansDiv.style.display = 'grid';
       let opts = [...q.opts].filter(o => o.t.trim() !== "").sort(() => Math.random() - 0.5);
       opts.forEach(o => {
         const b = document.createElement('button'); b.className = 'game-ans-btn'; b.innerText = o.t; b.style.fontFamily = q.font || 'Roboto';
-        b.onclick = () => finishTurn(o.c);
+        b.onclick = () => finishTurn(o.c, b);
         ansDiv.appendChild(b);
       });
     } else {
       ansDiv.style.display = 'none'; inpWrap.style.display = 'flex';
-      const inp = document.getElementById('gInput'); inp.value = ""; inp.style.fontFamily = q.font || 'Roboto';
-      document.getElementById('gSubmitBtn').onclick = () => {
+      inp.value = ""; inp.style.fontFamily = q.font || 'Roboto';
+      inp.disabled = false; subBtn.disabled = false;
+      subBtn.onclick = () => {
         const user = inp.value.trim().toLowerCase(); const accs = q.acc.map(a=>a.trim().toLowerCase());
-        finishTurn(accs.includes(user));
+        finishTurn(accs.includes(user), inp);
       };
     }
 
-    function finishTurn(isCorrect) {
-      clearInterval(timerId); document.getElementById('gModal').classList.remove('on');
-      arenaEl.classList.add('aiming'); 
-      aimCursor.style.display = 'block'; // Фикс невидимой мышки
+    function finishTurn(isCorrect, el = null, isTimeout = false) {
+      clearInterval(timerId);
       
-      if(isCorrect) { scores[curTeam] += Number(q.pts || 10); }
-      curTeam = (curTeam + 1) % gCfg.teams;
-      drawTeams(); onDone();
+      const btns = ansDiv.querySelectorAll('.game-ans-btn');
+      btns.forEach(b => b.style.pointerEvents = 'none');
+      inp.disabled = true; subBtn.disabled = true;
+
+      if(isCorrect) {
+          try { AudioSys.play('correct', gCfg.vol); } catch(e){}
+          if(el) el.classList.add('ans-correct');
+      } else {
+          try { AudioSys.play('wrong', gCfg.vol); } catch(e){}
+          if(el) el.classList.add('ans-wrong', 'shake-err');
+          else if(isTimeout) timerWrap.classList.add('shake-err');
+      }
+
+      setTimeout(() => {
+          document.getElementById('gModal').classList.remove('on');
+          arenaEl.classList.add('aiming'); 
+          aimCursor.style.display = 'block'; 
+          
+          if(isCorrect) { scores[curTeam] += Number(q.pts || 10); }
+          curTeam = (curTeam + 1) % gCfg.teams;
+          drawTeams(); onDone();
+      }, 1200);
     }
   }
 
@@ -1212,6 +1305,7 @@ function bootGame() {
     const sCard = document.getElementById('gStartCard');
     document.getElementById('gStartScreen').classList.add('on');
     document.getElementById('gStartTitle').innerText = gCfg.title;
+    document.getElementById('gStartTitle').style.fontFamily = gCfg.titleFont || 'Roboto';
     document.getElementById('gStartText').innerText = gCfg.start.text;
     sCard.style.borderColor = gCfg.start.color;
     if(gCfg.start.neon) sCard.style.boxShadow = `0 0 25px ${gCfg.start.color}, inset 0 0 10px ${gCfg.start.color}`;
@@ -1220,16 +1314,17 @@ function bootGame() {
       try{ AudioSys.init(); }catch(e){} 
       document.getElementById('gStartScreen').classList.remove('on'); 
       arenaEl.classList.add('aiming'); 
-      aimCursor.style.display = 'block'; // Фикс невидимой мышки
+      aimCursor.style.display = 'block';
     };
   } else if (!isEdit) {
     arenaEl.classList.add('aiming');
-    aimCursor.style.display = 'block'; // Фикс невидимой мышки
+    aimCursor.style.display = 'block'; 
   }
 
   function showEndScreen() {
     arenaEl.classList.remove('aiming'); aimCursor.style.display = 'none';
     document.getElementById('gEndScreen').classList.add('on');
+    document.getElementById('gEndTitle').style.fontFamily = gCfg.titleFont || 'Roboto';
     document.getElementById('gEndText').innerText = gCfg.end.text;
     const tNames = Array.from(document.querySelectorAll('.teamInput')).map(i => i.value);
     document.getElementById('gEndStats').innerHTML = scores.map((s,i) => `
