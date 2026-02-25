@@ -58,7 +58,6 @@
     .q-list { display: flex; flex-direction: column; gap: 8px; }
     .q-item { padding: 10px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
     .q-item:hover { border-color: rgba(217, 154, 41, 0.4); }
-    /* Эффект при перетаскивании (Drag & Drop) */
     .q-item.drag-over { border-color: var(--neon-orange-base); background: rgba(217, 154, 41, 0.15); transform: scale(1.02); }
     
     .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 9999; }
@@ -347,7 +346,13 @@
       <div class="section">
         <div class="title" data-i18n="sGame">Настройки игры</div>
         <div class="row">
-          <div><label data-i18n="lTeams">Команд (1-3)</label><select id="inpTeams"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select></div>
+          <div><label data-i18n="lTeams">Команд (1-3)</label>
+            <select id="inpTeams">
+              <option value="1">1</option>
+              <option value="2" selected>2</option>
+              <option value="3">3</option>
+            </select>
+          </div>
           <div>
             <label data-i18n="lSound">Выстрел</label>
             <select id="inpSound">
@@ -449,7 +454,7 @@
             <option value="Merriweather" style="font-family: 'Merriweather';">Merriweather</option>
             <option value="Playfair Display" style="font-family: 'Playfair Display';">Playfair Display</option>
             <option value="Lora" style="font-family: 'Lora';">Lora</option>
-            <option value="Courier New" style="font-family: 'Courier New';">Courier New</option>
+            <option value="Courier New" style="font-family: 'Courier New';">Courier New (Моноширинный)</option>
             <option value="Caveat" style="font-family: 'Caveat', cursive;">Caveat (Рукописный)</option>
             <option value="Neucha" style="font-family: 'Neucha', cursive;">Neucha (Рукописный)</option>
           </select>
@@ -576,7 +581,7 @@ function applyLang() {
 /* ========================
    База данных (Config) & УПАКОВКА (Супер-сжатие)
    ======================== */
-const LS_KEY = 'mathShooterSave_v5'; // Обновленный ключ для чистоты кэша
+const LS_KEY = 'mathShooterSave_v6'; // Обновленный ключ для чистоты кэша
 function defaultCfg() {
   return {
     title: "Математический тир", titleFont: "Roboto", titleSize: 24, titleColor: "#ffffff",
@@ -666,8 +671,8 @@ function unpackCfg(p) {
     teams: p.tm ? Number(p.tm) : d.teams, 
     teamCols: p.tc || d.teamCols,
     sound: p.sd ?? d.sound, 
-    vol: p.v ? Number(p.v) : d.vol,
-    penalty: { enabled: p.pe === 1, points: p.pp ? Number(p.pp) : d.penalty.points },
+    vol: p.v !== undefined ? Number(p.v) : d.vol,
+    penalty: { enabled: p.pe === 1, points: p.pp !== undefined ? Number(p.pp) : d.penalty.points },
     start: { enabled: p.se === 1, text: p.st ?? d.start.text, color: p.sc ?? d.start.color, neon: p.sn === undefined ? d.start.neon : p.sn === 1 },
     end: { enabled: p.fe === undefined ? d.end.enabled : p.fe === 1, text: p.ft ?? d.end.text },
     questions: (p.q || []).map(q => {
@@ -775,13 +780,15 @@ const AudioSys = (() => {
       }
       else if (type === 'correct') {
         const osc = ctx.createOscillator(); const g2 = ctx.createGain();
-        osc.type = 'sine'; osc.frequency.setValueAtTime(440, t); osc.frequency.exponentialRampToValueAtTime(880, t + 0.1);
+        osc.type = 'sine'; osc.frequency.setValueAtTime(440, t);
+        osc.frequency.exponentialRampToValueAtTime(880, t + 0.1);
         g2.gain.setValueAtTime(0, t); g2.gain.linearRampToValueAtTime(0.5, t + 0.05); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
         osc.connect(g2).connect(master); osc.start(t); osc.stop(t + 0.35);
       }
       else if (type === 'wrong') {
         const osc = ctx.createOscillator(); const g2 = ctx.createGain();
-        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, t); osc.frequency.exponentialRampToValueAtTime(100, t + 0.2);
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, t);
+        osc.frequency.exponentialRampToValueAtTime(100, t + 0.2);
         g2.gain.setValueAtTime(0, t); g2.gain.linearRampToValueAtTime(0.5, t + 0.05); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
         osc.connect(g2).connect(master); osc.start(t); osc.stop(t + 0.35);
       }
@@ -836,7 +843,7 @@ function bootEditor() {
   document.getElementById('inpCursorSize').value = cfg.cursorSize;
   document.getElementById('inpRadius').value = cfg.radius; document.getElementById('inpSpeed').value = cfg.speed;
   
-  // Принудительно устанавливаем количество команд при загрузке
+  // Строго проставляем количество команд
   document.getElementById('inpTeams').value = cfg.teams; 
   
   document.getElementById('inpSound').value = cfg.sound; 
@@ -851,7 +858,7 @@ function bootEditor() {
   document.getElementById('feedEnabled').value = cfg.end.enabled ? 'true' : 'false'; 
   document.getElementById('inpEndText').value = cfg.end.text;
 
-  // Обработчики всех текстовых/числовых полей и селектов (кроме inpTeams, он ниже)
+  // Обработчики полей ввода (исключаем inpTeams, чтобы обработать его отдельно)
   document.querySelectorAll('#editorApp input:not([id^="mod"]):not(#inpTeams), #editorApp textarea:not([id^="mod"]), #editorApp select:not([id^="mod"]):not(#inpTeams)').forEach(el => {
     el.addEventListener('input', upd); 
     el.addEventListener('change', upd);
@@ -863,8 +870,8 @@ function bootEditor() {
   document.getElementById('selCursor').addEventListener('change', (e) => { document.getElementById('inpCursorCustom').style.display = e.target.value === 'custom' ? 'block' : 'none'; });
   
   // НАДЁЖНАЯ ПРИВЯЗКА КОМАНД
-  document.getElementById('inpTeams').addEventListener('change', () => { renderTeamColsUI(); upd(); });
-  document.getElementById('inpTeams').addEventListener('input', () => { renderTeamColsUI(); upd(); });
+  document.getElementById('inpTeams').addEventListener('change', () => { renderTeamColsUI(); updateEditor(); });
+  document.getElementById('inpTeams').addEventListener('input', () => { renderTeamColsUI(); updateEditor(); });
   
   document.getElementById('inpSound').addEventListener('change', (e) => { AudioSys.play(e.target.value, document.getElementById('inpVol').value); });
 
@@ -938,7 +945,7 @@ function updateEditor() {
   cfg.cursorSize = Number(document.getElementById('inpCursorSize').value);
   cfg.radius = Number(document.getElementById('inpRadius').value); cfg.speed = Number(document.getElementById('inpSpeed').value);
   
-  // Строго читаем количество команд
+  // Строго переводим в число перед сохранением
   cfg.teams = Number(document.getElementById('inpTeams').value) || 2;
   
   cfg.sound = document.getElementById('inpSound').value; cfg.vol = Number(document.getElementById('inpVol').value);
@@ -1047,12 +1054,15 @@ window.closeModal = () => document.getElementById('modalBackdrop').classList.rem
    РЕЖИМ ИГРЫ (И ПРЕВЬЮ)
    ======================== */
 function bootGame() {
+  // ПРАВИЛЬНЫЙ И БЕЗОТКАЗНЫЙ ПАРСЕР URL
   const getParam = (k) => {
     let p = new URLSearchParams(location.search).get(k);
     if(!p && location.hash) {
-      let h = location.hash.substring(1);
-      if(h.startsWith('game=')) return h.substring(5);
-      p = new URLSearchParams(h).get(k);
+      // Браузер не декодирует хеш, делаем это вручную
+      let hashStr = location.hash.substring(1); 
+      // Пробуем раскодировать URL
+      try { hashStr = decodeURIComponent(hashStr); } catch(e){}
+      p = new URLSearchParams(hashStr).get(k);
     }
     return p;
   };
@@ -1063,7 +1073,10 @@ function bootGame() {
   
   let gCfg = cfg;
   let gameData = getParam('game');
-  if(gameData) { try { gCfg = b64d(gameData); } catch(e){} }
+  
+  if(gameData) { 
+    try { gCfg = b64d(gameData); } catch(e){ console.error(e); } 
+  }
   const isEdit = getParam('edit') === '1';
 
   window.addEventListener('pointerdown', () => { try { if(AudioSys.ctx && AudioSys.ctx.state === 'suspended') AudioSys.ctx.resume(); } catch(e){} }, {once: true});
@@ -1111,7 +1124,7 @@ function bootGame() {
   gTitleEl.style.color = gCfg.titleColor || '#ffffff';
 
   const tDiv = document.getElementById('gTeams');
-  const teamsCount = Number(gCfg.teams) || 2; // Жесткая привязка числа команд
+  const teamsCount = Number(gCfg.teams) || 2; 
   tDiv.style.gridTemplateColumns = `repeat(${teamsCount}, 1fr)`;
   let scores = Array(teamsCount).fill(0);
   let curTeam = 0;
@@ -1392,13 +1405,13 @@ function bootGame() {
   document.getElementById('btnReset').onclick = () => location.reload();
 }
 
-/* --- Запуск --- */
+/* --- Запуск с правильным декодированием Хеша --- */
 const getParamMain = (k) => {
     let p = new URLSearchParams(location.search).get(k);
     if(!p && location.hash) {
-      let h = location.hash.substring(1);
-      if(h.startsWith('game=')) return h.substring(5);
-      p = new URLSearchParams(h).get(k);
+      let hashStr = location.hash.substring(1); 
+      try { hashStr = decodeURIComponent(hashStr); } catch(e){}
+      p = new URLSearchParams(hashStr).get(k);
     }
     return p;
 };
