@@ -165,13 +165,15 @@
 
     /* Кнопка Черновика */
     #gDrawToggle {
-      position: absolute; top: 20px; right: 20px; font-size: 26px; 
+      position: absolute; top: 20px; right: 20px; font-size: 24px; 
       background: rgba(0,0,0,0.5); border: 2px solid var(--team-color);
-      border-radius: 50%; width: 44px; height: 44px; cursor: pointer;
+      border-radius: 50%; width: 46px; height: 46px; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       transition: 0.3s; z-index: 40; padding: 0; box-shadow: 0 0 10px var(--team-color-alpha);
     }
-    #gDrawToggle:hover { transform: scale(1.1); background: var(--team-color); }
+    #gDrawToggle:hover { transform: scale(1.1); }
+    /* Если включен режим рисования - светим кнопку */
+    .game-modal-content.draw-mode #gDrawToggle { background: var(--team-color); box-shadow: 0 0 20px var(--team-color); transform: scale(1.1); }
 
     #gTimerContainer { display: flex; justify-content: center; margin-bottom: 24px; position: relative; z-index: 30; }
     #gTimerWrap { background: var(--team-color); color: #000; padding: 6px 30px; border-radius: 30px; box-shadow: 0 5px 25px var(--team-color); display: flex; align-items: center; gap: 8px; border: 2px solid rgba(255,255,255,0.5); transition: 0.3s; }
@@ -205,9 +207,15 @@
     #gSubmitBtn { border-radius: 20px; padding: 0 40px; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; background: var(--team-color); color: #000; border: none; font-weight: 900; box-shadow: 0 4px 15px var(--team-color); cursor:pointer;}
     #gSubmitBtn:hover:not(:disabled) { filter: brightness(1.2); transform: translateY(-2px); }
 
-    /* Область черновика */
+    /* Прячем ответы, когда открыт черновик */
+    .game-modal-content.draw-mode #gAnswers,
+    .game-modal-content.draw-mode #gInputWrap { display: none !important; }
+    
+    .game-modal-content.draw-mode #gDrawArea { display: block; }
+
+    /* Область черновика (ОГРОМНАЯ) */
     #gDrawArea {
-      display: none; width: 100%; height: 350px; margin-top: 30px;
+      display: none; width: 100%; height: 50vh; min-height: 300px; margin-top: 10px;
       border-radius: 16px; border: 3px solid var(--team-color);
       background-color: #fdfdfc;
       background-image: linear-gradient(#b0d4e3 1px, transparent 1px), linear-gradient(90deg, #b0d4e3 1px, transparent 1px);
@@ -404,7 +412,7 @@
         <div class="title"><span data-i18n="sQ">Вопросы</span> <span id="qCount" style="color:#fff">0</span></div>
         <div class="row" style="margin-bottom:12px;">
           <button class="btn primary" id="btnAddQ" data-i18n="btnAdd">➕ Добавить</button>
-          <button class="btn primary" id="btnImportQ" data-i18n="btnImportQ" style="background: linear-gradient(90deg, #33d17a, #28a745); border-color: #28a745;">📥 Импорт</button>
+          <button class="btn primary" id="btnImportQ" style="background: linear-gradient(90deg, #33d17a, #28a745); border-color: #28a745;">📥 Импорт</button>
           <button class="btn" id="btnClearQ" data-i18n="btnClr">🧹 Очистить</button>
         </div>
         <div style="font-size:11px; color:var(--neon-orange-base); margin-bottom:8px;" data-i18n="lDragHint">💡 Можно перетаскивать вопросы (за значок ☰), чтобы менять их порядок.</div>
@@ -506,17 +514,30 @@
 <div class="modal-backdrop" id="importBackdrop">
   <div class="modal">
     <div class="modal-head">
-      <span style="font-weight:900; color:#33d17a;">📥 Умный Импорт (Решу ЕГЭ и др.)</span>
+      <span style="font-weight:900; color:#33d17a;">📥 Умный Импорт</span>
       <button class="btn small danger" onclick="closeImport()">✖</button>
     </div>
     <div class="modal-body">
-      <div style="font-size:13px; color:rgba(255,255,255,0.8); margin-bottom:10px; line-height:1.4;">
-        <b>Как это работает:</b> Скопируйте текст тестов прямо с сайта и вставьте сюда.<br>
-        Каждый вопрос должен быть отделен пустой строкой. <br>
-        Если алгоритм найдет строки вроде <code>1) ...</code> или <code>А) ...</code> — он создаст тест с выбором ответа.<br>
-        Если найдет слово <code>Ответ: 15</code> — он сам запишет "15" в правильный ответ!
+      <div class="row" style="margin-bottom:15px; align-items:flex-end;">
+        <div>
+          <label>Режим импорта текста:</label>
+          <select id="importMode" style="border-color:#33d17a;">
+            <option value="ege">Текст с вариантами ответов (Решу ЕГЭ)</option>
+            <option value="line">Простой список (каждая строка — новый вопрос)</option>
+          </select>
+        </div>
+        <div>
+          <label>Скопировать настройки из:</label>
+          <select id="importTemplate" style="border-color:#d99a29;">
+            <option value="-1">Стандартные (по умолчанию)</option>
+          </select>
+        </div>
       </div>
-      <textarea id="importText" style="height:350px; font-family:'Courier New', monospace; font-size:14px;" placeholder="Вставьте скопированный текст сюда..."></textarea>
+
+      <div style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:10px; line-height:1.4;">
+        <b>Подсказка:</b> Выберите нужный вопрос как шаблон, и все импортируемые вопросы автоматически получат его шрифт, размер, таймер и картинку мишени!
+      </div>
+      <textarea id="importText" style="height:300px; font-family:'Courier New', monospace; font-size:14px;" placeholder="Вставьте скопированный текст сюда..."></textarea>
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="closeImport()">Отмена</button>
@@ -597,14 +618,14 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
    ======================== */
 const dict = {
   ru: {
-    btnResetProj: "🗑 Сбросить всё", confirmReset: "Точно удалить все вопросы и настройки? Это нельзя отменить.", btnCopy: "📋 Код", sLang: "Язык интерфейса", sName: "Название игры", sDesign: "Оформление", lBg: "Фон игры", lTarget: "Мишень (общая)", optCustom: "По ссылке...", lRadius: "Радиус движения", lSpeed: "Скорость", sGame: "Настройки игры", lTeams: "Команд (1-3)", lTeamColors: "Цвета рамок команд", lSound: "Выстрел", lVol: "Громкость", lPenaltyOn: "Штраф за промах", lPenaltyPts: "Вычитать очков", oOff: "Выкл", oOn: "Вкл", sStart: "Стартовый экран", lInstructionColor: "Цвет рамки", lGlow: "Свечение рамки", sEnd: "Финальный экран (Фидбек)", sQ: "Вопросы", btnAdd: "➕ Добавить", btnClr: "🧹 Очистить", previewTitle: "Просмотр", btnModeEdit: "✏️ Редактор", btnModePlay: "▶️ Тест", mTitle: "Редактировать вопрос", lQType: "Тип вопроса", oChoice: "Выбор ответа", oInput: "Ввод ответа", lPts: "Очки", lTimer: "Таймер", lSec: "Секунды", lImg: "🖼️ Картинка (URL)", lQText: "Текст вопроса", lFont: "Шрифт", lFontSize: "Размер", lTitleColor: "Цвет текста", lAnsOpts: "Варианты ответа", btnAddOpt: "➕ Вариант", btnCancel: "Отмена", btnSave: "💾 Сохранить", lRightAns: "Верный", lOptText: "Текст варианта", lDel: "Удалить", lGameOver: "Результаты игры", btnRestart: "↻ Сыграть еще раз", lTeam: "Команда", btnPlay: "▶ Начать", btnReset: "Сброс", btnOK: "ОК", lCursor: "Прицел", oCrosshair: "Стандартный крестик", oSniper: "Снайперский (чёрный)", oRedDot: "Коллиматор (красный)", lSizeOk: "Код в норме", lSizeWarn: "Почти лимит", lSizeErr: "ПРЕВЫШЕН ЛИМИТ", oMagic: "✨ Волшебная палочка", oDing: "🔔 Дзынь", lQTarget: "Индивидуальная мишень", oDefault: "По умолчанию", lTargetSize: "Размер мишени", lCursorSize: "Размер прицела", btnCopyQ: "Дублировать", lDragHint: "💡 Можно перетаскивать вопросы (за значок ☰), чтобы менять их порядок.", btnImportQ: "📥 Импорт",
-    bg1: "🌌 Космические дали", bg2: "🌲 Сказочный лес", bg3: "🌊 Морское дно", bg4: "💧 Водный мир", bg5: "🌳 Старый парк", bg6: "🏜️ Древний Египет", bg7: "🏙️ Современный город", bg8: "🌵 Дикий Запад",
-    tgt10: "🔘 Спортивная мишень", tgt11: "💠 Модерн", tgt12: "🛸 Космическая мишень", tgt13: "🎯 Классическая мишень", tgt14: "⭐ Золотая звезда"
+    btnResetProj: "🗑 Сбросить всё", confirmReset: "Точно удалить все вопросы и настройки? Это нельзя отменить.", btnCopy: "📋 Код", sLang: "Язык интерфейса", sName: "Название игры", sDesign: "Оформление", lBg: "Фон игры", lTarget: "Мишень (общая)", optCustom: "По ссылке...", lRadius: "Радиус движения", lSpeed: "Скорость", sGame: "Настройки игры", lTeams: "Команд (1-3)", lTeamColors: "Цвета рамок команд", lSound: "Выстрел", lVol: "Громкость", lPenaltyOn: "Штраф за промах", lPenaltyPts: "Вычитать очков", oOff: "Выкл", oOn: "Вкл", sStart: "Стартовый экран", lInstructionColor: "Цвет рамки", lGlow: "Свечение рамки", sEnd: "Финальный экран (Фидбек)", sQ: "Вопросы", btnAdd: "➕ Добавить", btnClr: "🧹 Очистить", previewTitle: "Просмотр", btnModeEdit: "✏️ Редактор", btnModePlay: "▶️ Тест", mTitle: "Редактировать вопрос", lQType: "Тип вопроса", oChoice: "Выбор ответа", oInput: "Ввод ответа", lPts: "Очки", lTimer: "Таймер", lSec: "Секунды", lImg: "🖼️ Картинка (URL)", lQText: "Текст вопроса", lFont: "Шрифт", lFontSize: "Размер", lTitleColor: "Цвет текста", lAnsOpts: "Варианты ответа", btnAddOpt: "➕ Вариант", btnCancel: "Отмена", btnSave: "💾 Сохранить", lRightAns: "Верный", lOptText: "Текст варианта", lDel: "Удалить", lGameOver: "Результаты игры", btnRestart: "↻ Сыграть еще раз", lTeam: "Команда", btnPlay: "▶ Начать", btnReset: "Сброс", btnOK: "ОК", lCursor: "Прицел", oCrosshair: "Стандарт крестик", oSniper: "Снайперский", oRedDot: "Коллиматор", lSizeOk: "Код в норме", lSizeWarn: "Почти лимит", lSizeErr: "ПРЕВЫШЕН ЛИМИТ", oMagic: "✨ Волшебная палочка", oDing: "🔔 Дзынь", lQTarget: "Индивидуальная мишень", oDefault: "По умолчанию", lTargetSize: "Размер мишени", lCursorSize: "Размер прицела", btnCopyQ: "Дублировать", lDragHint: "💡 Можно перетаскивать вопросы (за значок ☰), чтобы менять их порядок.", btnImportQ: "📥 Импорт",
+    bg1: "🌌 Космос", bg2: "🌲 Лес", bg3: "🌊 Море", bg4: "💧 Вода", bg5: "🌳 Парк", bg6: "🏜️ Египет", bg7: "🏙️ Город", bg8: "🌵 Дикий Запад",
+    tgt10: "🔘 Спортивная", tgt11: "💠 Модерн", tgt12: "🛸 НЛО", tgt13: "🎯 Классика", tgt14: "⭐ Звезда"
   },
   en: {
-    btnResetProj: "🗑 Reset All", confirmReset: "Are you sure you want to delete all questions and settings? This cannot be undone.", btnCopy: "📋 Copy Code", sLang: "Interface Language", sName: "Game Title", sDesign: "Design", lBg: "Background", lTarget: "Target (global)", optCustom: "Custom URL...", lRadius: "Orbit Radius", lSpeed: "Speed", sGame: "Game Settings", lTeams: "Teams (1-3)", lTeamColors: "Team Colors", lSound: "Shot Sound", lVol: "Volume", lPenaltyOn: "Penalty for miss", lPenaltyPts: "Points to Deduct", oOff: "Off", oOn: "On", sStart: "Start Screen", lInstructionColor: "Border Color", lGlow: "Border Glow", sEnd: "Feedback Screen", sQ: "Questions", btnAdd: "➕ Add", btnClr: "🧹 Clear", previewTitle: "Preview", btnModeEdit: "✏️ Edit", btnModePlay: "▶️ Test", mTitle: "Edit Question", lQType: "Question Type", oChoice: "Multiple Choice", oInput: "Text Input", lPts: "Points", lTimer: "Timer", lSec: "Seconds", lImg: "🖼️ Image (URL)", lQText: "Question Text", lFont: "Font", lFontSize: "Size", lTitleColor: "Text Color", lAnsOpts: "Answer Options", btnAddOpt: "➕ Option", btnCancel: "Cancel", btnSave: "💾 Save", lRightAns: "Correct", lOptText: "Option Text", lDel: "Delete", lGameOver: "Game Results", btnRestart: "↻ Play Again", lTeam: "Team", btnPlay: "▶ Play", btnReset: "Reset", btnOK: "OK", lCursor: "Crosshair", oCrosshair: "Standard Crosshair", oSniper: "Sniper (Black)", oRedDot: "Red Dot Sight", lSizeOk: "Code Size OK", lSizeWarn: "Close to Limit", lSizeErr: "LIMIT REACHED", oMagic: "✨ Magic Wand", oDing: "🔔 Ding", lQTarget: "Individual Target", oDefault: "Default", lTargetSize: "Target Size", lCursorSize: "Crosshair Size", btnCopyQ: "Duplicate", lDragHint: "💡 Drag questions by ☰ to reorder them.", btnImportQ: "📥 Import",
+    btnResetProj: "🗑 Reset All", confirmReset: "Are you sure you want to delete all questions and settings? This cannot be undone.", btnCopy: "📋 Copy Code", sLang: "Interface Language", sName: "Game Title", sDesign: "Design", lBg: "Background", lTarget: "Target (global)", optCustom: "Custom URL...", lRadius: "Orbit Radius", lSpeed: "Speed", sGame: "Game Settings", lTeams: "Teams (1-3)", lTeamColors: "Team Colors", lSound: "Shot Sound", lVol: "Volume", lPenaltyOn: "Penalty for miss", lPenaltyPts: "Points to Deduct", oOff: "Off", oOn: "On", sStart: "Start Screen", lInstructionColor: "Border Color", lGlow: "Border Glow", sEnd: "Feedback Screen", sQ: "Questions", btnAdd: "➕ Add", btnClr: "🧹 Clear", previewTitle: "Preview", btnModeEdit: "✏️ Edit", btnModePlay: "▶️ Test", mTitle: "Edit Question", lQType: "Question Type", oChoice: "Multiple Choice", oInput: "Text Input", lPts: "Points", lTimer: "Timer", lSec: "Seconds", lImg: "🖼️ Image (URL)", lQText: "Question Text", lFont: "Font", lFontSize: "Size", lTitleColor: "Text Color", lAnsOpts: "Answer Options", btnAddOpt: "➕ Option", btnCancel: "Cancel", btnSave: "💾 Save", lRightAns: "Correct", lOptText: "Option Text", lDel: "Delete", lGameOver: "Game Results", btnRestart: "↻ Play Again", lTeam: "Team", btnPlay: "▶ Play", btnReset: "Reset", btnOK: "OK", lCursor: "Crosshair", oCrosshair: "Standard", oSniper: "Sniper", oRedDot: "Red Dot", lSizeOk: "Code Size OK", lSizeWarn: "Close to Limit", lSizeErr: "LIMIT REACHED", oMagic: "✨ Magic Wand", oDing: "🔔 Ding", lQTarget: "Individual Target", oDefault: "Default", lTargetSize: "Target Size", lCursorSize: "Crosshair Size", btnCopyQ: "Duplicate", lDragHint: "💡 Drag questions by ☰ to reorder them.", btnImportQ: "📥 Import",
     bg1: "🌌 Deep Space", bg2: "🌲 Fairy Forest", bg3: "🌊 Ocean Floor", bg4: "💧 Water World", bg5: "🌳 Old Park", bg6: "🏜️ Ancient Egypt", bg7: "🏙️ Modern City", bg8: "🌵 Wild West",
-    tgt10: "🔘 Sport Target", tgt11: "💠 Modern", tgt12: "🛸 Space Target", tgt13: "🎯 Classic Target", tgt14: "⭐ Golden Star"
+    tgt10: "🔘 Sport", tgt11: "💠 Modern", tgt12: "🛸 UFO", tgt13: "🎯 Classic", tgt14: "⭐ Star"
   }
 };
 let lang = "ru";
@@ -861,7 +882,6 @@ function bootEditor() {
 
   const upd = () => updateEditor();
   
-  // Кнопка полного сброса проекта (Очищает и память, и ссылку!)
   document.getElementById('btnResetProject').onclick = () => {
     if(confirm(t('confirmReset'))) { 
       localStorage.removeItem(LS_KEY); 
@@ -885,7 +905,6 @@ function bootEditor() {
   document.getElementById('inpCursorSize').value = cfg.cursorSize;
   document.getElementById('inpRadius').value = cfg.radius; document.getElementById('inpSpeed').value = cfg.speed;
   
-  // Строго проставляем количество команд
   document.getElementById('inpTeams').value = cfg.teams; 
   
   document.getElementById('inpSound').value = cfg.sound; 
@@ -901,7 +920,7 @@ function bootEditor() {
   document.getElementById('inpEndText').value = cfg.end.text;
 
   // Обработчики полей ввода
-  document.querySelectorAll('#editorApp input:not([id^="mod"]):not(#inpTeams):not(#importText), #editorApp textarea:not([id^="mod"]):not(#importText), #editorApp select:not([id^="mod"]):not(#inpTeams)').forEach(el => {
+  document.querySelectorAll('#editorApp input:not([id^="mod"]):not(#inpTeams):not(#importText), #editorApp textarea:not([id^="mod"]):not(#importText), #editorApp select:not([id^="mod"]):not(#inpTeams):not(#importMode):not(#importTemplate)').forEach(el => {
     el.addEventListener('input', upd); 
     el.addEventListener('change', upd);
   });
@@ -911,7 +930,6 @@ function bootEditor() {
   document.getElementById('selTarget').addEventListener('change', (e) => { document.getElementById('inpTargetCustom').style.display = e.target.value === 'custom' ? 'block' : 'none'; });
   document.getElementById('selCursor').addEventListener('change', (e) => { document.getElementById('inpCursorCustom').style.display = e.target.value === 'custom' ? 'block' : 'none'; });
   
-  // НАДЁЖНАЯ ПРИВЯЗКА КОМАНД
   document.getElementById('inpTeams').addEventListener('change', () => { renderTeamColsUI(); updateEditor(); });
   document.getElementById('inpTeams').addEventListener('input', () => { renderTeamColsUI(); updateEditor(); });
   
@@ -987,7 +1005,6 @@ function updateEditor() {
   cfg.cursorSize = Number(document.getElementById('inpCursorSize').value);
   cfg.radius = Number(document.getElementById('inpRadius').value); cfg.speed = Number(document.getElementById('inpSpeed').value);
   
-  // Строго переводим в число перед сохранением
   cfg.teams = Number(document.getElementById('inpTeams').value) || 2;
   
   cfg.sound = document.getElementById('inpSound').value; cfg.vol = Number(document.getElementById('inpVol').value);
@@ -1046,44 +1063,73 @@ window.copyQ = (i) => {
   updateEditor();
 };
 
-// === ПАРСЕР ИМПОРТА (РЕШУ ЕГЭ) ===
+// === ПАРСЕР ИМПОРТА ===
 window.btnImportQ = document.getElementById('btnImportQ');
-window.btnImportQ.onclick = () => { document.getElementById('importBackdrop').classList.add('show'); };
+window.btnImportQ.onclick = () => { 
+  const tplSelect = document.getElementById('importTemplate');
+  tplSelect.innerHTML = '<option value="-1">Стандартные (по умолчанию)</option>';
+  cfg.questions.forEach((q, i) => {
+      tplSelect.innerHTML += `<option value="${i}">Как в вопросе #${i+1}</option>`;
+  });
+  document.getElementById('importBackdrop').classList.add('show'); 
+};
 window.closeImport = () => { document.getElementById('importBackdrop').classList.remove('show'); document.getElementById('importText').value = ''; };
 
 window.processImport = () => {
     const txt = document.getElementById('importText').value.trim();
     if (!txt) return closeImport();
 
-    const blocks = txt.split(/\n\s*\n/);
+    const mode = document.getElementById('importMode').value;
+    const tplIdx = parseInt(document.getElementById('importTemplate').value);
     
-    blocks.forEach(block => {
-        const lines = block.trim().split('\n');
-        let qText = [];
-        let opts = [];
-        let autoAnswer = ['Ответ'];
-        
-        const optRegex = /^(\d+[\)\.]|[а-яА-Яa-zA-Z][\)\.])\s+(.+)$/;
+    // Базовые настройки или из шаблона
+    let baseQ = { pts: 10, timer: false, sec: 30, font: "Roboto", size: 20, tgt: "default", tu: "" };
+    if (tplIdx >= 0 && cfg.questions[tplIdx]) {
+        const tq = cfg.questions[tplIdx];
+        baseQ = { 
+            pts: tq.pts, timer: tq.timer, sec: tq.sec, 
+            font: tq.font, size: tq.size, tgt: tq.tgt, tu: tq.tu
+        };
+    }
 
-        lines.forEach(line => {
+    if (mode === 'line') {
+        const lines = txt.split('\n');
+        lines.forEach((line) => {
             const trimmed = line.trim();
-            const match = trimmed.match(optRegex);
-            
-            if (match) {
-                opts.push({ c: false, t: match[2].trim() });
-            } else if (trimmed.toLowerCase().startsWith('ответ:')) {
-                autoAnswer = [trimmed.replace(/^ответ:\s*/i, '').trim()];
-            } else {
-                qText.push(trimmed);
+            if (trimmed) {
+                cfg.questions.push({ ...baseQ, type: 'input', text: trimmed, opts: [], acc: ['Ответ'] });
             }
         });
+    } else {
+        const blocks = txt.split(/\n\s*\n/);
+        blocks.forEach(block => {
+            const lines = block.trim().split('\n');
+            let qText = [];
+            let opts = [];
+            let autoAnswer = ['Ответ'];
+            
+            const optRegex = /^(\d+[\)\.]|[а-яА-Яa-zA-Z][\)\.])\s+(.+)$/;
 
-        if (opts.length > 0) {
-            cfg.questions.push({ type: 'choice', text: qText.join('\n'), pts: 10, timer: false, sec: 30, img: '', opts: opts, acc: [''], tgt: 'default', tu: '', x: 50, y: 50 });
-        } else if (qText.length > 0) {
-            cfg.questions.push({ type: 'input', text: qText.join('\n'), pts: 10, timer: false, sec: 30, img: '', opts: [], acc: autoAnswer, tgt: 'default', tu: '', x: 50, y: 50 });
-        }
-    });
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                const match = trimmed.match(optRegex);
+                
+                if (match) {
+                    opts.push({ c: false, t: match[2].trim() });
+                } else if (trimmed.toLowerCase().startsWith('ответ:')) {
+                    autoAnswer = [trimmed.replace(/^ответ:\s*/i, '').trim()];
+                } else {
+                    qText.push(trimmed);
+                }
+            });
+
+            if (opts.length > 0) {
+                cfg.questions.push({ ...baseQ, type: 'choice', text: qText.join('\n'), opts: opts, acc: [''] });
+            } else if (qText.length > 0) {
+                cfg.questions.push({ ...baseQ, type: 'input', text: qText.join('\n'), opts: [], acc: autoAnswer });
+            }
+        });
+    }
 
     closeImport();
     updateEditor();
@@ -1356,12 +1402,12 @@ function bootGame() {
   // Логика холста (черновика)
   const drawArea = document.getElementById('gDrawArea');
   const canvas = document.getElementById('gCanvas');
-  const ctx = canvas.getContext('2d');
+  const ctxCanvas = canvas.getContext('2d');
   let isDrawing = false;
 
   function resizeCanvas() {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
+      canvas.width = drawArea.offsetWidth;
+      canvas.height = drawArea.offsetHeight;
   }
 
   function getMousePos(e) {
@@ -1374,20 +1420,20 @@ function bootGame() {
   const startDraw = (e) => {
       isDrawing = true;
       const pos = getMousePos(e);
-      ctx.beginPath();
-      ctx.moveTo(pos.x, pos.y);
+      ctxCanvas.beginPath();
+      ctxCanvas.moveTo(pos.x, pos.y);
   };
 
   const draw = (e) => {
       if (!isDrawing) return;
       const pos = getMousePos(e);
-      ctx.lineTo(pos.x, pos.y);
-      ctx.strokeStyle = '#0f4c81'; // Синие чернила
-      ctx.lineWidth = 3;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.stroke();
-      e.preventDefault(); // Чтобы экран на телефоне не прокручивался
+      ctxCanvas.lineTo(pos.x, pos.y);
+      ctxCanvas.strokeStyle = '#0f4c81'; // Синие чернила
+      ctxCanvas.lineWidth = 3;
+      ctxCanvas.lineCap = 'round';
+      ctxCanvas.lineJoin = 'round';
+      ctxCanvas.stroke();
+      if(e.cancelable) e.preventDefault(); // Чтобы экран на телефоне не прокручивался
   };
 
   const stopDraw = () => isDrawing = false;
@@ -1398,15 +1444,15 @@ function bootGame() {
   canvas.addEventListener('pointerout', stopDraw);
 
   document.getElementById('gCanvasClear').onclick = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctxCanvas.clearRect(0, 0, canvas.width, canvas.height);
   };
 
   document.getElementById('gDrawToggle').onclick = () => {
-      if(drawArea.style.display === 'none') {
-          drawArea.style.display = 'block';
-          resizeCanvas(); // Обязательно после display:block
-      } else {
-          drawArea.style.display = 'none';
+      const modalContent = document.querySelector('.game-modal-content');
+      modalContent.classList.toggle('draw-mode');
+      
+      if(modalContent.classList.contains('draw-mode')) {
+          setTimeout(resizeCanvas, 50); // Ждем пока CSS display:block отработает
       }
   };
 
@@ -1415,12 +1461,12 @@ function bootGame() {
   function openGameQuestion(q, tCol, onDone) {
     arenaEl.classList.remove('aiming'); aimCursor.style.display = 'none';
     
-    // Скрываем и очищаем черновик при каждом новом вопросе
-    drawArea.style.display = 'none';
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+    // Сбрасываем режим черновика и очищаем его
     const modal = document.getElementById('gModal');
     const modalContent = modal.querySelector('.game-modal-content');
+    modalContent.classList.remove('draw-mode');
+    ctxCanvas.clearRect(0, 0, canvas.width, canvas.height);
+
     modalContent.style.setProperty('--team-color', tCol);
     
     const hexToRgb = (hex) => {
@@ -1485,6 +1531,9 @@ function bootGame() {
       const btns = ansDiv.querySelectorAll('.game-ans-btn');
       btns.forEach(b => b.style.pointerEvents = 'none');
       inp.disabled = true; subBtn.disabled = true;
+
+      // Если черновик открыт, закрываем его, чтобы показать результат
+      modalContent.classList.remove('draw-mode');
 
       if(isCorrect) {
           try { AudioSys.play('correct', gCfg.vol); } catch(e){}
