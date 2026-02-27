@@ -375,7 +375,7 @@
           <div><label data-i18n="lVol">Громкость</label><input type="range" id="inpVol" min="0" max="1" step="0.1" value="0.7"></div>
         </div>
         <div class="row" style="margin-top:10px;">
-          <div><label data-i18n="lPenaltyOn">Штраф за промах (мимо мишени)</label><select id="inpPenaltyOn"><option value="false" data-i18n="oOff">Выкл</option><option value="true" data-i18n="oOn">Вкл</option></select></div>
+          <div><label data-i18n="lPenaltyOn">Штраф за промах</label><select id="inpPenaltyOn"><option value="false" data-i18n="oOff">Выкл</option><option value="true" data-i18n="oOn">Вкл</option></select></div>
           <div><label data-i18n="lPenaltyPts">Вычитать очков</label><input type="number" id="inpPenaltyPts" value="5"></div>
         </div>
         <label data-i18n="lTeamColors" style="margin-top:10px;">Цвета рамок команд</label>
@@ -464,7 +464,7 @@
             <option value="Merriweather" style="font-family: 'Merriweather';">Merriweather</option>
             <option value="Playfair Display" style="font-family: 'Playfair Display';">Playfair Display</option>
             <option value="Lora" style="font-family: 'Lora';">Lora</option>
-            <option value="Courier New" style="font-family: 'Courier New';">Courier New</option>
+            <option value="Courier New" style="font-family: 'Courier New';">Courier New (Моноширинный)</option>
             <option value="Caveat" style="font-family: 'Caveat', cursive;">Caveat (Рукописный)</option>
             <option value="Neucha" style="font-family: 'Neucha', cursive;">Neucha (Рукописный)</option>
           </select>
@@ -512,7 +512,7 @@
         <div>
           <label>Режим импорта текста:</label>
           <select id="importMode" style="border-color:#33d17a;">
-            <option value="ege">Текст с вариантами ответов (Решу ЕГЭ)</option>
+            <option value="ege">Текст блоками (с вариантами ответов)</option>
             <option value="line">Простой список (каждая строка — новый вопрос)</option>
           </select>
         </div>
@@ -525,14 +525,10 @@
       </div>
 
       <div style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:10px; line-height:1.4;">
-        <b>Подсказка:</b> Выберите нужный вопрос как шаблон, и все импортируемые вопросы автоматически получат его шрифт, размер, таймер и картинку мишени!
+        <b>Подсказка:</b> Если в конце скопированного блока есть строка <code>Ответ: 2</code> (или любой другой), умный алгоритм сам найдет правильный вариант и поставит на него галочку!
       </div>
       
-      <button class="btn small" style="background:#4a4a4a; margin-bottom: 10px; width: 100%; border-color:#888;" onclick="fixEgeText()" title="Нажмите, если текст с Решу ЕГЭ скопировался кракозябрами (ВерШятнШсть)">
-        🛠 Починить кракозябры (Решу ЕГЭ)
-      </button>
-
-      <textarea id="importText" style="height:250px; font-family:'Courier New', monospace; font-size:14px;" placeholder="Вставьте скопированный текст сюда..."></textarea>
+      <textarea id="importText" style="height:300px; font-family:'Courier New', monospace; font-size:14px;" placeholder="Вставьте скопированный текст сюда..."></textarea>
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="closeImport()">Отмена</button>
@@ -877,6 +873,7 @@ function bootEditor() {
 
   const upd = () => updateEditor();
   
+  // Кнопка полного сброса проекта (Очищает и память, и ссылку!)
   document.getElementById('btnResetProject').onclick = () => {
     if(confirm(t('confirmReset'))) { 
       localStorage.removeItem(LS_KEY); 
@@ -900,6 +897,7 @@ function bootEditor() {
   document.getElementById('inpCursorSize').value = cfg.cursorSize;
   document.getElementById('inpRadius').value = cfg.radius; document.getElementById('inpSpeed').value = cfg.speed;
   
+  // Строго проставляем количество команд
   document.getElementById('inpTeams').value = cfg.teams; 
   
   document.getElementById('inpSound').value = cfg.sound; 
@@ -914,6 +912,7 @@ function bootEditor() {
   document.getElementById('feedEnabled').value = cfg.end.enabled ? 'true' : 'false'; 
   document.getElementById('inpEndText').value = cfg.end.text;
 
+  // Обработчики полей ввода
   document.querySelectorAll('#editorApp input:not([id^="mod"]):not(#inpTeams):not(#importText), #editorApp textarea:not([id^="mod"]):not(#importText), #editorApp select:not([id^="mod"]):not(#inpTeams):not(#importMode):not(#importTemplate)').forEach(el => {
     el.addEventListener('input', upd); 
     el.addEventListener('change', upd);
@@ -924,6 +923,7 @@ function bootEditor() {
   document.getElementById('selTarget').addEventListener('change', (e) => { document.getElementById('inpTargetCustom').style.display = e.target.value === 'custom' ? 'block' : 'none'; });
   document.getElementById('selCursor').addEventListener('change', (e) => { document.getElementById('inpCursorCustom').style.display = e.target.value === 'custom' ? 'block' : 'none'; });
   
+  // НАДЁЖНАЯ ПРИВЯЗКА КОМАНД
   document.getElementById('inpTeams').addEventListener('change', () => { renderTeamColsUI(); updateEditor(); });
   document.getElementById('inpTeams').addEventListener('input', () => { renderTeamColsUI(); updateEditor(); });
   
@@ -1067,7 +1067,7 @@ window.copyQ = (i) => {
   updateEditor();
 };
 
-// === ПАРСЕР ИМПОРТА ===
+// === УМНЫЙ ПАРСЕР ИМПОРТА ===
 window.btnImportQ = document.getElementById('btnImportQ');
 window.btnImportQ.onclick = () => { 
   const tplSelect = document.getElementById('importTemplate');
@@ -1078,38 +1078,6 @@ window.btnImportQ.onclick = () => {
   document.getElementById('importBackdrop').classList.add('show'); 
 };
 window.closeImport = () => { document.getElementById('importBackdrop').classList.remove('show'); document.getElementById('importText').value = ''; };
-
-window.fixEgeText = () => {
-    let el = document.getElementById('importText');
-    let val = el.value;
-    
-    val = val.replace(/Ш/g, 'о');
-    val = val.replace(/t/g, 'т');
-    val = val.replace(/r/g, 'г');
-    val = val.replace(/u/g, 'и');
-    val = val.replace(/n/g, 'п');
-    val = val.replace(/c/g, 'с');
-    val = val.replace(/p/g, 'р');
-    val = val.replace(/k/g, 'к');
-    val = val.replace(/x/g, 'х');
-    val = val.replace(/y/g, 'у');
-    val = val.replace(/a/g, 'а');
-    val = val.replace(/e/g, 'е');
-    val = val.replace(/o/g, 'о');
-
-    val = val.replace(/H/g, 'Н');
-    val = val.replace(/T/g, 'Т');
-    val = val.replace(/M/g, 'М');
-    val = val.replace(/K/g, 'К');
-    val = val.replace(/P/g, 'Р');
-    val = val.replace(/C/g, 'С');
-    val = val.replace(/E/g, 'Е');
-    val = val.replace(/A/g, 'А');
-    val = val.replace(/O/g, 'О');
-    val = val.replace(/X/g, 'Х');
-
-    el.value = val;
-};
 
 window.processImport = () => {
     const txt = document.getElementById('importText').value.trim();
@@ -1141,27 +1109,49 @@ window.processImport = () => {
             const lines = block.trim().split('\n');
             let qText = [];
             let opts = [];
-            let autoAnswer = ['Ответ'];
+            let autoAnswer = '';
             
-            const optRegex = /^(\d+[\)\.]|[а-яА-Яa-zA-Z][\)\.])\s+(.+)$/;
+            // Ищет "1) текст", "А) текст", "1. текст" и т.д.
+            const optRegex = /^(\d+|[а-яА-Яa-zA-Z])[\)\.]\s+(.+)$/;
 
             lines.forEach(line => {
                 const trimmed = line.trim();
                 const match = trimmed.match(optRegex);
                 
                 if (match) {
-                    opts.push({ c: false, t: match[2].trim() });
+                    opts.push({ 
+                        c: false, 
+                        marker: match[1].toLowerCase(), 
+                        t: match[2].trim() 
+                    });
                 } else if (trimmed.toLowerCase().startsWith('ответ:')) {
-                    autoAnswer = [trimmed.replace(/^ответ:\s*/i, '').trim()];
+                    autoAnswer = trimmed.replace(/^ответ:\s*/i, '').trim().toLowerCase();
                 } else {
                     qText.push(trimmed);
                 }
             });
 
             if (opts.length > 0) {
+                // Если мы нашли ответ, пытаемся сопоставить его с вариантами
+                if (autoAnswer) {
+                    let matched = false;
+                    // Сначала ищем по букве/цифре (например, Ответ: 2)
+                    opts.forEach(o => {
+                        if (o.marker === autoAnswer) { o.c = true; matched = true; }
+                    });
+                    // Если не нашли, ищем по самому тексту ответа
+                    if (!matched) {
+                        opts.forEach(o => {
+                            if (o.t.toLowerCase() === autoAnswer) { o.c = true; matched = true; }
+                        });
+                    }
+                }
+                
+                // Очищаем техническое поле 'marker'
+                opts = opts.map(o => ({ c: o.c, t: o.t }));
                 cfg.questions.push({ ...baseQ, type: 'choice', text: qText.join('\n'), opts: opts, acc: [''] });
             } else if (qText.length > 0) {
-                cfg.questions.push({ ...baseQ, type: 'input', text: qText.join('\n'), opts: [], acc: autoAnswer });
+                cfg.questions.push({ ...baseQ, type: 'input', text: qText.join('\n'), opts: [], acc: autoAnswer ? [autoAnswer] : ['Ответ'] });
             }
         });
     }
