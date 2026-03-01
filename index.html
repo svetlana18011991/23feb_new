@@ -68,7 +68,7 @@
     .modal-foot { padding: 14px 20px; border-top: 1px solid rgba(217, 154, 41, 0.3); display: flex; justify-content: flex-end; gap: 10px; }
     
     .topBrand { display: flex; align-items: center; gap: 10px; }
-    .topBrand img { height: 42px; width: 42px; object-fit: cover; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+    .topBrand img { height: 42px; width: 42px; object-fit: cover; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); }
     
     /* --- GAME UI --- */
     .gameRoot { position: absolute; inset: 0; overflow: hidden; background: #000; font-family: 'Roboto', sans-serif; cursor: var(--game-cursor, default); perspective: 1000px; }
@@ -76,6 +76,20 @@
     
     .hud { position: absolute; top: 14px; left: 14px; right: 14px; pointer-events: none; z-index: 10; display:flex; justify-content:space-between; align-items:center; }
     .gameTitle { font-weight: 900; text-shadow: 0 4px 15px #000; color: #fff; }
+    
+    /* ИГРОВОЙ БРЕНДИНГ В УГЛУ */
+    .hud-right { display:flex; align-items:center; gap:15px; pointer-events:auto; }
+    .hud-brand { display:flex; align-items:center; gap:10px; opacity:0.85; user-select:none; transition: 0.3s; }
+    .hud-brand:hover { opacity: 1; }
+    .hud-brand-text { color:#fff; font-size:15px; font-weight:900; text-shadow: 0 2px 6px #000; font-family: 'Montserrat', sans-serif; letter-spacing:0.5px; }
+    .hud-brand img { width:42px; height:42px; border-radius:50%; box-shadow: 0 2px 10px rgba(0,0,0,0.8); object-fit:cover; border: 2px solid rgba(255,255,255,0.15); }
+    @media (max-width: 700px) { .hud-brand-text { display: none; } }
+
+    /* БРЕНДИНГ НА ЭКРАНАХ */
+    .screen-brand { display:flex; flex-direction:column; align-items:center; margin-bottom:20px; }
+    .screen-brand img { width:80px; height:80px; border-radius:50%; object-fit:cover; box-shadow: 0 0 25px rgba(217,154,41,0.5); border: 2px solid rgba(217,154,41,0.3); }
+    .screen-brand .brand-name { color:var(--neon-orange-base); font-size:15px; font-weight:900; margin-top:12px; letter-spacing:1px; text-transform:uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif;}
+
     .teams { display: grid; gap: 10px; margin-top: 54px; padding:0 14px; pointer-events: auto; position:relative; z-index:10; cursor: default; }
     .teamCard { background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 10px; backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
     .teamInput { background: transparent; border: none; outline: none; color: #fff; font-weight: 900; font-size: 16px; width: 100%; max-width: 150px; }
@@ -309,7 +323,7 @@
             </select>
             <input type="text" id="inpBgCustom" placeholder="https://..." style="display:none; margin-top:8px;">
             <label style="display:flex; align-items:center; gap:5px; margin-top:8px; font-size:11px;">
-              <input type="checkbox" id="inpBg3d" checked> <span data-i18n="lBg3d">3D-эффект (параллакс)</span>
+              <input type="checkbox" id="inpBg3d" checked> <span data-i18n="lBg3d">3D-эффект фона</span>
             </label>
           </div>
           <div>
@@ -484,7 +498,7 @@
             <option value="Merriweather" style="font-family: 'Merriweather';">Merriweather</option>
             <option value="Playfair Display" style="font-family: 'Playfair Display';">Playfair Display</option>
             <option value="Lora" style="font-family: 'Lora';">Lora</option>
-            <option value="Courier New" style="font-family: 'Courier New';">Courier New</option>
+            <option value="Courier New" style="font-family: 'Courier New';">Courier New (Моноширинный)</option>
             <option value="Caveat" style="font-family: 'Caveat', cursive;">Caveat (Рукописный)</option>
             <option value="Neucha" style="font-family: 'Neucha', cursive;">Neucha (Рукописный)</option>
           </select>
@@ -562,8 +576,15 @@
 
     <div class="hud">
       <div class="gameTitle" id="gTitle"></div>
-      <button class="btn small" id="btnReset" style="pointer-events:auto; z-index: 100;" data-i18n="btnReset">Сброс</button>
+      <div class="hud-right">
+        <div class="hud-brand">
+          <span class="hud-brand-text">Шкатулка интерактивов</span>
+          <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+        </div>
+        <button class="btn small" id="btnReset" style="z-index: 100;" data-i18n="btnReset">Сброс</button>
+      </div>
     </div>
+    
     <div class="teams" id="gTeams"></div>
     <div class="targets" id="gTargets"></div>
 
@@ -599,6 +620,11 @@
 
     <div class="screen" id="gStartScreen">
       <div class="screenCard" id="gStartCard">
+        <div class="screen-brand">
+           <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+           <div class="brand-name">Шкатулка интерактивов</div>
+        </div>
+        
         <h1 id="gStartTitle" style="color:#fff; margin-top:0;"></h1>
         <p id="gStartText" style="color:#ccc; font-size:18px; white-space:pre-wrap;"></p>
         <button class="btn primary" id="gBtnPlay" style="font-size:20px; padding:12px 24px; margin-top:20px;" data-i18n="btnPlay">▶ Начать</button>
@@ -607,6 +633,11 @@
 
     <div class="screen" id="gEndScreen">
       <div class="screenCard" id="gEndCard">
+        <div class="screen-brand" style="margin-bottom:10px;">
+           <img src="logo.png" style="width:60px; height:60px;" alt="Logo" onerror="this.style.display='none'">
+           <div class="brand-name" style="font-size:12px;">Шкатулка интерактивов</div>
+        </div>
+        
         <h1 id="gEndTitle" style="color:var(--neon-orange-base); margin-top:0;" data-i18n="lGameOver">Результаты игры</h1>
         <div id="gEndStats" style="width:100%; margin:20px 0;"></div>
         <p id="gEndText" style="color:#ccc; font-size:16px; white-space:pre-wrap;"></p>
@@ -933,7 +964,6 @@ function bootEditor() {
 
   const upd = () => updateEditor();
   
-  // Кнопка полного сброса проекта
   document.getElementById('btnResetProject').onclick = () => {
     if(confirm(t('confirmReset'))) { 
       localStorage.removeItem(LS_KEY); 
@@ -959,7 +989,6 @@ function bootEditor() {
   document.getElementById('inpCursorSize').value = cfg.cursorSize;
   document.getElementById('inpRadius').value = cfg.radius; document.getElementById('inpSpeed').value = cfg.speed;
   
-  // Строго проставляем количество команд
   document.getElementById('inpTeams').value = cfg.teams; 
   
   document.getElementById('inpSound').value = cfg.sound; 
@@ -1073,7 +1102,6 @@ function updateEditor() {
   cfg.radius = Number(document.getElementById('inpRadius').value);
   cfg.speed = Number(document.getElementById('inpSpeed').value);
   
-  // Строго переводим в число перед сохранением
   cfg.teams = Number(document.getElementById('inpTeams').value) || 2;
   
   cfg.sound = document.getElementById('inpSound').value;
@@ -1106,7 +1134,6 @@ window.applyTemplateToAll = () => {
     if(cfg.questions.length === 0) return;
     const tplIdx = parseInt(document.getElementById('newQTemplate').value);
     
-    // Подтверждение
     let confirmMsg = "Применить настройки (шрифт, таймер, мишень, очки) ко всем вопросам?\nТексты и ответы НЕ изменятся.";
     if (lang === 'en') confirmMsg = "Apply settings (font, timer, target, points) to all questions? Texts and answers will remain unchanged.";
     if (lang === 'de') confirmMsg = "Einstellungen (Schriftart, Timer, Ziel, Punkte) auf alle Fragen anwenden? Texte und Antworten bleiben unverändert.";
@@ -1166,7 +1193,6 @@ window.renderQList = function() {
     </div>
   `).join('');
 
-  // Обновляем список шаблонов
   const sel = document.getElementById('newQTemplate');
   const val = sel.value;
   sel.innerHTML = `<option value="-1">${t('oDefaultSettings')}</option>`;
@@ -1306,7 +1332,6 @@ window.processImport = () => {
 function openMod(idx = null) {
   editIdx = idx;
   
-  // Если создаем новый вопрос, берем настройки из шаблона
   let defQ = { type: "choice", text: "", pts: 10, font: "Roboto", size: 20, timer: false, sec: 30, img: "", opts: [{t:"", c:true}, {t:"", c:false}], acc: ["Ответ"], tgt: "default", tu: "" };
   if (idx === null) {
       const tplIdx = parseInt(document.getElementById('newQTemplate').value);
