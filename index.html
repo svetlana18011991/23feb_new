@@ -68,7 +68,7 @@
     .modal-foot { padding: 14px 20px; border-top: 1px solid rgba(217, 154, 41, 0.3); display: flex; justify-content: flex-end; gap: 10px; }
     
     .topBrand { display: flex; align-items: center; gap: 10px; }
-    .topBrand img { height: 36px; width: 36px; object-fit: contain; border-radius: 8px; }
+    .topBrand img { height: 42px; width: 42px; object-fit: cover; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
     
     /* --- GAME UI --- */
     .gameRoot { position: absolute; inset: 0; overflow: hidden; background: #000; font-family: 'Roboto', sans-serif; cursor: var(--game-cursor, default); perspective: 1000px; }
@@ -230,8 +230,11 @@
   <div class="panel">
     <div class="panel-header">
       <div class="topBrand">
-        <img src="63.png" alt="Logo" onerror="this.style.display='none'">
-        <div style="font-weight:900; font-size:16px;">Светлана Быкова</div>
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+        <div style="display:flex; flex-direction:column;">
+          <div style="font-weight:900; font-size:16px;">Шкатулка интерактивов</div>
+          <div style="font-size:11px; opacity:0.8;">Светлана Быкова</div>
+        </div>
       </div>
       <div style="display:flex; gap:10px; align-items:center;">
         <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; margin-right:5px;">
@@ -305,6 +308,9 @@
               <option value="custom" data-i18n="optCustom">По ссылке...</option>
             </select>
             <input type="text" id="inpBgCustom" placeholder="https://..." style="display:none; margin-top:8px;">
+            <label style="display:flex; align-items:center; gap:5px; margin-top:8px; font-size:11px;">
+              <input type="checkbox" id="inpBg3d" checked> <span data-i18n="lBg3d">3D-эффект (параллакс)</span>
+            </label>
           </div>
           <div>
             <label data-i18n="lTarget">Мишень (общая)</label>
@@ -538,6 +544,9 @@
       
       <textarea id="importText" style="height:250px; font-family:'Courier New', monospace; font-size:14px;" data-i18n="placeholderImport" placeholder="Вставьте скопированный текст сюда..."></textarea>
       
+      <button class="btn small" style="background:#4a4a4a; margin-top: 10px; width: 100%; border-color:#888;" onclick="fixEgeText()" data-i18n="btnFixEge">
+        🛠 Починить кракозябры (Решу ЕГЭ)
+      </button>
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="closeImport()" data-i18n="btnCancel">Отмена</button>
@@ -631,26 +640,26 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
    ======================== */
 const dict = {
   ru: {
-    btnResetProj: "🗑 Сбросить всё", confirmReset: "Точно удалить все вопросы и настройки? Это нельзя отменить.", btnCopy: "📋 Код", sLang: "Язык интерфейса", sName: "Название игры", sDesign: "Оформление", lBg: "Фон игры", lTarget: "Мишень (общая)", optCustom: "По ссылке...", lRadius: "Радиус движения", lSpeed: "Скорость", sGame: "Настройки игры", lTeams: "Команд (1-3)", lTeamColors: "Цвета рамок команд", lSound: "Выстрел", lVol: "Громкость", lPenaltyOn: "Штраф за промах", lPenaltyPts: "Вычитать очков", oOff: "Выкл", oOn: "Вкл", sStart: "Стартовый экран", lInstructionColor: "Цвет рамки", lGlow: "Свечение рамки", sEnd: "Финальный экран (Фидбек)", sQ: "Вопросы", btnAdd: "➕ Добавить", btnClr: "🧹 Очистить", previewTitle: "Просмотр", btnModeEdit: "✏️ Редактор", btnModePlay: "▶️ Тест", mTitle: "Редактировать вопрос", lQType: "Тип вопроса", oChoice: "Выбор ответа", oInput: "Ввод ответа", lPts: "Очки", lTimer: "Таймер", lSec: "Секунды", lImg: "🖼️ Картинка (URL)", lQText: "Текст вопроса", lFont: "Шрифт", lFontSize: "Размер", lTitleColor: "Цвет текста", lAnsOpts: "Варианты ответа", btnAddOpt: "➕ Вариант", btnCancel: "Отмена", btnSave: "💾 Сохранить", lRightAns: "Верный", lOptText: "Текст варианта", lDel: "Удалить", lGameOver: "Результаты игры", btnRestart: "↻ Сыграть еще раз", lTeam: "Команда", btnPlay: "▶ Начать", btnReset: "Сброс", btnOK: "ОК", lCursor: "Прицел", oCrosshair: "Стандарт крестик", oSniper: "Снайперский", oRedDot: "Коллиматор", lSizeOk: "Код в норме", lSizeWarn: "Почти лимит", lSizeErr: "ПРЕВЫШЕН ЛИМИТ", oMagic: "✨ Волшебная палочка", oDing: "🔔 Дзынь", lQTarget: "Индивидуальная мишень", oDefault: "По умолчанию", lTargetSize: "Размер мишени", lCursorSize: "Размер прицела", btnCopyQ: "Дублировать", lDragHint: "💡 Можно перетаскивать вопросы (за значок ☰), чтобы менять их порядок.", btnImportQ: "📥 Импорт", lQTemplate: "Шаблон настроек:", oDefaultSettings: "Стандартные (по умолчанию)", 
-    mImportTitle: "📥 Умный Импорт", lImportMode: "Режим импорта текста:", oImpBlocks: "Текст блоками (с вариантами)", oImpLines: "Простой список (строка = вопрос)", lImpHint: "<b>Подсказка:</b> Если в конце скопированного блока есть строка <code>Ответ: 2</code>, умный алгоритм сам найдет правильный вариант!", btnImpProcess: "✨ Распознать и добавить", oLikeQ: "Как в вопросе", placeholderImport: "Вставьте скопированный текст сюда...", lNoText: "Без текста", btnClearCanvas: "🗑 Очистить",
+    btnResetProj: "🗑 Сбросить всё", confirmReset: "Точно удалить все вопросы и настройки? Это нельзя отменить.", btnCopy: "📋 Код", sLang: "Язык интерфейса", sName: "Название игры", sDesign: "Оформление", lBg: "Фон игры", lBg3d: "3D-эффект фона", lTarget: "Мишень (общая)", optCustom: "По ссылке...", lRadius: "Радиус движения", lSpeed: "Скорость", sGame: "Настройки игры", lTeams: "Команд (1-3)", lTeamColors: "Цвета рамок команд", lSound: "Выстрел", lVol: "Громкость", lPenaltyOn: "Штраф за промах", lPenaltyPts: "Вычитать очков", oOff: "Выкл", oOn: "Вкл", sStart: "Стартовый экран", lInstructionColor: "Цвет рамки", lGlow: "Свечение рамки", sEnd: "Финальный экран (Фидбек)", sQ: "Вопросы", btnAdd: "➕ Добавить", btnClr: "🧹 Очистить", previewTitle: "Просмотр", btnModeEdit: "✏️ Редактор", btnModePlay: "▶️ Тест", mTitle: "Редактировать вопрос", lQType: "Тип вопроса", oChoice: "Выбор ответа", oInput: "Ввод ответа", lPts: "Очки", lTimer: "Таймер", lSec: "Секунды", lImg: "🖼️ Картинка (URL)", lQText: "Текст вопроса", lFont: "Шрифт", lFontSize: "Размер", lTitleColor: "Цвет текста", lAnsOpts: "Варианты ответа", btnAddOpt: "➕ Вариант", btnCancel: "Отмена", btnSave: "💾 Сохранить", lRightAns: "Верный", lOptText: "Текст варианта", lDel: "Удалить", lGameOver: "Результаты игры", btnRestart: "↻ Сыграть еще раз", lTeam: "Команда", btnPlay: "▶ Начать", btnReset: "Сброс", btnOK: "ОК", lCursor: "Прицел", oCrosshair: "Стандарт крестик", oSniper: "Снайперский", oRedDot: "Коллиматор", lSizeOk: "Код в норме", lSizeWarn: "Почти лимит", lSizeErr: "ПРЕВЫШЕН ЛИМИТ", oMagic: "✨ Волшебная палочка", oDing: "🔔 Дзынь", lQTarget: "Индивидуальная мишень", oDefault: "По умолчанию", lTargetSize: "Размер мишени", lCursorSize: "Размер прицела", btnCopyQ: "Дублировать", lDragHint: "💡 Можно перетаскивать вопросы (за значок ☰), чтобы менять их порядок.", btnImportQ: "📥 Импорт", lQTemplate: "Шаблон настроек:", oDefaultSettings: "Стандартные (по умолчанию)", 
+    mImportTitle: "📥 Умный Импорт", lImportMode: "Режим импорта текста:", oImpBlocks: "Текст блоками (с вариантами)", oImpLines: "Простой список (строка = вопрос)", lImpHint: "<b>Подсказка:</b> Если в конце скопированного блока есть строка <code>Ответ: 2</code>, умный алгоритм сам найдет правильный вариант!", btnImpProcess: "✨ Распознать и добавить", btnFixEge: "🛠 Починить кракозябры (Решу ЕГЭ)", oLikeQ: "Как в вопросе", placeholderImport: "Вставьте скопированный текст сюда...", lNoText: "Без текста", btnClearCanvas: "🗑 Очистить",
     bg1: "🌌 Космические дали", bg2: "🌲 Сказочный лес", bg3: "🌊 Морское дно", bg4: "💧 Водный мир", bg5: "🌳 Старый парк", bg6: "🏜️ Древний Египет", bg7: "🏙️ Современный город", bg8: "🌵 Дикий Запад",
     tgt10: "🔘 Спортивная мишень", tgt11: "💠 Модерн", tgt12: "🛸 Космическая мишень", tgt13: "🎯 Классическая мишень", tgt14: "⭐ Золотая звезда"
   },
   en: {
-    btnResetProj: "🗑 Reset All", confirmReset: "Are you sure you want to delete all questions and settings? This cannot be undone.", btnCopy: "📋 Copy Code", sLang: "Interface Language", sName: "Game Title", sDesign: "Design", lBg: "Background", lTarget: "Target (global)", optCustom: "Custom URL...", lRadius: "Orbit Radius", lSpeed: "Speed", sGame: "Game Settings", lTeams: "Teams (1-3)", lTeamColors: "Team Colors", lSound: "Shot Sound", lVol: "Volume", lPenaltyOn: "Penalty for miss", lPenaltyPts: "Points to Deduct", oOff: "Off", oOn: "On", sStart: "Start Screen", lInstructionColor: "Border Color", lGlow: "Border Glow", sEnd: "Feedback Screen", sQ: "Questions", btnAdd: "➕ Add", btnClr: "🧹 Clear", previewTitle: "Preview", btnModeEdit: "✏️ Edit", btnModePlay: "▶️ Test", mTitle: "Edit Question", lQType: "Question Type", oChoice: "Multiple Choice", oInput: "Text Input", lPts: "Points", lTimer: "Timer", lSec: "Seconds", lImg: "🖼️ Image (URL)", lQText: "Question Text", lFont: "Font", lFontSize: "Size", lTitleColor: "Text Color", lAnsOpts: "Answer Options", btnAddOpt: "➕ Option", btnCancel: "Cancel", btnSave: "💾 Save", lRightAns: "Correct", lOptText: "Option Text", lDel: "Delete", lGameOver: "Game Results", btnRestart: "↻ Play Again", lTeam: "Team", btnPlay: "▶ Play", btnReset: "Reset", btnOK: "OK", lCursor: "Crosshair", oCrosshair: "Standard Crosshair", oSniper: "Sniper (Black)", oRedDot: "Red Dot Sight", lSizeOk: "Code Size OK", lSizeWarn: "Close to Limit", lSizeErr: "LIMIT REACHED", oMagic: "✨ Magic Wand", oDing: "🔔 Ding", lQTarget: "Individual Target", oDefault: "Default", lTargetSize: "Target Size", lCursorSize: "Crosshair Size", btnCopyQ: "Duplicate", lDragHint: "💡 Drag questions by ☰ to reorder them.", btnImportQ: "📥 Import", lQTemplate: "Settings template:", oDefaultSettings: "Default Settings",
-    mImportTitle: "📥 Smart Import", lImportMode: "Text import mode:", oImpBlocks: "Text blocks (with options)", oImpLines: "Simple list (line = question)", lImpHint: "<b>Hint:</b> If the copied block ends with <code>Answer: 2</code>, the algorithm will automatically check the correct option!", btnImpProcess: "✨ Parse and Add", oLikeQ: "Like Q", placeholderImport: "Paste copied text here...", lNoText: "No text", btnClearCanvas: "🗑 Clear",
+    btnResetProj: "🗑 Reset All", confirmReset: "Are you sure you want to delete all questions and settings? This cannot be undone.", btnCopy: "📋 Copy Code", sLang: "Interface Language", sName: "Game Title", sDesign: "Design", lBg: "Background", lBg3d: "3D Parallax Effect", lTarget: "Target (global)", optCustom: "Custom URL...", lRadius: "Orbit Radius", lSpeed: "Speed", sGame: "Game Settings", lTeams: "Teams (1-3)", lTeamColors: "Team Colors", lSound: "Shot Sound", lVol: "Volume", lPenaltyOn: "Penalty for miss", lPenaltyPts: "Points to Deduct", oOff: "Off", oOn: "On", sStart: "Start Screen", lInstructionColor: "Border Color", lGlow: "Border Glow", sEnd: "Feedback Screen", sQ: "Questions", btnAdd: "➕ Add", btnClr: "🧹 Clear", previewTitle: "Preview", btnModeEdit: "✏️ Edit", btnModePlay: "▶️ Test", mTitle: "Edit Question", lQType: "Question Type", oChoice: "Multiple Choice", oInput: "Text Input", lPts: "Points", lTimer: "Timer", lSec: "Seconds", lImg: "🖼️ Image (URL)", lQText: "Question Text", lFont: "Font", lFontSize: "Size", lTitleColor: "Text Color", lAnsOpts: "Answer Options", btnAddOpt: "➕ Option", btnCancel: "Cancel", btnSave: "💾 Save", lRightAns: "Correct", lOptText: "Option Text", lDel: "Delete", lGameOver: "Game Results", btnRestart: "↻ Play Again", lTeam: "Team", btnPlay: "▶ Play", btnReset: "Reset", btnOK: "OK", lCursor: "Crosshair", oCrosshair: "Standard Crosshair", oSniper: "Sniper (Black)", oRedDot: "Red Dot Sight", lSizeOk: "Code Size OK", lSizeWarn: "Close to Limit", lSizeErr: "LIMIT REACHED", oMagic: "✨ Magic Wand", oDing: "🔔 Ding", lQTarget: "Individual Target", oDefault: "Default", lTargetSize: "Target Size", lCursorSize: "Crosshair Size", btnCopyQ: "Duplicate", lDragHint: "💡 Drag questions by ☰ to reorder them.", btnImportQ: "📥 Import", lQTemplate: "Settings template:", oDefaultSettings: "Default Settings",
+    mImportTitle: "📥 Smart Import", lImportMode: "Text import mode:", oImpBlocks: "Text blocks (with options)", oImpLines: "Simple list (line = question)", lImpHint: "<b>Hint:</b> If the copied block ends with <code>Answer: 2</code>, the algorithm will automatically check the correct option!", btnImpProcess: "✨ Parse and Add", btnFixEge: "🛠 Fix encoding (Reshu EGE)", oLikeQ: "Like Q", placeholderImport: "Paste copied text here...", lNoText: "No text", btnClearCanvas: "🗑 Clear",
     bg1: "🌌 Deep Space", bg2: "🌲 Fairy Forest", bg3: "🌊 Ocean Floor", bg4: "💧 Water World", bg5: "🌳 Old Park", bg6: "🏜️ Ancient Egypt", bg7: "🏙️ Modern City", bg8: "🌵 Wild West",
     tgt10: "🔘 Sport Target", tgt11: "💠 Modern", tgt12: "🛸 Space Target", tgt13: "🎯 Classic Target", tgt14: "⭐ Golden Star"
   },
   de: {
-    btnResetProj: "🗑 Alles zurücksetzen", confirmReset: "Möchten Sie wirklich alle Fragen und Einstellungen löschen?", btnCopy: "📋 Code kopieren", sLang: "Sprache", sName: "Spieltitel", sDesign: "Design", lBg: "Hintergrund", lTarget: "Ziel (global)", optCustom: "Eigene URL...", lRadius: "Orbit-Radius", lSpeed: "Geschw.", sGame: "Spieleinstellungen", lTeams: "Teams (1-3)", lTeamColors: "Teamfarben", lSound: "Schuss-Sound", lVol: "Lautstärke", lPenaltyOn: "Strafe bei Fehlschuss", lPenaltyPts: "Punkte abziehen", oOff: "Aus", oOn: "An", sStart: "Startbildschirm", lInstructionColor: "Randfarbe", lGlow: "Randleuchten", sEnd: "Endbildschirm", sQ: "Fragen", btnAdd: "➕ Hinzufügen", btnClr: "🧹 Leeren", previewTitle: "Vorschau", btnModeEdit: "✏️ Bearbeiten", btnModePlay: "▶️ Testen", mTitle: "Frage bearbeiten", lQType: "Fragetyp", oChoice: "Multiple Choice", oInput: "Texteingabe", lPts: "Punkte", lTimer: "Timer", lSec: "Sek.", lImg: "🖼️ Bild (URL)", lQText: "Fragentext", lFont: "Schriftart", lFontSize: "Größe", lTitleColor: "Textfarbe", lAnsOpts: "Antwortmöglichkeiten", btnAddOpt: "➕ Option", btnCancel: "Abbrechen", btnSave: "💾 Speichern", lRightAns: "Richtig", lOptText: "Optionstext", lDel: "Löschen", lGameOver: "Spielergebnisse", btnRestart: "↻ Nochmal spielen", lTeam: "Team", btnPlay: "▶ Start", btnReset: "Zurücksetzen", btnOK: "OK", lCursor: "Fadenkreuz", oCrosshair: "Standard", oSniper: "Scharfschütze", oRedDot: "Leuchtpunkt", lSizeOk: "Code OK", lSizeWarn: "Limit fast erreicht", lSizeErr: "LIMIT ERREICHT", oMagic: "✨ Zauberstab", oDing: "🔔 Klingel", lQTarget: "Individuelles Ziel", oDefault: "Standard", lTargetSize: "Zielgröße", lCursorSize: "Fadenkreuzgröße", btnCopyQ: "Duplizieren", lDragHint: "💡 Ziehen Sie Fragen an ☰, um sie neu zu ordnen.", btnImportQ: "📥 Import", lQTemplate: "Einstellungsvorlage:", oDefaultSettings: "Standardeinstellungen",
-    mImportTitle: "📥 Smart-Import", lImportMode: "Text-Importmodus:", oImpBlocks: "Textblöcke (mit Optionen)", oImpLines: "Einfache Liste (Zeile = Frage)", lImpHint: "<b>Tipp:</b> Wenn der kopierte Block mit <code>Antwort: 2</code> endet, wählt der Algorithmus automatisch die richtige Option!", btnImpProcess: "✨ Erkennen und Hinzufügen", oLikeQ: "Wie Frage", placeholderImport: "Kopierten Text hier einfügen...", lNoText: "Kein Text", btnClearCanvas: "🗑 Leeren",
+    btnResetProj: "🗑 Alles zurücksetzen", confirmReset: "Möchten Sie wirklich alle Fragen und Einstellungen löschen?", btnCopy: "📋 Code kopieren", sLang: "Sprache", sName: "Spieltitel", sDesign: "Design", lBg: "Hintergrund", lBg3d: "3D-Parallaxe-Effekt", lTarget: "Ziel (global)", optCustom: "Eigene URL...", lRadius: "Orbit-Radius", lSpeed: "Geschw.", sGame: "Spieleinstellungen", lTeams: "Teams (1-3)", lTeamColors: "Teamfarben", lSound: "Schuss-Sound", lVol: "Lautstärke", lPenaltyOn: "Strafe bei Fehlschuss", lPenaltyPts: "Punkte abziehen", oOff: "Aus", oOn: "An", sStart: "Startbildschirm", lInstructionColor: "Randfarbe", lGlow: "Randleuchten", sEnd: "Endbildschirm", sQ: "Fragen", btnAdd: "➕ Hinzufügen", btnClr: "🧹 Leeren", previewTitle: "Vorschau", btnModeEdit: "✏️ Bearbeiten", btnModePlay: "▶️ Testen", mTitle: "Frage bearbeiten", lQType: "Fragetyp", oChoice: "Multiple Choice", oInput: "Texteingabe", lPts: "Punkte", lTimer: "Timer", lSec: "Sek.", lImg: "🖼️ Bild (URL)", lQText: "Fragentext", lFont: "Schriftart", lFontSize: "Größe", lTitleColor: "Textfarbe", lAnsOpts: "Antwortmöglichkeiten", btnAddOpt: "➕ Option", btnCancel: "Abbrechen", btnSave: "💾 Speichern", lRightAns: "Richtig", lOptText: "Optionstext", lDel: "Löschen", lGameOver: "Spielergebnisse", btnRestart: "↻ Nochmal spielen", lTeam: "Team", btnPlay: "▶ Start", btnReset: "Zurücksetzen", btnOK: "OK", lCursor: "Fadenkreuz", oCrosshair: "Standard", oSniper: "Scharfschütze", oRedDot: "Leuchtpunkt", lSizeOk: "Code OK", lSizeWarn: "Limit fast erreicht", lSizeErr: "LIMIT ERREICHT", oMagic: "✨ Zauberstab", oDing: "🔔 Klingel", lQTarget: "Individuelles Ziel", oDefault: "Standard", lTargetSize: "Zielgröße", lCursorSize: "Fadenkreuzgröße", btnCopyQ: "Duplizieren", lDragHint: "💡 Ziehen Sie Fragen an ☰, um sie neu zu ordnen.", btnImportQ: "📥 Import", lQTemplate: "Einstellungsvorlage:", oDefaultSettings: "Standardeinstellungen",
+    mImportTitle: "📥 Smart-Import", lImportMode: "Text-Importmodus:", oImpBlocks: "Textblöcke (mit Optionen)", oImpLines: "Einfache Liste (Zeile = Frage)", lImpHint: "<b>Tipp:</b> Wenn der kopierte Block mit <code>Antwort: 2</code> endet, wählt der Algorithmus automatisch die richtige Option!", btnImpProcess: "✨ Erkennen und Hinzufügen", btnFixEge: "🛠 Kodierung reparieren", oLikeQ: "Wie in Frage", placeholderImport: "Kopierten Text hier einfügen...", lNoText: "Kein Text", btnClearCanvas: "🗑 Leeren",
     bg1: "🌌 Weltraum", bg2: "🌲 Märchenwald", bg3: "🌊 Meeresgrund", bg4: "💧 Wasserwelt", bg5: "🌳 Alter Park", bg6: "🏜️ Altes Ägypten", bg7: "🏙️ Moderne Stadt", bg8: "🌵 Wilder Westen",
     tgt10: "🔘 Sportziel", tgt11: "💠 Modern", tgt12: "🛸 Weltraumziel", tgt13: "🎯 Klassisches Ziel", tgt14: "⭐ Goldener Stern"
   },
   zh: {
-    btnResetProj: "🗑 重置全部", confirmReset: "您确定要删除所有问题和设置吗？此操作无法撤销。", btnCopy: "📋 复制代码", sLang: "界面语言", sName: "游戏名称", sDesign: "设计", lBg: "背景", lTarget: "目标 (全局)", optCustom: "自定义 URL...", lRadius: "轨道半径", lSpeed: "速度", sGame: "游戏设置", lTeams: "队伍 (1-3)", lTeamColors: "队伍边框颜色", lSound: "射击声音", lVol: "音量", lPenaltyOn: "脱靶惩罚", lPenaltyPts: "扣除分数", oOff: "关", oOn: "开", sStart: "开始屏幕", lInstructionColor: "边框颜色", lGlow: "边框发光", sEnd: "反馈屏幕", sQ: "问题", btnAdd: "➕ 添加", btnClr: "🧹 清除", previewTitle: "预览", btnModeEdit: "✏️ 编辑", btnModePlay: "▶️ 测试", mTitle: "编辑问题", lQType: "问题类型", oChoice: "选择题", oInput: "填空题", lPts: "分数", lTimer: "计时器", lSec: "秒", lImg: "🖼️ 图片 (URL)", lQText: "问题文本", lFont: "字体", lFontSize: "字体大小", lTitleColor: "文字颜色", lAnsOpts: "答案选项", btnAddOpt: "➕ 添加选项", btnCancel: "取消", btnSave: "💾 保存", lRightAns: "正确", lOptText: "选项文本", lDel: "删除", lGameOver: "游戏结果", btnRestart: "↻ 再玩一次", lTeam: "队伍", btnPlay: "▶ 开始", btnReset: "重置", btnOK: "确定", lCursor: "准星", oCrosshair: "标准十字", oSniper: "狙击（黑色）", oRedDot: "红点瞄准镜", lSizeOk: "Code Size OK", lSizeWarn: "Close to Limit", lSizeErr: "LIMIT REACHED", oMagic: "✨ 魔法棒", oDing: "🔔 叮", lQTarget: "独立目标", oDefault: "默认", lTargetSize: "目标大小", lCursorSize: "准星大小", btnCopyQ: "复制", lDragHint: "💡 拖动 ☰ 可重新排序问题。", btnImportQ: "📥 导入", lQTemplate: "设置模板：", oDefaultSettings: "默认设置",
-    mImportTitle: "📥 智能导入", lImportMode: "文本导入模式：", oImpBlocks: "文本块（带选项）", oImpLines: "简单列表（行=问题）", lImpHint: "<b>提示：</b> 如果复制的块以 <code>答案: 2</code> 结尾，智能算法将自动勾选正确的选项！", btnImpProcess: "✨ 识别并添加", oLikeQ: "如同问题", placeholderImport: "在此处粘贴复制的文本...", lNoText: "无文本", btnClearCanvas: "🗑 清除",
+    btnResetProj: "🗑 重置全部", confirmReset: "您确定要删除所有问题和设置吗？此操作无法撤销。", btnCopy: "📋 复制代码", sLang: "界面语言", sName: "游戏名称", sDesign: "设计", lBg: "背景", lBg3d: "3D 视差效果", lTarget: "目标 (全局)", optCustom: "自定义 URL...", lRadius: "轨道半径", lSpeed: "速度", sGame: "游戏设置", lTeams: "队伍 (1-3)", lTeamColors: "队伍边框颜色", lSound: "射击声音", lVol: "音量", lPenaltyOn: "脱靶惩罚", lPenaltyPts: "扣除分数", oOff: "关", oOn: "开", sStart: "开始屏幕", lInstructionColor: "边框颜色", lGlow: "边框发光", sEnd: "反馈屏幕", sQ: "问题", btnAdd: "➕ 添加", btnClr: "🧹 清除", previewTitle: "预览", btnModeEdit: "✏️ 编辑", btnModePlay: "▶️ 测试", mTitle: "编辑问题", lQType: "问题类型", oChoice: "选择题", oInput: "填空题", lPts: "分数", lTimer: "计时器", lSec: "秒", lImg: "🖼️ 图片 (URL)", lQText: "问题文本", lFont: "字体", lFontSize: "字体大小", lTitleColor: "文字颜色", lAnsOpts: "答案选项", btnAddOpt: "➕ 添加选项", btnCancel: "取消", btnSave: "💾 保存", lRightAns: "正确", lOptText: "选项文本", lDel: "删除", lGameOver: "游戏结果", btnRestart: "↻ 再玩一次", lTeam: "队伍", btnPlay: "▶ 开始", btnReset: "重置", btnOK: "确定", lCursor: "准星", oCrosshair: "标准十字", oSniper: "狙击（黑色）", oRedDot: "红点瞄准镜", lSizeOk: "Code Size OK", lSizeWarn: "Close to Limit", lSizeErr: "LIMIT REACHED", oMagic: "✨ 魔法棒", oDing: "🔔 叮", lQTarget: "独立目标", oDefault: "默认", lTargetSize: "目标大小", lCursorSize: "准星大小", btnCopyQ: "复制", lDragHint: "💡 拖动 ☰ 可重新排序问题。", btnImportQ: "📥 导入", lQTemplate: "设置模板：", oDefaultSettings: "默认设置",
+    mImportTitle: "📥 智能导入", lImportMode: "文本导入模式：", oImpBlocks: "文本块（带选项）", oImpLines: "简单列表（行=问题）", lImpHint: "<b>提示：</b> 如果复制的块以 <code>答案: 2</code> 结尾，智能算法将自动勾选正确的选项！", btnImpProcess: "✨ 识别并添加", btnFixEge: "🛠 修复编码", oLikeQ: "如同问题", placeholderImport: "在此处粘贴复制的文本...", lNoText: "无文本", btnClearCanvas: "🗑 清除",
     bg1: "🌌 深空", bg2: "🌲 童话森林", bg3: "🌊 海底", bg4: "💧 水世界", bg5: "🌳 老公园", bg6: "🏜️ 古埃及", bg7: "🏙️ 现代城市", bg8: "🌵 狂野西部",
     tgt10: "🔘 运动靶", tgt11: "💠 现代靶", tgt12: "🛸 太空靶", tgt13: "🎯 经典靶子", tgt14: "⭐ 金星"
   }
@@ -685,7 +694,7 @@ const LS_KEY = 'mathShooterSave_v6';
 function defaultCfg() {
   return {
     title: "Математический тир", titleFont: "Roboto", titleSize: 24, titleColor: "#ffffff",
-    bg: "2.png", bgUrl: "", target: "13.png", targetUrl: "",
+    bg: "2.png", bgUrl: "", bg3d: true, target: "13.png", targetUrl: "",
     targetSize: 90, cursorSize: 40,
     cursor: "crosshair", cursorUrl: "",
     radius: 0, speed: 0, teams: 2, teamCols: ["#ffae00", "#33d17a", "#ff5b6b"], sound: "pif", vol: 0.7,
@@ -705,6 +714,7 @@ function packCfg(c) {
   if(c.titleColor !== d.titleColor) p.tcl = c.titleColor;
   if(c.bg !== d.bg) p.b = c.bg;
   if(c.bgUrl) p.bu = c.bgUrl;
+  if(c.bg3d !== d.bg3d) p.b3d = c.bg3d ? 1 : 0;
   if(c.target !== d.target) p.tg = c.target;
   if(c.targetUrl) p.tu = c.targetUrl;
   if(Number(c.targetSize) !== d.targetSize) p.ts = Number(c.targetSize);
@@ -762,6 +772,7 @@ function unpackCfg(p) {
     titleSize: p.tsz ? Number(p.tsz) : d.titleSize,
     titleColor: p.tcl ?? d.titleColor,
     bg: p.b ?? d.bg, bgUrl: p.bu || "",
+    bg3d: p.b3d !== undefined ? (p.b3d === 1) : d.bg3d,
     target: p.tg ?? d.target, targetUrl: p.tu || "",
     targetSize: p.ts ? Number(p.ts) : d.targetSize,
     cursor: p.cu ?? d.cursor, cursorUrl: p.cur || "", 
@@ -922,7 +933,7 @@ function bootEditor() {
 
   const upd = () => updateEditor();
   
-  // Кнопка полного сброса проекта (Очищает и память, и ссылку!)
+  // Кнопка полного сброса проекта
   document.getElementById('btnResetProject').onclick = () => {
     if(confirm(t('confirmReset'))) { 
       localStorage.removeItem(LS_KEY); 
@@ -938,6 +949,8 @@ function bootEditor() {
   
   document.getElementById('selBg').value = cfg.bg; document.getElementById('inpBgCustom').value = cfg.bgUrl;
   document.getElementById('inpBgCustom').style.display = cfg.bg === 'custom' ? 'block' : 'none';
+  document.getElementById('inpBg3d').checked = cfg.bg3d !== false;
+  
   document.getElementById('selTarget').value = cfg.target; document.getElementById('inpTargetCustom').value = cfg.targetUrl;
   document.getElementById('inpTargetCustom').style.display = cfg.target === 'custom' ? 'block' : 'none';
   document.getElementById('inpTargetSize').value = cfg.targetSize;
@@ -1050,6 +1063,7 @@ function updateEditor() {
   cfg.titleColor = document.getElementById('inpTitleColor').value;
   cfg.bg = document.getElementById('selBg').value;
   cfg.bgUrl = document.getElementById('inpBgCustom').value;
+  cfg.bg3d = document.getElementById('inpBg3d').checked;
   cfg.target = document.getElementById('selTarget').value;
   cfg.targetUrl = document.getElementById('inpTargetCustom').value;
   cfg.targetSize = Number(document.getElementById('inpTargetSize').value);
@@ -1059,6 +1073,7 @@ function updateEditor() {
   cfg.radius = Number(document.getElementById('inpRadius').value);
   cfg.speed = Number(document.getElementById('inpSpeed').value);
   
+  // Строго переводим в число перед сохранением
   cfg.teams = Number(document.getElementById('inpTeams').value) || 2;
   
   cfg.sound = document.getElementById('inpSound').value;
@@ -1177,6 +1192,38 @@ window.btnImportQ.onclick = () => {
   document.getElementById('importBackdrop').classList.add('show'); 
 };
 window.closeImport = () => { document.getElementById('importBackdrop').classList.remove('show'); document.getElementById('importText').value = ''; };
+
+window.fixEgeText = () => {
+    let el = document.getElementById('importText');
+    let val = el.value;
+    
+    val = val.replace(/Ш/g, 'о');
+    val = val.replace(/t/g, 'т');
+    val = val.replace(/r/g, 'г');
+    val = val.replace(/u/g, 'и');
+    val = val.replace(/n/g, 'п');
+    val = val.replace(/c/g, 'с');
+    val = val.replace(/p/g, 'р');
+    val = val.replace(/k/g, 'к');
+    val = val.replace(/x/g, 'х');
+    val = val.replace(/y/g, 'у');
+    val = val.replace(/a/g, 'а');
+    val = val.replace(/e/g, 'е');
+    val = val.replace(/o/g, 'о');
+
+    val = val.replace(/H/g, 'Н');
+    val = val.replace(/T/g, 'Т');
+    val = val.replace(/M/g, 'М');
+    val = val.replace(/K/g, 'К');
+    val = val.replace(/P/g, 'Р');
+    val = val.replace(/C/g, 'С');
+    val = val.replace(/E/g, 'Е');
+    val = val.replace(/A/g, 'А');
+    val = val.replace(/O/g, 'О');
+    val = val.replace(/X/g, 'Х');
+
+    el.value = val;
+};
 
 window.processImport = () => {
     const txt = document.getElementById('importText').value.trim();
@@ -1365,15 +1412,19 @@ function bootGame() {
     arenaEl.addEventListener('mouseleave', () => aimCursor.style.display = 'none');
   }
 
-  arenaEl.addEventListener('mousemove', e => {
-      const r = arenaEl.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width - 0.5;
-      const y = (e.clientY - r.top) / r.height - 0.5;
-      arenaBg.style.transform = `scale(1.05) perspective(1000px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translate(${x * -20}px, ${y * -20}px)`;
-  });
-  arenaEl.addEventListener('mouseleave', () => {
-      arenaBg.style.transform = `scale(1.05) perspective(1000px) rotateY(0deg) rotateX(0deg) translate(0px, 0px)`;
-  });
+  if (gCfg.bg3d !== false) {
+    arenaEl.addEventListener('mousemove', e => {
+        const r = arenaEl.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        arenaBg.style.transform = `scale(1.05) perspective(1000px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translate(${x * -20}px, ${y * -20}px)`;
+    });
+    arenaEl.addEventListener('mouseleave', () => {
+        arenaBg.style.transform = `scale(1.05) perspective(1000px) rotateY(0deg) rotateX(0deg) translate(0px, 0px)`;
+    });
+  } else {
+    arenaBg.style.transform = `none`;
+  }
 
   const bgImg = gCfg.bg === 'custom' ? gCfg.bgUrl : gCfg.bg;
   arenaBg.style.backgroundImage = `url("${bgImg}")`;
