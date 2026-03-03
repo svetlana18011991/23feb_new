@@ -76,7 +76,6 @@
     .topBrand { display: flex; align-items: center; gap: 10px; }
     .topBrand img { height: 42px; width: 42px; object-fit: cover; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); }
     
-    /* Тост для уведомлений в редакторе */
     @keyframes toastFade { 0%{opacity:0; bottom:0;} 10%{opacity:1; bottom:20px;} 90%{opacity:1; bottom:20px;} 100%{opacity:0; bottom:0;} }
     .editor-toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--neon-orange-base); color:#000; padding:12px 24px; border-radius:14px; font-weight:bold; z-index:99999; box-shadow:0 5px 25px rgba(0,0,0,0.5); animation: toastFade 3.5s forwards; font-size:14px; pointer-events:none; }
 
@@ -110,7 +109,6 @@
         100% { transform: translate(-50%, -50%) translate(var(--orbit-x, 0px), var(--orbit-y, 0px)) scale(0); opacity: 0; filter: brightness(1); }
     }
     
-    /* Подсветка мишеней в режиме Редактора */
     .edit-mode .target { cursor: move !important; }
     .edit-mode .target::after { content: ''; position:absolute; inset:-4px; border: 2px dashed rgba(217, 154, 41, 0.9); border-radius: 50%; pointer-events:none; }
     .edit-mode .target:hover { transform: translate(-50%, -50%) translate(var(--orbit-x, 0px), var(--orbit-y, 0px)); }
@@ -149,9 +147,23 @@
       overflow-y: auto;
       animation: modalPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
       --team-color: var(--neon-orange-base); 
+      
+      /* Анимация расширения для черновика */
+      transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), max-width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      display: flex;
+      flex-direction: column;
     }
     .game-modal-content::-webkit-scrollbar { width: 6px; }
     .game-modal-content::-webkit-scrollbar-thumb { background: var(--team-color); border-radius: 4px; }
+
+    /* Когда черновик открыт - расширяем окно и ставим в ряд! */
+    .game-modal-content.draw-mode {
+      width: 98% !important;
+      max-width: 1600px !important;
+      flex-direction: row; 
+      gap: 30px;
+      align-items: stretch;
+    }
 
     .game-modal-content::after {
       content: ''; position: absolute; inset: 0; border-radius: 30px; pointer-events: none;
@@ -173,15 +185,18 @@
     }
     @keyframes floatSparkle { 0% { transform: translateY(0) scale(1); opacity: 0.4; } 100% { transform: translateY(-20px) scale(1.5); opacity: 0.9; box-shadow: 0 0 15px var(--team-color); } }
 
-    /* --- УСКОРЕНИЕ ДЛЯ РЕЖИМА РИСОВАНИЯ --- */
-    .game-modal-content.draw-mode::before {
-        animation: none !important;
-        opacity: 0.2 !important;
-        filter: none !important;
+    /* Оболочка вопросов (чтобы они оставались слева при рисовании) */
+    #gQAWrapper {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      flex-shrink: 0;
+      transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
-    .game-modal-content.draw-mode {
-        box-shadow: 0 10px 30px rgba(0,0,0,0.9) !important;
-        background: rgba(15, 20, 25, 0.98) !important;
+    
+    /* Сжимаем вопросы влево, когда черновик открыт */
+    .game-modal-content.draw-mode #gQAWrapper {
+      width: 400px;
     }
 
     /* Кнопка Черновика */
@@ -194,6 +209,10 @@
     }
     #gDrawToggle:hover { transform: scale(1.1); }
     .game-modal-content.draw-mode #gDrawToggle { background: var(--team-color); box-shadow: 0 0 20px var(--team-color); transform: scale(1.1); }
+
+    /* --- УСКОРЕНИЕ ДЛЯ РЕЖИМА РИСОВАНИЯ --- */
+    .game-modal-content.draw-mode::before { animation: none !important; opacity: 0.2 !important; filter: none !important; }
+    .game-modal-content.draw-mode { box-shadow: 0 10px 30px rgba(0,0,0,0.9) !important; background: rgba(15, 20, 25, 0.98) !important; }
 
     #gTimerContainer { display: flex; justify-content: center; margin-bottom: 24px; position: relative; z-index: 30; }
     #gTimerWrap { background: var(--team-color); color: #000; padding: 6px 30px; border-radius: 30px; box-shadow: 0 5px 25px var(--team-color); display: flex; align-items: center; gap: 8px; border: 2px solid rgba(255,255,255,0.5); transition: 0.3s; }
@@ -221,20 +240,16 @@
     }
     .game-ans-btn:active:not(:disabled) { transform: translateY(0); }
 
-    #gInputWrap { display: flex; gap: 12px; margin-top: 10px; justify-content: center; position: relative; z-index: 10; }
-    #gInput { width: 100%; max-width: 450px; font-size: 24px; padding: 18px 24px; border-radius: 20px; background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.15); color: #fff; text-align: center; outline: none; transition: 0.3s; box-shadow: inset 0 4px 10px rgba(0,0,0,0.5); }
+    #gInputWrap { display: flex; gap: 12px; margin-top: 10px; justify-content: center; position: relative; z-index: 10; flex-wrap: wrap; }
+    #gInput { width: 100%; max-width: 450px; font-size: 24px; padding: 18px 24px; border-radius: 20px; background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.15); color: #fff; text-align: center; outline: none; transition: 0.3s; box-shadow: inset 0 4px 10px rgba(0,0,0,0.5); flex:1;}
     #gInput:focus { border-color: var(--team-color); background: rgba(0,0,0,0.7); box-shadow: 0 0 25px var(--team-color-alpha, rgba(217, 154, 41, 0.3)), inset 0 4px 10px rgba(0,0,0,0.5); }
     #gSubmitBtn { border-radius: 20px; padding: 0 40px; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; background: var(--team-color); color: #000; border: none; font-weight: 900; box-shadow: 0 4px 15px var(--team-color); cursor:pointer;}
     #gSubmitBtn:hover:not(:disabled) { filter: brightness(1.2); transform: translateY(-2px); }
 
-    /* Прячем ответы, когда открыт черновик */
-    .game-modal-content.draw-mode #gAnswers,
-    .game-modal-content.draw-mode #gInputWrap { display: none !important; }
-    .game-modal-content.draw-mode #gDrawArea { display: block; }
-
-    /* Область черновика */
+    /* Область черновика (ОГРОМНАЯ) */
+    @keyframes drawAreaFade { 0% {opacity:0; transform:scale(0.95);} 100% {opacity:1; transform:scale(1);} }
     #gDrawArea {
-      display: none; width: 100%; height: 50vh; min-height: 300px; margin-top: 10px;
+      display: none; 
       border-radius: 16px; border: 3px solid var(--team-color);
       background-color: #fdfdfc;
       background-image: linear-gradient(#b0d4e3 1px, transparent 1px), linear-gradient(90deg, #b0d4e3 1px, transparent 1px);
@@ -242,9 +257,25 @@
       position: relative; z-index: 10; box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
       overflow: hidden;
     }
+    
+    .game-modal-content.draw-mode #gDrawArea { 
+      display: block; 
+      flex-grow: 1; /* Занимает всю правую часть */
+      width: auto;
+      margin-top: 0;
+      min-height: 60vh;
+      animation: drawAreaFade 0.4s ease forwards;
+    }
+    
+    @media (max-width: 1000px) {
+       .game-modal-content.draw-mode { flex-direction: column; width: 100% !important; }
+       .game-modal-content.draw-mode #gQAWrapper { width: 100%; }
+       .game-modal-content.draw-mode #gDrawArea { min-height: 50vh; margin-top: 15px; }
+    }
+
     #gCanvas { 
       width: 100%; height: 100%; touch-action: none; cursor: crosshair; 
-      transform: translateZ(0); 
+      transform: translateZ(0); /* Аппаратное ускорение */
     }
 
     /* ПАНЕЛЬ ИНСТРУМЕНТОВ ЧЕРНОВИКА */
@@ -474,7 +505,7 @@
         </div>
         
         <div style="background: rgba(217, 154, 41, 0.1); padding: 10px; border-radius: 12px; border: 1px solid var(--neon-orange-base); margin-bottom: 12px;">
-          <div style="font-size: 12px; color: var(--neon-orange-base); font-weight: bold; margin-bottom: 8px;">🎨 Управление настройками вопросов (Тип, Шрифт, Таймер, Мишень):</div>
+          <div style="font-size: 12px; color: var(--neon-orange-base); font-weight: bold; margin-bottom: 8px;">🎨 Управление настройками вопросов (Шрифт, Таймер, Мишень):</div>
           <div style="display:flex; align-items:center; gap:8px; flex-wrap: wrap;">
             <select id="newQTemplate" style="flex:1; min-width: 160px; border-color:var(--neon-orange-base); padding: 6px; font-size: 13px; background: rgba(0,0,0,0.5);">
               <option value="-1" data-i18n="oDefaultSettings">Стандартные (по умолчанию)</option>
@@ -483,7 +514,7 @@
           </div>
           <div style="font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 8px; line-height: 1.3;">
             * Выбранный шаблон автоматически применяется ко всем <b>новым</b> и импортируемым вопросам.<br>
-            * Кнопка «Применить ко всем» обновляет настройки у <b>уже существующих</b> вопросов (ваши тексты не изменятся!).
+            * Кнопка «Применить ко всем» обновляет настройки у <b>уже существующих</b> вопросов (ваши тексты и ответы не изменятся!).
           </div>
         </div>
 
@@ -646,17 +677,19 @@
         
         <button id="gDrawToggle" title="✏️">✏️</button>
 
-        <div id="gTimerContainer" style="display:none;">
-           <div id="gTimerWrap">
-              <span class="timer-icon">⏱</span> <span id="gTimer">30</span>
-           </div>
-        </div>
-        <h2 id="gQText"></h2>
-        <div id="gQImgWrap" style="display:none;"><img id="gQImg"></div>
-        <div id="gAnswers"></div>
-        <div id="gInputWrap" style="display:none;">
-          <input type="text" id="gInput" autocomplete="off" placeholder="...">
-          <button id="gSubmitBtn" data-i18n="btnOK">OK</button>
+        <div id="gQAWrapper">
+            <div id="gTimerContainer" style="display:none;">
+               <div id="gTimerWrap">
+                  <span class="timer-icon">⏱</span> <span id="gTimer">30</span>
+               </div>
+            </div>
+            <h2 id="gQText"></h2>
+            <div id="gQImgWrap" style="display:none;"><img id="gQImg"></div>
+            <div id="gAnswers"></div>
+            <div id="gInputWrap" style="display:none;">
+              <input type="text" id="gInput" autocomplete="off" placeholder="...">
+              <button id="gSubmitBtn" data-i18n="btnOK">OK</button>
+            </div>
         </div>
         
         <div id="gDrawArea">
@@ -1799,13 +1832,32 @@ function bootGame() {
   let dpr = 1;
 
   function resizeCanvas() {
+      if (!drawArea.offsetWidth) return;
       const rect = drawArea.getBoundingClientRect();
       dpr = window.devicePixelRatio || 1;
       
-      if(canvas.width !== Math.round(rect.width * dpr) || canvas.height !== Math.round(rect.height * dpr)) {
-          canvas.width = rect.width * dpr;
-          canvas.height = rect.height * dpr;
-          ctxCanvas.scale(dpr, dpr);
+      const newW = Math.round(rect.width * dpr);
+      const newH = Math.round(rect.height * dpr);
+      
+      if(canvas.width !== newW || canvas.height !== newH) {
+          let tempCanvas = null;
+          if (canvas.width > 0 && canvas.height > 0) {
+              tempCanvas = document.createElement('canvas');
+              tempCanvas.width = canvas.width;
+              tempCanvas.height = canvas.height;
+              tempCanvas.getContext('2d').drawImage(canvas, 0, 0);
+          }
+
+          canvas.width = newW;
+          canvas.height = newH;
+          ctxCanvas.setTransform(dpr, 0, 0, dpr, 0, 0);
+          
+          if (tempCanvas) {
+              ctxCanvas.save();
+              ctxCanvas.setTransform(1, 0, 0, 1, 0, 0);
+              ctxCanvas.drawImage(tempCanvas, 0, 0);
+              ctxCanvas.restore();
+          }
       }
       
       canvas.style.width = rect.width + 'px';
@@ -1813,7 +1865,14 @@ function bootGame() {
       canvasRect = rect; 
   }
 
+  // Автоматический ресайз при анимации
+  const drawResizeObs = new ResizeObserver(() => {
+      if(drawArea.offsetWidth > 0) resizeCanvas();
+  });
+  drawResizeObs.observe(drawArea);
+
   function getPointerPos(e) {
+      if(!canvasRect) canvasRect = canvas.getBoundingClientRect();
       return { 
           x: e.clientX - canvasRect.left, 
           y: e.clientY - canvasRect.top 
@@ -1887,17 +1946,19 @@ function bootGame() {
   canvas.addEventListener('pointerup', stopDraw);
   canvas.addEventListener('pointercancel', stopDraw);
 
-  document.getElementById('gCanvasClear').onclick = () => {
-      ctxCanvas.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
-  };
+  function clearCanvas() {
+      if(!canvasRect) return;
+      ctxCanvas.save();
+      ctxCanvas.setTransform(1, 0, 0, 1, 0, 0);
+      ctxCanvas.clearRect(0, 0, canvas.width, canvas.height);
+      ctxCanvas.restore();
+  }
+
+  document.getElementById('gCanvasClear').onclick = clearCanvas;
 
   document.getElementById('gDrawToggle').onclick = () => {
       const modalContent = document.querySelector('.game-modal-content');
       modalContent.classList.toggle('draw-mode');
-      
-      if(modalContent.classList.contains('draw-mode')) {
-          setTimeout(resizeCanvas, 10); 
-      }
   };
 
   let timerId = null;
@@ -1909,10 +1970,7 @@ function bootGame() {
     const modalContent = modal.querySelector('.game-modal-content');
     modalContent.classList.remove('draw-mode');
     if(btnPen) btnPen.click(); 
-    
-    if(canvasRect) {
-        ctxCanvas.clearRect(0, 0, canvas.width, canvas.height);
-    }
+    clearCanvas();
 
     modalContent.style.setProperty('--team-color', tCol);
     
