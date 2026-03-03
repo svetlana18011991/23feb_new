@@ -466,7 +466,7 @@
         </div>
         
         <div style="background: rgba(217, 154, 41, 0.1); padding: 10px; border-radius: 12px; border: 1px solid var(--neon-orange-base); margin-bottom: 12px;">
-          <div style="font-size: 12px; color: var(--neon-orange-base); font-weight: bold; margin-bottom: 8px;">🎨 Управление настройками вопросов (Шрифт, Таймер, Мишень):</div>
+          <div style="font-size: 12px; color: var(--neon-orange-base); font-weight: bold; margin-bottom: 8px;">🎨 Управление настройками вопросов:</div>
           <div style="display:flex; align-items:center; gap:8px; flex-wrap: wrap;">
             <select id="newQTemplate" style="flex:1; min-width: 160px; border-color:var(--neon-orange-base); padding: 6px; font-size: 13px; background: rgba(0,0,0,0.5);">
               <option value="-1" data-i18n="oDefaultSettings">Стандартные (по умолчанию)</option>
@@ -598,9 +598,6 @@
       
       <textarea id="importText" style="height:250px; font-family:'Courier New', monospace; font-size:14px;" data-i18n="placeholderImport" placeholder="Вставьте скопированный текст сюда..."></textarea>
       
-      <button class="btn small" style="background:#4a4a4a; margin-top: 10px; width: 100%; border-color:#888;" onclick="fixEgeText()" data-i18n="btnFixEge">
-        🛠 Починить кракозябры (Решу ЕГЭ)
-      </button>
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="closeImport()" data-i18n="btnCancel">Отмена</button>
@@ -1293,7 +1290,6 @@ window.renderQList = function() {
     </div>
   `).join('');
 
-  // Обновляем список шаблонов
   const sel = document.getElementById('newQTemplate');
   const val = sel.value;
   sel.innerHTML = `<option value="-1">${t('oDefaultSettings')}</option>`;
@@ -1425,7 +1421,6 @@ window.processImport = () => {
 function openMod(idx = null) {
   editIdx = idx;
   
-  // Если создаем новый вопрос, берем настройки из шаблона
   let defQ = { type: "choice", text: "", pts: 10, font: "Roboto", size: 20, timer: false, sec: 30, img: "", opts: [{t:"", c:true}, {t:"", c:false}], acc: ["Ответ"], tgt: "default", tu: "" };
   if (idx === null) {
       const tplIdx = parseInt(document.getElementById('newQTemplate').value);
@@ -1743,7 +1738,7 @@ function bootGame() {
     tgtDiv.appendChild(el);
   });
 
-  // Логика холста (ПЛАВНЫЙ ЧЕРНОВИК)
+  // Логика холста (СУПЕР-ПЛАВНЫЙ ЧЕРНОВИК)
   const drawArea = document.getElementById('gDrawArea');
   const canvas = document.getElementById('gCanvas');
   const ctxCanvas = canvas.getContext('2d');
@@ -1757,18 +1752,20 @@ function bootGame() {
   let currentTool = 'pen'; 
   let currentColor = '#0f4c81'; 
   let currentSize = 4; 
-  let points = [];
+  let lastPos = {x: 0, y: 0};
+  let canvasRect = null; // Кешируем размеры для скорости!
 
   function resizeCanvas() {
       canvas.width = drawArea.offsetWidth;
       canvas.height = drawArea.offsetHeight;
+      canvasRect = canvas.getBoundingClientRect();
   }
 
   function getMousePos(e) {
-      const rect = canvas.getBoundingClientRect();
+      if (!canvasRect) canvasRect = canvas.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      return { x: clientX - rect.left, y: clientY - rect.top };
+      return { x: clientX - canvasRect.left, y: clientY - canvasRect.top };
   }
 
   if(btnPen) btnPen.onclick = () => { currentTool = 'pen'; btnPen.classList.add('active'); if(btnEraser) btnEraser.classList.remove('active'); canvas.style.cursor = 'crosshair'; };
@@ -1794,49 +1791,37 @@ function bootGame() {
   const startDraw = (e) => {
       if(e.target.closest('#gDrawTools')) return; 
       isDrawing = true;
-      const pos = getMousePos(e);
-      points = [pos];
+      canvasRect = canvas.getBoundingClientRect(); // Обновляем кеш позиции перед рисованием
+      lastPos = getMousePos(e);
       
       ctxCanvas.lineCap = 'round';
       ctxCanvas.lineJoin = 'round';
       ctxCanvas.lineWidth = currentTool === 'eraser' ? currentSize * 4 : currentSize;
       ctxCanvas.strokeStyle = currentTool === 'eraser' ? 'rgba(0,0,0,1)' : currentColor;
-      ctxCanvas.fillStyle = ctxCanvas.strokeStyle;
       ctxCanvas.globalCompositeOperation = currentTool === 'eraser' ? 'destination-out' : 'source-over';
       
+      // Рисуем точку при одинарном клике
       ctxCanvas.beginPath();
-      ctxCanvas.arc(pos.x, pos.y, ctxCanvas.lineWidth / 2, 0, Math.PI * 2);
-      ctxCanvas.fill();
+      ctxCanvas.moveTo(lastPos.x, lastPos.y);
+      ctxCanvas.lineTo(lastPos.x, lastPos.y);
+      ctxCanvas.stroke();
   };
 
   const draw = (e) => {
       if (!isDrawing) return;
       if(e.cancelable) e.preventDefault(); 
-      points.push(getMousePos(e));
       
-      if (points.length >= 3) {
-          const p1 = points[points.length - 3];
-          const p2 = points[points.length - 2];
-          const p3 = points[points.length - 1];
-          
-          const mid1 = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
-          const mid2 = { x: (p2.x + p3.x) / 2, y: (p2.y + p3.y) / 2 };
-          
-          ctxCanvas.beginPath();
-          ctxCanvas.moveTo(mid1.x, mid1.y);
-          ctxCanvas.quadraticCurveTo(p2.x, p2.y, mid2.x, mid2.y);
-          ctxCanvas.stroke();
-      }
+      const pos = getMousePos(e);
+      
+      ctxCanvas.beginPath();
+      ctxCanvas.moveTo(lastPos.x, lastPos.y);
+      ctxCanvas.lineTo(pos.x, pos.y);
+      ctxCanvas.stroke();
+      
+      lastPos = pos;
   };
 
   const stopDraw = () => {
-      if (!isDrawing) return;
-      if (points.length === 2) {
-          ctxCanvas.beginPath();
-          ctxCanvas.moveTo(points[0].x, points[0].y);
-          ctxCanvas.lineTo(points[1].x, points[1].y);
-          ctxCanvas.stroke();
-      }
       isDrawing = false;
   };
 
@@ -2009,8 +1994,19 @@ function bootGame() {
   document.getElementById('btnReset').onclick = () => location.reload();
 }
 
-if(getParamSafe('game') && getParamSafe('edit') !== '1') bootGame();
-else { bootEditor(); if(getParamSafe('edit') === '1') bootGame(); }
+/* --- Запуск с правильным декодированием Хеша --- */
+const getParamMain = (k) => {
+    let p = new URLSearchParams(location.search).get(k);
+    if(!p && location.hash) {
+      let hashStr = location.hash.substring(1); 
+      try { hashStr = decodeURIComponent(hashStr); } catch(e){}
+      p = new URLSearchParams(hashStr).get(k);
+    }
+    return p;
+};
+
+if(getParamMain('game') && getParamMain('edit') !== '1') bootGame();
+else { bootEditor(); if(getParamMain('edit') === '1') bootGame(); }
 </script>
 </body>
 </html>
