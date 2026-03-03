@@ -647,8 +647,8 @@
         <div id="gDrawArea">
           <div class="draw-tools-panel" id="gDrawTools">
              <div class="tool-group">
-                 <button class="d-tool active" data-tool="pen" title="Ручка">🖊️</button>
-                 <button class="d-tool" data-tool="eraser" title="Ластик">🧽</button>
+                 <button id="gDrawPen" class="d-tool active" data-tool="pen" title="Ручка">🖊️</button>
+                 <button id="gDrawEraser" class="d-tool" data-tool="eraser" title="Ластик">🧽</button>
              </div>
              <div class="tool-sep"></div>
              <div class="tool-group">
@@ -939,7 +939,7 @@ window.forceCheckSize = () => { try { checkLinkSize(b64e(cfg)); } catch(e){} };
 window.checkImgLink = (inp) => { document.getElementById('modImgWarn').style.display = inp.value.length > 500 ? "block" : "none"; };
 
 /* ========================
-   Звуковой движок (Глобальный + Надежный)
+   Звуковой движок
    ======================== */
 const AudioSys = (() => {
   let ctx, master;
@@ -1021,7 +1021,6 @@ function bootEditor() {
 
   const upd = () => updateEditor();
   
-  // Кнопка полного сброса проекта
   document.getElementById('btnResetProject').onclick = () => {
     if(confirm(t('confirmReset'))) { 
       localStorage.removeItem(LS_KEY); 
@@ -1047,7 +1046,6 @@ function bootEditor() {
   document.getElementById('inpCursorSize').value = cfg.cursorSize;
   document.getElementById('inpRadius').value = cfg.radius; document.getElementById('inpSpeed').value = cfg.speed;
   
-  // Строго проставляем количество команд
   document.getElementById('inpTeams').value = cfg.teams; 
   
   document.getElementById('inpSound').value = cfg.sound; 
@@ -1192,7 +1190,6 @@ function updateEditor() {
   }, 400);
 }
 
-// КНОПКА ПРИМЕНИТЬ КО ВСЕМ СУЩЕСТВУЮЩИМ
 window.applyTemplateToAll = () => {
     if(cfg.questions.length === 0) return;
     const tplIdx = parseInt(document.getElementById('newQTemplate').value);
@@ -1395,7 +1392,6 @@ window.processImport = () => {
 function openMod(idx = null) {
   editIdx = idx;
   
-  // Если создаем новый вопрос, берем настройки из шаблона
   let defQ = { type: "choice", text: "", pts: 10, font: "Roboto", size: 20, timer: false, sec: 30, img: "", opts: [{t:"", c:true}, {t:"", c:false}], acc: ["Ответ"], tgt: "default", tu: "" };
   if (idx === null) {
       const tplIdx = parseInt(document.getElementById('newQTemplate').value);
@@ -1716,8 +1712,8 @@ function bootGame() {
   }
 
   // Переключение ручка/ластик
-  btnPen.onclick = () => { currentTool = 'pen'; btnPen.classList.add('active'); btnEraser.classList.remove('active'); canvas.style.cursor = 'crosshair'; };
-  btnEraser.onclick = () => { currentTool = 'eraser'; btnEraser.classList.add('active'); btnPen.classList.remove('active'); canvas.style.cursor = 'cell'; };
+  if(btnPen) btnPen.onclick = () => { currentTool = 'pen'; btnPen.classList.add('active'); btnEraser.classList.remove('active'); canvas.style.cursor = 'crosshair'; };
+  if(btnEraser) btnEraser.onclick = () => { currentTool = 'eraser'; btnEraser.classList.add('active'); btnPen.classList.remove('active'); canvas.style.cursor = 'cell'; };
 
   // Переключение цвета
   colorBtns.forEach(btn => {
@@ -1725,7 +1721,7 @@ function bootGame() {
           colorBtns.forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           currentColor = btn.dataset.color;
-          if(currentTool === 'eraser') btnPen.click();
+          if(currentTool === 'eraser' && btnPen) btnPen.click();
       };
   });
 
@@ -1814,7 +1810,7 @@ function bootGame() {
     const modal = document.getElementById('gModal');
     const modalContent = modal.querySelector('.game-modal-content');
     modalContent.classList.remove('draw-mode');
-    btnPen.click(); // Возвращаем инструмент на ручку
+    if(btnPen) btnPen.click(); // Возвращаем инструмент на ручку
     ctxCanvas.clearRect(0, 0, canvas.width, canvas.height);
 
     modalContent.style.setProperty('--team-color', tCol);
