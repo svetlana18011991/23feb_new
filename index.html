@@ -87,13 +87,7 @@
     .hud { position: absolute; top: 14px; left: 14px; right: 14px; pointer-events: none; z-index: 10; display:flex; justify-content:space-between; align-items:center; }
     .gameTitle { font-weight: 900; text-shadow: 0 4px 15px #000; color: #fff; }
     
-    /* ИГРОВОЙ БРЕНДИНГ В УГЛУ */
     .hud-right { display:flex; align-items:center; gap:15px; pointer-events:auto; }
-    .hud-brand { display:flex; align-items:center; gap:10px; opacity:0.85; user-select:none; transition: 0.3s; }
-    .hud-brand:hover { opacity: 1; }
-    .hud-brand-text { color:#fff; font-size:15px; font-weight:900; text-shadow: 0 2px 6px #000; font-family: 'Montserrat', sans-serif; letter-spacing:0.5px; }
-    .hud-brand img { width:42px; height:42px; border-radius:50%; box-shadow: 0 2px 10px rgba(0,0,0,0.8); object-fit:cover; border: 2px solid rgba(255,255,255,0.15); }
-    @media (max-width: 700px) { .hud-brand-text { display: none; } }
 
     /* БРЕНДИНГ НА ЭКРАНАХ */
     .screen-brand { display:flex; flex-direction:column; align-items:center; margin-bottom:20px; }
@@ -633,12 +627,13 @@
     <div class="hud">
       <div class="gameTitle" id="gTitle"></div>
       <div class="hud-right">
-        <div class="hud-brand">
-          <span class="hud-brand-text">Шкатулка интерактивов</span>
-          <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
-        </div>
         <button class="btn small" id="btnReset" style="z-index: 100;" data-i18n="btnReset">Сброс</button>
       </div>
+    </div>
+    
+    <div style="position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; opacity: 0.5; pointer-events: none; z-index: 2; user-select: none;">
+      <img src="logo.png" alt="Логотип" style="height: 24px; width: 24px; border-radius: 50%; object-fit: cover; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));" onerror="this.style.display='none'">
+      <span style="font-family: 'Caveat', cursive; font-size: 20px; color: rgba(255,255,255,0.85); text-shadow: 0 2px 4px rgba(0,0,0,0.9); white-space: nowrap; letter-spacing: 0.5px;">Шкатулка математических интерактивов</span>
     </div>
     
     <div class="teams" id="gTeams"></div>
@@ -1645,21 +1640,6 @@ function bootGame() {
     }
   }
 
-  arenaEl.onclick = (e) => {
-    if(isEdit || !arenaEl.classList.contains('aiming')) return;
-    if(e.target.closest('.target') || e.target.closest('.hud') || e.target.closest('.teams') || e.target.closest('.game-modal') || e.target.closest('.screen')) return;
-    
-    try { AudioSys.play(gCfg.sound, gCfg.vol); } catch(err){}
-    
-    if(gCfg.penalty && gCfg.penalty.enabled) {
-      const p = Number(gCfg.penalty.points || 0);
-      scores[curTeam] -= p;
-      drawTeams();
-      const r = arenaEl.getBoundingClientRect();
-      popFloatText(e.clientX - r.left, e.clientY - r.top, `-${p}`, '#ff5b6b');
-    }
-  };
-
   const tgtDiv = document.getElementById('gTargets');
   tgtDiv.className = isEdit ? "targets edit-mode" : "targets";
   let targetsHit = 0;
@@ -1756,11 +1736,10 @@ function bootGame() {
     tgtDiv.appendChild(el);
   });
 
-  // --- ЛОГИКА СУПЕР-ПЛАВНОГО ХОЛСТА (PointerEvents) ---
+  // Логика холста (СУПЕР-ПЛАВНЫЙ ЧЕРНОВИК)
   const drawArea = document.getElementById('gDrawArea');
   const canvas = document.getElementById('gCanvas');
   
-  // desynchronized: true дает команду браузеру отрисовывать холст быстрее, минуя стандартную очередь!
   const ctxCanvas = canvas.getContext('2d', { desynchronized: true });
   
   const btnPen = document.getElementById('gDrawPen');
@@ -1780,7 +1759,6 @@ function bootGame() {
       const rect = drawArea.getBoundingClientRect();
       dpr = window.devicePixelRatio || 1;
       
-      // Защита от стирания при случайном ресайзе (меняем размер только если он реально изменился)
       if(canvas.width !== Math.round(rect.width * dpr) || canvas.height !== Math.round(rect.height * dpr)) {
           canvas.width = rect.width * dpr;
           canvas.height = rect.height * dpr;
@@ -1823,10 +1801,8 @@ function bootGame() {
       if(e.target.closest('#gDrawTools')) return; 
       isDrawing = true;
       
-      // ЗАХВАТ УКАЗАТЕЛЯ: предотвращает обрыв линии, если мышь выскочила за холст!
       canvas.setPointerCapture(e.pointerId);
       
-      // Обновляем координаты на всякий случай
       canvasRect = canvas.getBoundingClientRect();
       lastPos = getPointerPos(e);
       
@@ -1863,7 +1839,6 @@ function bootGame() {
       }
   };
 
-  // ИСПОЛЬЗУЕМ POINTER EVENTS (самые быстрые и точные)
   canvas.addEventListener('pointerdown', startDraw);
   canvas.addEventListener('pointermove', draw, {passive: false});
   canvas.addEventListener('pointerup', stopDraw);
@@ -1892,7 +1867,6 @@ function bootGame() {
     modalContent.classList.remove('draw-mode');
     if(btnPen) btnPen.click(); 
     
-    // Очищаем холст с учетом ретины
     if(canvasRect) {
         ctxCanvas.clearRect(0, 0, canvas.width, canvas.height);
     }
@@ -2037,8 +2011,19 @@ function bootGame() {
   document.getElementById('btnReset').onclick = () => location.reload();
 }
 
-if(getParamSafe('game') && getParamSafe('edit') !== '1') bootGame();
-else { bootEditor(); if(getParamSafe('edit') === '1') bootGame(); }
+/* --- Запуск с правильным декодированием Хеша --- */
+const getParamMain = (k) => {
+    let p = new URLSearchParams(location.search).get(k);
+    if(!p && location.hash) {
+      let hashStr = location.hash.substring(1); 
+      try { hashStr = decodeURIComponent(hashStr); } catch(e){}
+      p = new URLSearchParams(hashStr).get(k);
+    }
+    return p;
+};
+
+if(getParamMain('game') && getParamMain('edit') !== '1') bootGame();
+else { bootEditor(); if(getParamMain('edit') === '1') bootGame(); }
 </script>
 </body>
 </html>
