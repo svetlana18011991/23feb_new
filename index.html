@@ -466,7 +466,7 @@
         </div>
         
         <div style="background: rgba(217, 154, 41, 0.1); padding: 10px; border-radius: 12px; border: 1px solid var(--neon-orange-base); margin-bottom: 12px;">
-          <div style="font-size: 12px; color: var(--neon-orange-base); font-weight: bold; margin-bottom: 8px;">🎨 Управление настройками вопросов:</div>
+          <div style="font-size: 12px; color: var(--neon-orange-base); font-weight: bold; margin-bottom: 8px;">🎨 Управление настройками вопросов (Шрифт, Таймер, Мишень):</div>
           <div style="display:flex; align-items:center; gap:8px; flex-wrap: wrap;">
             <select id="newQTemplate" style="flex:1; min-width: 160px; border-color:var(--neon-orange-base); padding: 6px; font-size: 13px; background: rgba(0,0,0,0.5);">
               <option value="-1" data-i18n="oDefaultSettings">Стандартные (по умолчанию)</option>
@@ -708,6 +708,27 @@
 </div>
 
 <script>
+/* БЕЗОПАСНОЕ ДЕКОДИРОВАНИЕ ССЫЛКИ И ХЕША (Критически важно для LZString) */
+function getParamSafe(k) {
+    let p = new URLSearchParams(location.search).get(k);
+    if (p !== null) return p;
+    if (location.hash) {
+        let h = location.hash.substring(1);
+        let vars = h.split('&');
+        for (let i = 0; i < vars.length; i++) {
+            let pair = vars[i].split('=');
+            if (pair[0] === k) {
+                try {
+                    return decodeURIComponent(pair[1] || "");
+                } catch(e) {
+                    return pair[1];
+                }
+            }
+        }
+    }
+    return null;
+}
+
 /* Загружаем язык из памяти */
 let lang = localStorage.getItem('mathShooterLang') || "ru";
 
@@ -1022,10 +1043,12 @@ function bootEditor() {
   document.body.classList.add('editor-mode');
   document.getElementById('editorApp').style.display = 'grid';
 
+  // Устанавливаем язык при загрузке
   document.getElementById('selLang').value = lang;
 
   const upd = () => updateEditor();
   
+  // Кнопка полного сброса проекта
   document.getElementById('btnResetProject').onclick = () => {
     if(confirm(t('confirmReset'))) { 
       localStorage.removeItem(LS_KEY); 
@@ -1051,6 +1074,7 @@ function bootEditor() {
   document.getElementById('inpCursorSize').value = cfg.cursorSize;
   document.getElementById('inpRadius').value = cfg.radius; document.getElementById('inpSpeed').value = cfg.speed;
   
+  // Строго проставляем количество команд
   document.getElementById('inpTeams').value = cfg.teams; 
   
   document.getElementById('inpSound').value = cfg.sound; 
@@ -1067,6 +1091,7 @@ function bootEditor() {
   
   document.getElementById('inpLatex').checked = cfg.latex;
 
+  // Обработчики полей ввода
   document.querySelectorAll('#editorApp input:not([id^="mod"]):not(#inpTeams):not(#importText), #editorApp textarea:not([id^="mod"]):not(#importText), #editorApp select:not([id^="mod"]):not(#inpTeams):not(#importMode):not(#newQTemplate)').forEach(el => {
     el.addEventListener('input', upd); 
     el.addEventListener('change', upd);
@@ -1083,6 +1108,7 @@ function bootEditor() {
   document.getElementById('selTarget').addEventListener('change', (e) => { document.getElementById('inpTargetCustom').style.display = e.target.value === 'custom' ? 'block' : 'none'; });
   document.getElementById('selCursor').addEventListener('change', (e) => { document.getElementById('inpCursorCustom').style.display = e.target.value === 'custom' ? 'block' : 'none'; });
   
+  // НАДЁЖНАЯ ПРИВЯЗКА КОМАНД
   document.getElementById('inpTeams').addEventListener('change', () => { renderTeamColsUI(); updateEditor(); });
   document.getElementById('inpTeams').addEventListener('input', () => { renderTeamColsUI(); updateEditor(); });
   
@@ -1203,6 +1229,7 @@ function updateEditor() {
   }, 400);
 }
 
+// КНОПКА ПРИМЕНИТЬ КО ВСЕМ СУЩЕСТВУЮЩИМ
 window.applyTemplateToAll = () => {
     if(cfg.questions.length === 0) return;
     const tplIdx = parseInt(document.getElementById('newQTemplate').value);
@@ -1266,6 +1293,7 @@ window.renderQList = function() {
     </div>
   `).join('');
 
+  // Обновляем список шаблонов
   const sel = document.getElementById('newQTemplate');
   const val = sel.value;
   sel.innerHTML = `<option value="-1">${t('oDefaultSettings')}</option>`;
@@ -1279,8 +1307,9 @@ window.delQ = (i) => { cfg.questions.splice(i,1); updateEditor(); };
 
 window.copyQ = (i) => {
   const qCopy = JSON.parse(JSON.stringify(cfg.questions[i]));
-  qCopy.x = Math.min(95, (qCopy.x || 50) + 5); 
-  qCopy.y = Math.min(95, (qCopy.y || 50) + 5);
+  // Авто-разброс дубликатов, чтобы не слипались
+  qCopy.x = 15 + ((cfg.questions.length) % 5) * 16;
+  qCopy.y = 30 + Math.floor((cfg.questions.length) / 5) * 20;
   cfg.questions.push(qCopy);
   updateEditor();
 };
@@ -1396,6 +1425,7 @@ window.processImport = () => {
 function openMod(idx = null) {
   editIdx = idx;
   
+  // Если создаем новый вопрос, берем настройки из шаблона
   let defQ = { type: "choice", text: "", pts: 10, font: "Roboto", size: 20, timer: false, sec: 30, img: "", opts: [{t:"", c:true}, {t:"", c:false}], acc: ["Ответ"], tgt: "default", tu: "" };
   if (idx === null) {
       const tplIdx = parseInt(document.getElementById('newQTemplate').value);
@@ -1475,16 +1505,16 @@ function bootGame() {
 
   document.body.classList.add('game-mode');
   document.getElementById('gameRoot').style.display = 'block';
-  lang = getParam('lang') || localStorage.getItem('mathShooterLang') || 'ru'; 
+  lang = getParamSafe('lang') || localStorage.getItem('mathShooterLang') || 'ru'; 
   applyLang();
   
   let gCfg = cfg;
-  let gameData = getParam('game');
+  let gameData = getParamSafe('game');
   
   if(gameData) { 
     try { gCfg = b64d(gameData); } catch(e){ console.error(e); } 
   }
-  const isEdit = getParam('edit') === '1';
+  const isEdit = getParamSafe('edit') === '1';
 
   function applyLatex(el) {
     if (gCfg.latex && window.renderMathInElement) {
@@ -1601,6 +1631,21 @@ function bootGame() {
       setTimeout(() => p.remove(), 600);
     }
   }
+
+  arenaEl.onclick = (e) => {
+    if(isEdit || !arenaEl.classList.contains('aiming')) return;
+    if(e.target.closest('.target') || e.target.closest('.hud') || e.target.closest('.teams') || e.target.closest('.game-modal') || e.target.closest('.screen')) return;
+    
+    try { AudioSys.play(gCfg.sound, gCfg.vol); } catch(err){}
+    
+    if(gCfg.penalty && gCfg.penalty.enabled) {
+      const p = Number(gCfg.penalty.points || 0);
+      scores[curTeam] -= p;
+      drawTeams();
+      const r = arenaEl.getBoundingClientRect();
+      popFloatText(e.clientX - r.left, e.clientY - r.top, `-${p}`, '#ff5b6b');
+    }
+  };
 
   const tgtDiv = document.getElementById('gTargets');
   tgtDiv.className = isEdit ? "targets edit-mode" : "targets";
@@ -1964,19 +2009,8 @@ function bootGame() {
   document.getElementById('btnReset').onclick = () => location.reload();
 }
 
-/* --- Запуск с правильным декодированием Хеша --- */
-const getParamMain = (k) => {
-    let p = new URLSearchParams(location.search).get(k);
-    if(!p && location.hash) {
-      let hashStr = location.hash.substring(1); 
-      try { hashStr = decodeURIComponent(hashStr); } catch(e){}
-      p = new URLSearchParams(hashStr).get(k);
-    }
-    return p;
-};
-
-if(getParamMain('game') && getParamMain('edit') !== '1') bootGame();
-else { bootEditor(); if(getParamMain('edit') === '1') bootGame(); }
+if(getParamSafe('game') && getParamSafe('edit') !== '1') bootGame();
+else { bootEditor(); if(getParamSafe('edit') === '1') bootGame(); }
 </script>
 </body>
 </html>
