@@ -179,6 +179,18 @@
     }
     @keyframes floatSparkle { 0% { transform: translateY(0) scale(1); opacity: 0.4; } 100% { transform: translateY(-20px) scale(1.5); opacity: 0.9; box-shadow: 0 0 15px var(--team-color); } }
 
+    /* --- УСКОРЕНИЕ ДЛЯ РЕЖИМА РИСОВАНИЯ --- */
+    /* Отключаем тяжелые анимации и фильтры, чтобы холст летал без зависаний! */
+    .game-modal-content.draw-mode::before {
+        animation: none !important;
+        opacity: 0.2 !important;
+        filter: none !important;
+    }
+    .game-modal-content.draw-mode {
+        box-shadow: 0 10px 30px rgba(0,0,0,0.9) !important;
+        background: rgba(15, 20, 25, 0.98) !important;
+    }
+
     /* Кнопка Черновика */
     #gDrawToggle {
       position: absolute; top: 20px; right: 20px; font-size: 24px; 
@@ -237,7 +249,11 @@
       position: relative; z-index: 10; box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
       overflow: hidden;
     }
-    #gCanvas { width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+    #gCanvas { 
+      width: 100%; height: 100%; touch-action: none; cursor: crosshair; 
+      /* Аппаратное ускорение для максимальной плавности! */
+      transform: translateZ(0); 
+    }
 
     /* ПАНЕЛЬ ИНСТРУМЕНТОВ ЧЕРНОВИКА (ЗУМ СТАЙЛ) */
     .draw-tools-panel {
@@ -466,7 +482,7 @@
         </div>
         
         <div style="background: rgba(217, 154, 41, 0.1); padding: 10px; border-radius: 12px; border: 1px solid var(--neon-orange-base); margin-bottom: 12px;">
-          <div style="font-size: 12px; color: var(--neon-orange-base); font-weight: bold; margin-bottom: 8px;">🎨 Управление настройками вопросов:</div>
+          <div style="font-size: 12px; color: var(--neon-orange-base); font-weight: bold; margin-bottom: 8px;">🎨 Управление настройками вопросов (Шрифт, Таймер, Мишень):</div>
           <div style="display:flex; align-items:center; gap:8px; flex-wrap: wrap;">
             <select id="newQTemplate" style="flex:1; min-width: 160px; border-color:var(--neon-orange-base); padding: 6px; font-size: 13px; background: rgba(0,0,0,0.5);">
               <option value="-1" data-i18n="oDefaultSettings">Стандартные (по умолчанию)</option>
@@ -598,6 +614,9 @@
       
       <textarea id="importText" style="height:250px; font-family:'Courier New', monospace; font-size:14px;" data-i18n="placeholderImport" placeholder="Вставьте скопированный текст сюда..."></textarea>
       
+      <button class="btn small" style="background:#4a4a4a; margin-top: 10px; width: 100%; border-color:#888;" onclick="fixEgeText()" data-i18n="btnFixEge">
+        🛠 Починить кракозябры (Решу ЕГЭ)
+      </button>
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="closeImport()" data-i18n="btnCancel">Отмена</button>
@@ -1226,7 +1245,6 @@ function updateEditor() {
   }, 400);
 }
 
-// КНОПКА ПРИМЕНИТЬ КО ВСЕМ СУЩЕСТВУЮЩИМ
 window.applyTemplateToAll = () => {
     if(cfg.questions.length === 0) return;
     const tplIdx = parseInt(document.getElementById('newQTemplate').value);
@@ -1738,10 +1756,12 @@ function bootGame() {
     tgtDiv.appendChild(el);
   });
 
-  // Логика холста (СУПЕР-ПЛАВНЫЙ ЧЕРНОВИК)
+  // --- ЛОГИКА СУПЕР-ПЛАВНОГО ХОЛСТА (PointerEvents) ---
   const drawArea = document.getElementById('gDrawArea');
   const canvas = document.getElementById('gCanvas');
-  const ctxCanvas = canvas.getContext('2d');
+  
+  // desynchronized: true дает команду браузеру отрисовывать холст быстрее, минуя стандартную очередь!
+  const ctxCanvas = canvas.getContext('2d', { desynchronized: true });
   
   const btnPen = document.getElementById('gDrawPen');
   const btnEraser = document.getElementById('gDrawEraser');
@@ -1753,19 +1773,30 @@ function bootGame() {
   let currentColor = '#0f4c81'; 
   let currentSize = 4; 
   let lastPos = {x: 0, y: 0};
-  let canvasRect = null; // Кешируем размеры для скорости!
+  let canvasRect = null; 
+  let dpr = 1;
 
   function resizeCanvas() {
-      canvas.width = drawArea.offsetWidth;
-      canvas.height = drawArea.offsetHeight;
-      canvasRect = canvas.getBoundingClientRect();
+      const rect = drawArea.getBoundingClientRect();
+      dpr = window.devicePixelRatio || 1;
+      
+      // Защита от стирания при случайном ресайзе (меняем размер только если он реально изменился)
+      if(canvas.width !== Math.round(rect.width * dpr) || canvas.height !== Math.round(rect.height * dpr)) {
+          canvas.width = rect.width * dpr;
+          canvas.height = rect.height * dpr;
+          ctxCanvas.scale(dpr, dpr);
+      }
+      
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
+      canvasRect = rect; 
   }
 
-  function getMousePos(e) {
-      if (!canvasRect) canvasRect = canvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      return { x: clientX - canvasRect.left, y: clientY - canvasRect.top };
+  function getPointerPos(e) {
+      return { 
+          x: e.clientX - canvasRect.left, 
+          y: e.clientY - canvasRect.top 
+      };
   }
 
   if(btnPen) btnPen.onclick = () => { currentTool = 'pen'; btnPen.classList.add('active'); if(btnEraser) btnEraser.classList.remove('active'); canvas.style.cursor = 'crosshair'; };
@@ -1791,8 +1822,13 @@ function bootGame() {
   const startDraw = (e) => {
       if(e.target.closest('#gDrawTools')) return; 
       isDrawing = true;
-      canvasRect = canvas.getBoundingClientRect(); // Обновляем кеш позиции перед рисованием
-      lastPos = getMousePos(e);
+      
+      // ЗАХВАТ УКАЗАТЕЛЯ: предотвращает обрыв линии, если мышь выскочила за холст!
+      canvas.setPointerCapture(e.pointerId);
+      
+      // Обновляем координаты на всякий случай
+      canvasRect = canvas.getBoundingClientRect();
+      lastPos = getPointerPos(e);
       
       ctxCanvas.lineCap = 'round';
       ctxCanvas.lineJoin = 'round';
@@ -1800,7 +1836,6 @@ function bootGame() {
       ctxCanvas.strokeStyle = currentTool === 'eraser' ? 'rgba(0,0,0,1)' : currentColor;
       ctxCanvas.globalCompositeOperation = currentTool === 'eraser' ? 'destination-out' : 'source-over';
       
-      // Рисуем точку при одинарном клике
       ctxCanvas.beginPath();
       ctxCanvas.moveTo(lastPos.x, lastPos.y);
       ctxCanvas.lineTo(lastPos.x, lastPos.y);
@@ -1811,7 +1846,7 @@ function bootGame() {
       if (!isDrawing) return;
       if(e.cancelable) e.preventDefault(); 
       
-      const pos = getMousePos(e);
+      const pos = getPointerPos(e);
       
       ctxCanvas.beginPath();
       ctxCanvas.moveTo(lastPos.x, lastPos.y);
@@ -1821,17 +1856,21 @@ function bootGame() {
       lastPos = pos;
   };
 
-  const stopDraw = () => {
-      isDrawing = false;
+  const stopDraw = (e) => {
+      if (isDrawing) {
+          isDrawing = false;
+          try { canvas.releasePointerCapture(e.pointerId); } catch(err){}
+      }
   };
 
+  // ИСПОЛЬЗУЕМ POINTER EVENTS (самые быстрые и точные)
   canvas.addEventListener('pointerdown', startDraw);
   canvas.addEventListener('pointermove', draw, {passive: false});
   canvas.addEventListener('pointerup', stopDraw);
-  canvas.addEventListener('pointerout', stopDraw);
+  canvas.addEventListener('pointercancel', stopDraw);
 
   document.getElementById('gCanvasClear').onclick = () => {
-      ctxCanvas.clearRect(0, 0, canvas.width, canvas.height);
+      ctxCanvas.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
   };
 
   document.getElementById('gDrawToggle').onclick = () => {
@@ -1839,7 +1878,7 @@ function bootGame() {
       modalContent.classList.toggle('draw-mode');
       
       if(modalContent.classList.contains('draw-mode')) {
-          setTimeout(resizeCanvas, 50); 
+          setTimeout(resizeCanvas, 10); 
       }
   };
 
@@ -1852,7 +1891,11 @@ function bootGame() {
     const modalContent = modal.querySelector('.game-modal-content');
     modalContent.classList.remove('draw-mode');
     if(btnPen) btnPen.click(); 
-    ctxCanvas.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Очищаем холст с учетом ретины
+    if(canvasRect) {
+        ctxCanvas.clearRect(0, 0, canvas.width, canvas.height);
+    }
 
     modalContent.style.setProperty('--team-color', tCol);
     
@@ -1994,19 +2037,8 @@ function bootGame() {
   document.getElementById('btnReset').onclick = () => location.reload();
 }
 
-/* --- Запуск с правильным декодированием Хеша --- */
-const getParamMain = (k) => {
-    let p = new URLSearchParams(location.search).get(k);
-    if(!p && location.hash) {
-      let hashStr = location.hash.substring(1); 
-      try { hashStr = decodeURIComponent(hashStr); } catch(e){}
-      p = new URLSearchParams(hashStr).get(k);
-    }
-    return p;
-};
-
-if(getParamMain('game') && getParamMain('edit') !== '1') bootGame();
-else { bootEditor(); if(getParamMain('edit') === '1') bootGame(); }
+if(getParamSafe('game') && getParamSafe('edit') !== '1') bootGame();
+else { bootEditor(); if(getParamSafe('edit') === '1') bootGame(); }
 </script>
 </body>
 </html>
