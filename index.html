@@ -221,7 +221,7 @@
     .game-modal-content.draw-mode #gInputWrap { display: none !important; }
     .game-modal-content.draw-mode #gDrawArea { display: block; }
 
-    /* Область черновика с панелью инструментов */
+    /* Область черновика */
     #gDrawArea {
       display: none; width: 100%; height: 50vh; min-height: 300px; margin-top: 10px;
       border-radius: 16px; border: 3px solid var(--team-color);
@@ -233,19 +233,25 @@
     }
     #gCanvas { width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
 
-    /* Панель инструментов внутри черновика */
-    #gDrawTools {
-      position: absolute; top: 10px; left: 10px; z-index: 15; display: flex; gap: 8px;
-      background: rgba(255, 255, 255, 0.95); padding: 6px 12px; border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15); align-items: center; border: 1px solid #ddd;
+    /* ПАНЕЛЬ ИНСТРУМЕНТОВ ЧЕРНОВИКА (ЗУМ СТАЙЛ) */
+    .draw-tools-panel {
+        position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.95); padding: 6px 14px; border-radius: 30px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 10px;
+        z-index: 15; border: 1px solid rgba(0,0,0,0.1); user-select: none;
     }
-    .tool-btn {
-      background: transparent; border: 2px solid transparent; border-radius: 8px;
-      font-size: 16px; cursor: pointer; padding: 4px; transition: 0.2s;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .tool-btn:hover { background: rgba(0,0,0,0.05); }
-    .tool-btn.active { background: rgba(217, 154, 41, 0.15); border-color: var(--neon-orange-base); }
+    @media (max-width: 600px) { .draw-tools-panel { padding: 4px 8px; gap: 6px; width: 95%; justify-content: space-evenly; } }
+    .tool-group { display: flex; align-items: center; gap: 4px; }
+    .tool-sep { width: 1px; height: 20px; background: #ccc; }
+    .d-tool { background: transparent; border: none; font-size: 18px; cursor: pointer; padding: 4px; border-radius: 8px; transition: 0.2s; filter: grayscale(1); opacity: 0.6; }
+    .d-tool.active { background: rgba(217, 154, 41, 0.2); filter: grayscale(0); opacity: 1; }
+    .d-tool:hover { background: rgba(0,0,0,0.05); }
+    .d-color { width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); padding:0; margin:0 2px; }
+    .d-color.active { transform: scale(1.2); border-color: #000; }
+    .d-size { width: 26px; height: 26px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; padding:0;}
+    .d-size span { background: #333; border-radius: 50%; display: block; }
+    .d-size.active { background: rgba(0,0,0,0.1); }
+    .d-size:hover { background: rgba(0,0,0,0.05); }
 
     /* КЛАССЫ ОБРАТНОЙ СВЯЗИ */
     .ans-correct { background: #33d17a !important; border-color: #33d17a !important; color: #000 !important; box-shadow: 0 0 30px rgba(51,209,122,0.8) !important; transform: scale(1.05) !important; z-index: 20; }
@@ -586,6 +592,9 @@
       
       <textarea id="importText" style="height:250px; font-family:'Courier New', monospace; font-size:14px;" data-i18n="placeholderImport" placeholder="Вставьте скопированный текст сюда..."></textarea>
       
+      <button class="btn small" style="background:#4a4a4a; margin-top: 10px; width: 100%; border-color:#888;" onclick="fixEgeText()" data-i18n="btnFixEge">
+        🛠 Починить кракозябры (Решу ЕГЭ)
+      </button>
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="closeImport()" data-i18n="btnCancel">Отмена</button>
@@ -636,16 +645,26 @@
         </div>
         
         <div id="gDrawArea">
-          <div id="gDrawTools">
-             <input type="color" id="gDrawColor" value="#0f4c81" title="Цвет чернил">
-             <div style="display:flex; flex-direction:column; gap:2px; margin:0 5px;">
-               <label style="font-size:10px; color:#555; margin:0; font-weight:bold; line-height:1;">Толщина</label>
-               <input type="range" id="gDrawSize" min="1" max="25" value="3" style="width:70px; height:4px; margin:0;">
+          <div class="draw-tools-panel" id="gDrawTools">
+             <div class="tool-group">
+                 <button class="d-tool active" data-tool="pen" title="Ручка">🖊️</button>
+                 <button class="d-tool" data-tool="eraser" title="Ластик">🧽</button>
              </div>
-             <button id="gDrawPen" class="tool-btn active" title="Ручка">🖊️</button>
-             <button id="gDrawEraser" class="tool-btn" title="Ластик">🧽</button>
-             <div style="width:1px; height:20px; background:#ccc; margin:0 5px;"></div>
-             <button class="btn small danger" id="gCanvasClear" style="padding:4px 8px; font-size:12px;" data-i18n="btnClearCanvas">🗑 Очистить</button>
+             <div class="tool-sep"></div>
+             <div class="tool-group">
+                 <button class="d-color active" data-color="#0f4c81" style="background:#0f4c81;"></button>
+                 <button class="d-color" data-color="#e53935" style="background:#e53935;"></button>
+                 <button class="d-color" data-color="#43a047" style="background:#43a047;"></button>
+                 <button class="d-color" data-color="#212121" style="background:#212121;"></button>
+             </div>
+             <div class="tool-sep"></div>
+             <div class="tool-group">
+                 <button class="d-size" data-size="2" title="Тонко"><span style="width:4px;height:4px;"></span></button>
+                 <button class="d-size active" data-size="4" title="Средне"><span style="width:8px;height:8px;"></span></button>
+                 <button class="d-size" data-size="8" title="Толсто"><span style="width:14px;height:14px;"></span></button>
+             </div>
+             <div class="tool-sep"></div>
+             <button class="btn small danger" id="gCanvasClear" style="padding:4px 8px; font-size:12px; margin:0;" data-i18n="btnClearCanvas">🗑 Очистить</button>
           </div>
           <canvas id="gCanvas"></canvas>
         </div>
@@ -997,10 +1016,12 @@ function bootEditor() {
   document.body.classList.add('editor-mode');
   document.getElementById('editorApp').style.display = 'grid';
 
+  // Устанавливаем язык при загрузке
   document.getElementById('selLang').value = lang;
 
   const upd = () => updateEditor();
   
+  // Кнопка полного сброса проекта
   document.getElementById('btnResetProject').onclick = () => {
     if(confirm(t('confirmReset'))) { 
       localStorage.removeItem(LS_KEY); 
@@ -1026,6 +1047,7 @@ function bootEditor() {
   document.getElementById('inpCursorSize').value = cfg.cursorSize;
   document.getElementById('inpRadius').value = cfg.radius; document.getElementById('inpSpeed').value = cfg.speed;
   
+  // Строго проставляем количество команд
   document.getElementById('inpTeams').value = cfg.teams; 
   
   document.getElementById('inpSound').value = cfg.sound; 
@@ -1042,6 +1064,7 @@ function bootEditor() {
   
   document.getElementById('inpLatex').checked = cfg.latex;
 
+  // Обработчики полей ввода
   document.querySelectorAll('#editorApp input:not([id^="mod"]):not(#inpTeams):not(#importText), #editorApp textarea:not([id^="mod"]):not(#importText), #editorApp select:not([id^="mod"]):not(#inpTeams):not(#importMode):not(#newQTemplate)').forEach(el => {
     el.addEventListener('input', upd); 
     el.addEventListener('change', upd);
@@ -1058,6 +1081,7 @@ function bootEditor() {
   document.getElementById('selTarget').addEventListener('change', (e) => { document.getElementById('inpTargetCustom').style.display = e.target.value === 'custom' ? 'block' : 'none'; });
   document.getElementById('selCursor').addEventListener('change', (e) => { document.getElementById('inpCursorCustom').style.display = e.target.value === 'custom' ? 'block' : 'none'; });
   
+  // НАДЁЖНАЯ ПРИВЯЗКА КОМАНД
   document.getElementById('inpTeams').addEventListener('change', () => { renderTeamColsUI(); updateEditor(); });
   document.getElementById('inpTeams').addEventListener('input', () => { renderTeamColsUI(); updateEditor(); });
   
@@ -1168,6 +1192,7 @@ function updateEditor() {
   }, 400);
 }
 
+// КНОПКА ПРИМЕНИТЬ КО ВСЕМ СУЩЕСТВУЮЩИМ
 window.applyTemplateToAll = () => {
     if(cfg.questions.length === 0) return;
     const tplIdx = parseInt(document.getElementById('newQTemplate').value);
@@ -1370,6 +1395,7 @@ window.processImport = () => {
 function openMod(idx = null) {
   editIdx = idx;
   
+  // Если создаем новый вопрос, берем настройки из шаблона
   let defQ = { type: "choice", text: "", pts: 10, font: "Roboto", size: 20, timer: false, sec: 30, img: "", opts: [{t:"", c:true}, {t:"", c:false}], acc: ["Ответ"], tgt: "default", tu: "" };
   if (idx === null) {
       const tplIdx = parseInt(document.getElementById('newQTemplate').value);
@@ -1668,12 +1694,14 @@ function bootGame() {
   
   const btnPen = document.getElementById('gDrawPen');
   const btnEraser = document.getElementById('gDrawEraser');
-  const colorPicker = document.getElementById('gDrawColor');
-  const sizeSlider = document.getElementById('gDrawSize');
+  const colorBtns = document.querySelectorAll('.d-color');
+  const sizeBtns = document.querySelectorAll('.d-size');
 
   let isDrawing = false;
-  let isEraserMode = false;
-  let lastPos = {x:0, y:0};
+  let currentTool = 'pen'; // 'pen' или 'eraser'
+  let currentColor = '#0f4c81'; // синий по умолчанию
+  let currentSize = 4; // средняя толщина по умолчанию
+  let points = [];
 
   function resizeCanvas() {
       canvas.width = drawArea.offsetWidth;
@@ -1687,70 +1715,78 @@ function bootGame() {
       return { x: clientX - rect.left, y: clientY - rect.top };
   }
 
-  btnPen.onclick = () => {
-      isEraserMode = false;
-      btnPen.classList.add('active');
-      btnEraser.classList.remove('active');
-      canvas.style.cursor = 'crosshair';
-  };
+  // Переключение ручка/ластик
+  btnPen.onclick = () => { currentTool = 'pen'; btnPen.classList.add('active'); btnEraser.classList.remove('active'); canvas.style.cursor = 'crosshair'; };
+  btnEraser.onclick = () => { currentTool = 'eraser'; btnEraser.classList.add('active'); btnPen.classList.remove('active'); canvas.style.cursor = 'cell'; };
 
-  btnEraser.onclick = () => {
-      isEraserMode = true;
-      btnEraser.classList.add('active');
-      btnPen.classList.remove('active');
-      canvas.style.cursor = 'cell';
-  };
+  // Переключение цвета
+  colorBtns.forEach(btn => {
+      btn.onclick = () => {
+          colorBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentColor = btn.dataset.color;
+          if(currentTool === 'eraser') btnPen.click();
+      };
+  });
+
+  // Переключение толщины
+  sizeBtns.forEach(btn => {
+      btn.onclick = () => {
+          sizeBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentSize = Number(btn.dataset.size);
+      };
+  });
 
   const startDraw = (e) => {
-      if(e.target.closest('#gDrawTools')) return; // Клик по панели инструментов
+      if(e.target.closest('#gDrawTools')) return; // Игнорируем клики по панели инструментов
       isDrawing = true;
-      lastPos = getMousePos(e);
+      const pos = getMousePos(e);
+      points = [pos];
       
-      ctxCanvas.beginPath();
-      if(isEraserMode){
-          ctxCanvas.globalCompositeOperation = 'destination-out';
-          ctxCanvas.lineWidth = sizeSlider.value * 2;
-      } else {
-          ctxCanvas.globalCompositeOperation = 'source-over';
-          ctxCanvas.lineWidth = sizeSlider.value;
-          ctxCanvas.strokeStyle = colorPicker.value;
-      }
       ctxCanvas.lineCap = 'round';
       ctxCanvas.lineJoin = 'round';
+      ctxCanvas.lineWidth = currentTool === 'eraser' ? currentSize * 4 : currentSize;
+      ctxCanvas.strokeStyle = currentTool === 'eraser' ? 'rgba(0,0,0,1)' : currentColor;
+      ctxCanvas.fillStyle = ctxCanvas.strokeStyle;
+      ctxCanvas.globalCompositeOperation = currentTool === 'eraser' ? 'destination-out' : 'source-over';
       
-      // Рисуем точку при простом клике
-      ctxCanvas.moveTo(lastPos.x, lastPos.y);
-      ctxCanvas.lineTo(lastPos.x, lastPos.y);
-      ctxCanvas.stroke();
+      // Рисуем точку при одинарном клике
+      ctxCanvas.beginPath();
+      ctxCanvas.arc(pos.x, pos.y, ctxCanvas.lineWidth / 2, 0, Math.PI * 2);
+      ctxCanvas.fill();
   };
 
   const draw = (e) => {
       if (!isDrawing) return;
-      const pos = getMousePos(e);
-      
-      ctxCanvas.beginPath();
-      ctxCanvas.moveTo(lastPos.x, lastPos.y);
-      ctxCanvas.lineTo(pos.x, pos.y);
-      
-      if (isEraserMode) {
-          ctxCanvas.globalCompositeOperation = 'destination-out';
-          ctxCanvas.lineWidth = sizeSlider.value * 2; 
-          ctxCanvas.strokeStyle = 'rgba(0,0,0,1)';
-      } else {
-          ctxCanvas.globalCompositeOperation = 'source-over';
-          ctxCanvas.lineWidth = sizeSlider.value;
-          ctxCanvas.strokeStyle = colorPicker.value;
-      }
-      
-      ctxCanvas.lineCap = 'round';
-      ctxCanvas.lineJoin = 'round';
-      ctxCanvas.stroke();
-      
-      lastPos = pos;
       if(e.cancelable) e.preventDefault(); 
+      points.push(getMousePos(e));
+      
+      if (points.length >= 3) {
+          const p1 = points[points.length - 3];
+          const p2 = points[points.length - 2];
+          const p3 = points[points.length - 1];
+          
+          const mid1 = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+          const mid2 = { x: (p2.x + p3.x) / 2, y: (p2.y + p3.y) / 2 };
+          
+          ctxCanvas.beginPath();
+          ctxCanvas.moveTo(mid1.x, mid1.y);
+          ctxCanvas.quadraticCurveTo(p2.x, p2.y, mid2.x, mid2.y);
+          ctxCanvas.stroke();
+      }
   };
 
-  const stopDraw = () => isDrawing = false;
+  const stopDraw = () => {
+      if (!isDrawing) return;
+      if (points.length === 2) {
+          ctxCanvas.beginPath();
+          ctxCanvas.moveTo(points[0].x, points[0].y);
+          ctxCanvas.lineTo(points[1].x, points[1].y);
+          ctxCanvas.stroke();
+      }
+      isDrawing = false;
+  };
 
   canvas.addEventListener('pointerdown', startDraw);
   canvas.addEventListener('pointermove', draw, {passive: false});
@@ -1774,12 +1810,11 @@ function bootGame() {
   function openGameQuestion(q, tCol, onDone) {
     arenaEl.classList.remove('aiming'); aimCursor.style.display = 'none';
     
+    // Сбрасываем режим черновика и очищаем его
     const modal = document.getElementById('gModal');
     const modalContent = modal.querySelector('.game-modal-content');
-    
-    // Сбрасываем черновик на ручку и очищаем
     modalContent.classList.remove('draw-mode');
-    btnPen.click(); 
+    btnPen.click(); // Возвращаем инструмент на ручку
     ctxCanvas.clearRect(0, 0, canvas.width, canvas.height);
 
     modalContent.style.setProperty('--team-color', tCol);
@@ -1849,6 +1884,7 @@ function bootGame() {
       btns.forEach(b => b.style.pointerEvents = 'none');
       inp.disabled = true; subBtn.disabled = true;
 
+      // Если черновик открыт, закрываем его, чтобы показать результат
       modalContent.classList.remove('draw-mode');
 
       if(isCorrect) {
