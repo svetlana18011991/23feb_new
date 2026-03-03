@@ -466,7 +466,7 @@
         </div>
         
         <div style="background: rgba(217, 154, 41, 0.1); padding: 10px; border-radius: 12px; border: 1px solid var(--neon-orange-base); margin-bottom: 12px;">
-          <div style="font-size: 12px; color: var(--neon-orange-base); font-weight: bold; margin-bottom: 8px;">🎨 Управление настройками вопросов (Шрифт, Таймер, Мишень):</div>
+          <div style="font-size: 12px; color: var(--neon-orange-base); font-weight: bold; margin-bottom: 8px;">🎨 Управление настройками вопросов:</div>
           <div style="display:flex; align-items:center; gap:8px; flex-wrap: wrap;">
             <select id="newQTemplate" style="flex:1; min-width: 160px; border-color:var(--neon-orange-base); padding: 6px; font-size: 13px; background: rgba(0,0,0,0.5);">
               <option value="-1" data-i18n="oDefaultSettings">Стандартные (по умолчанию)</option>
@@ -1279,9 +1279,8 @@ window.delQ = (i) => { cfg.questions.splice(i,1); updateEditor(); };
 
 window.copyQ = (i) => {
   const qCopy = JSON.parse(JSON.stringify(cfg.questions[i]));
-  // Авто-разброс дубликатов, чтобы не слипались
-  qCopy.x = 15 + ((cfg.questions.length) % 5) * 16;
-  qCopy.y = 30 + Math.floor((cfg.questions.length) / 5) * 20;
+  qCopy.x = Math.min(95, (qCopy.x || 50) + 5); 
+  qCopy.y = Math.min(95, (qCopy.y || 50) + 5);
   cfg.questions.push(qCopy);
   updateEditor();
 };
@@ -1614,7 +1613,6 @@ function bootGame() {
     el.style.width = tSize + 'px';
     el.style.height = tSize + 'px';
     
-    // Защита от NaN
     let qx = isNaN(q.x) ? 50 : q.x;
     let qy = isNaN(q.y) ? 50 : q.y;
 
@@ -1819,6 +1817,7 @@ function bootGame() {
   function openGameQuestion(q, tCol, onDone) {
     arenaEl.classList.remove('aiming'); aimCursor.style.display = 'none';
     
+    // Сбрасываем режим черновика и очищаем его
     const modal = document.getElementById('gModal');
     const modalContent = modal.querySelector('.game-modal-content');
     modalContent.classList.remove('draw-mode');
@@ -1876,3 +1875,108 @@ function bootGame() {
     } else {
       ansDiv.style.display = 'none'; inpWrap.style.display = 'flex';
       inp.value = ""; inp.style.fontFamily = q.font || 'Roboto';
+      inp.disabled = false; subBtn.disabled = false;
+      subBtn.onclick = () => {
+        const user = inp.value.trim().toLowerCase(); const accs = q.acc.map(a=>a.trim().toLowerCase());
+        finishTurn(accs.includes(user), inp);
+      };
+    }
+    
+    applyLatex(modalContent);
+
+    function finishTurn(isCorrect, el = null, isTimeout = false) {
+      clearInterval(timerId);
+      
+      const btns = ansDiv.querySelectorAll('.game-ans-btn');
+      btns.forEach(b => b.style.pointerEvents = 'none');
+      inp.disabled = true; subBtn.disabled = true;
+
+      // Если черновик открыт, закрываем его, чтобы показать результат
+      modalContent.classList.remove('draw-mode');
+
+      if(isCorrect) {
+          try { AudioSys.play('correct', gCfg.vol); } catch(e){}
+          if(el) el.classList.add('ans-correct');
+      } else {
+          try { AudioSys.play('wrong', gCfg.vol); } catch(e){}
+          if(el) el.classList.add('ans-wrong', 'shake-err');
+          else if(isTimeout) timerWrap.classList.add('shake-err');
+      }
+
+      setTimeout(() => {
+          document.getElementById('gModal').classList.remove('on');
+          arenaEl.classList.add('aiming'); 
+          aimCursor.style.display = 'block'; 
+          
+          if(isCorrect) { scores[curTeam] += Number(q.pts || 10); }
+          curTeam = (curTeam + 1) % teamsCount;
+          drawTeams(); onDone();
+      }, 1200);
+    }
+  }
+
+  if(!isEdit && gCfg.start.enabled && gCfg.start.text) {
+    arenaEl.classList.remove('aiming'); aimCursor.style.display = 'none';
+    const sCard = document.getElementById('gStartCard');
+    document.getElementById('gStartScreen').classList.add('on');
+    document.getElementById('gStartTitle').innerText = gCfg.title;
+    document.getElementById('gStartTitle').style.fontFamily = gCfg.titleFont || 'Roboto';
+    document.getElementById('gStartTitle').style.fontSize = (gCfg.titleSize || 24) + 'px';
+    document.getElementById('gStartTitle').style.color = gCfg.titleColor || '#ffffff';
+    document.getElementById('gStartText').innerText = gCfg.start.text;
+    
+    applyLatex(document.getElementById('gStartScreen'));
+    
+    sCard.style.borderColor = gCfg.start.color;
+    if(gCfg.start.neon) sCard.style.boxShadow = `0 0 25px ${gCfg.start.color}, inset 0 0 10px ${gCfg.start.color}`;
+    
+    document.getElementById('gBtnPlay').onclick = () => { 
+      try{ AudioSys.init(); }catch(e){} 
+      document.getElementById('gStartScreen').classList.remove('on'); 
+      arenaEl.classList.add('aiming'); 
+      aimCursor.style.display = 'block';
+    };
+  } else if (!isEdit) {
+    arenaEl.classList.add('aiming');
+    aimCursor.style.display = 'block'; 
+  }
+
+  function showEndScreen() {
+    arenaEl.classList.remove('aiming'); aimCursor.style.display = 'none';
+    document.getElementById('gEndScreen').classList.add('on');
+    document.getElementById('gEndTitle').style.fontFamily = gCfg.titleFont || 'Roboto';
+    document.getElementById('gEndTitle').style.fontSize = (gCfg.titleSize || 24) + 'px';
+    document.getElementById('gEndTitle').style.color = gCfg.titleColor || '#ffffff';
+    document.getElementById('gEndText').innerText = gCfg.end.text;
+    const tNames = Array.from(document.querySelectorAll('.teamInput')).map(i => i.value);
+    document.getElementById('gEndStats').innerHTML = scores.map((s,i) => `
+      <div class="resultRow">
+        <span>${tNames[i] || 'Команда '+(i+1)}</span>
+        <span style="color:var(--neon-orange-base)">${s}</span>
+      </div>
+    `).join('');
+    
+    applyLatex(document.getElementById('gEndScreen'));
+    
+    document.getElementById('gBtnRestart').onclick = () => location.reload();
+  }
+  
+  document.getElementById('btnReset').onclick = () => location.reload();
+}
+
+/* --- Запуск с правильным декодированием Хеша --- */
+const getParamMain = (k) => {
+    let p = new URLSearchParams(location.search).get(k);
+    if(!p && location.hash) {
+      let hashStr = location.hash.substring(1); 
+      try { hashStr = decodeURIComponent(hashStr); } catch(e){}
+      p = new URLSearchParams(hashStr).get(k);
+    }
+    return p;
+};
+
+if(getParamMain('game') && getParamMain('edit') !== '1') bootGame();
+else { bootEditor(); if(getParamMain('edit') === '1') bootGame(); }
+</script>
+</body>
+</html>
