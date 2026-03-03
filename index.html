@@ -174,7 +174,6 @@
     @keyframes floatSparkle { 0% { transform: translateY(0) scale(1); opacity: 0.4; } 100% { transform: translateY(-20px) scale(1.5); opacity: 0.9; box-shadow: 0 0 15px var(--team-color); } }
 
     /* --- УСКОРЕНИЕ ДЛЯ РЕЖИМА РИСОВАНИЯ --- */
-    /* Отключаем тяжелые анимации и фильтры, чтобы холст летал без зависаний! */
     .game-modal-content.draw-mode::before {
         animation: none !important;
         opacity: 0.2 !important;
@@ -245,11 +244,10 @@
     }
     #gCanvas { 
       width: 100%; height: 100%; touch-action: none; cursor: crosshair; 
-      /* Аппаратное ускорение для максимальной плавности! */
       transform: translateZ(0); 
     }
 
-    /* ПАНЕЛЬ ИНСТРУМЕНТОВ ЧЕРНОВИКА (ЗУМ СТАЙЛ) */
+    /* ПАНЕЛЬ ИНСТРУМЕНТОВ ЧЕРНОВИКА */
     .draw-tools-panel {
         position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
         background: rgba(255, 255, 255, 0.95); padding: 6px 14px; border-radius: 30px;
@@ -476,7 +474,7 @@
         </div>
         
         <div style="background: rgba(217, 154, 41, 0.1); padding: 10px; border-radius: 12px; border: 1px solid var(--neon-orange-base); margin-bottom: 12px;">
-          <div style="font-size: 12px; color: var(--neon-orange-base); font-weight: bold; margin-bottom: 8px;">🎨 Управление настройками вопросов (Шрифт, Таймер, Мишень):</div>
+          <div style="font-size: 12px; color: var(--neon-orange-base); font-weight: bold; margin-bottom: 8px;">🎨 Управление настройками вопросов (Тип, Шрифт, Таймер, Мишень):</div>
           <div style="display:flex; align-items:center; gap:8px; flex-wrap: wrap;">
             <select id="newQTemplate" style="flex:1; min-width: 160px; border-color:var(--neon-orange-base); padding: 6px; font-size: 13px; background: rgba(0,0,0,0.5);">
               <option value="-1" data-i18n="oDefaultSettings">Стандартные (по умолчанию)</option>
@@ -485,7 +483,7 @@
           </div>
           <div style="font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 8px; line-height: 1.3;">
             * Выбранный шаблон автоматически применяется ко всем <b>новым</b> и импортируемым вопросам.<br>
-            * Кнопка «Применить ко всем» обновляет настройки у <b>уже существующих</b> вопросов (ваши тексты и ответы не изменятся!).
+            * Кнопка «Применить ко всем» обновляет настройки у <b>уже существующих</b> вопросов (ваши тексты не изменятся!).
           </div>
         </div>
 
@@ -1240,21 +1238,22 @@ function updateEditor() {
   }, 400);
 }
 
+// КНОПКА ПРИМЕНИТЬ КО ВСЕМ СУЩЕСТВУЮЩИМ (с учетом типа вопроса)
 window.applyTemplateToAll = () => {
     if(cfg.questions.length === 0) return;
     const tplIdx = parseInt(document.getElementById('newQTemplate').value);
     
-    let confirmMsg = "Применить настройки (шрифт, таймер, мишень, очки) ко всем вопросам?\nТексты и ответы НЕ изменятся.";
-    if (lang === 'en') confirmMsg = "Apply settings (font, timer, target, points) to all questions? Texts and answers will remain unchanged.";
-    if (lang === 'de') confirmMsg = "Einstellungen (Schriftart, Timer, Ziel, Punkte) auf alle Fragen anwenden? Texte und Antworten bleiben unverändert.";
-    if (lang === 'zh') confirmMsg = "将设置（字体，计时器，目标，分数）应用于所有问题？ 文本和答案将保持不变。";
+    let confirmMsg = "Применить настройки (Тип вопроса, шрифт, таймер, мишень, очки) ко всем вопросам?\nТексты изменены не будут.";
+    if (lang === 'en') confirmMsg = "Apply settings (type, font, timer, target, points) to all questions? Texts will remain unchanged.";
+    if (lang === 'de') confirmMsg = "Einstellungen (Typ, Schriftart, Timer, Ziel, Punkte) auf alle Fragen anwenden? Texte bleiben unverändert.";
+    if (lang === 'zh') confirmMsg = "将设置（类型，字体，计时器，目标，分数）应用于所有问题？ 文本将保持不变。";
     
     if(!confirm(confirmMsg)) return;
     
-    let baseQ = { pts: 10, timer: false, sec: 30, font: "Roboto", size: 20, tgt: "default", tu: "" };
+    let baseQ = { type: "choice", pts: 10, timer: false, sec: 30, font: "Roboto", size: 20, tgt: "default", tu: "" };
     if (tplIdx >= 0 && cfg.questions[tplIdx]) {
         const tq = cfg.questions[tplIdx];
-        baseQ = { pts: tq.pts, timer: tq.timer, sec: tq.sec, font: tq.font, size: tq.size, tgt: tq.tgt, tu: tq.tu };
+        baseQ = { type: tq.type || "choice", pts: tq.pts, timer: tq.timer, sec: tq.sec, font: tq.font, size: tq.size, tgt: tq.tgt, tu: tq.tu };
     }
     
     cfg.questions.forEach(q => {
@@ -1265,6 +1264,22 @@ window.applyTemplateToAll = () => {
         q.size = baseQ.size;
         q.tgt = baseQ.tgt;
         q.tu = baseQ.tu;
+        
+        // Умная смена типа с сохранением ответа
+        if (q.type !== baseQ.type) {
+            q.type = baseQ.type;
+            if (q.type === 'input') {
+                if (!q.acc || q.acc.length === 0 || q.acc[0] === "Ответ" || q.acc[0] === "") {
+                    let correctOpt = q.opts ? q.opts.find(o => o.c) : null;
+                    q.acc = correctOpt && correctOpt.t ? [correctOpt.t] : ["Ответ"];
+                }
+            } else {
+                if (!q.opts || q.opts.length === 0 || (q.opts.length === 2 && q.opts[0].t === "" && q.opts[1].t === "")) {
+                    let mainAcc = q.acc && q.acc[0] && q.acc[0] !== "Ответ" ? q.acc[0] : "";
+                    q.opts = [{t: mainAcc, c: true}, {t: "", c: false}];
+                }
+            }
+        }
     });
     
     updateEditor();
@@ -1355,11 +1370,11 @@ window.processImport = () => {
     const mode = document.getElementById('importMode').value;
     const tplIdx = parseInt(document.getElementById('newQTemplate').value);
     
-    let baseQ = { pts: 10, timer: false, sec: 30, font: "Roboto", size: 20, tgt: "default", tu: "" };
+    let baseQ = { type: 'choice', pts: 10, timer: false, sec: 30, font: "Roboto", size: 20, tgt: "default", tu: "" };
     if (tplIdx >= 0 && cfg.questions[tplIdx]) {
         const tq = cfg.questions[tplIdx];
         baseQ = { 
-            pts: tq.pts, timer: tq.timer, sec: tq.sec, 
+            type: tq.type || 'choice', pts: tq.pts, timer: tq.timer, sec: tq.sec, 
             font: tq.font, size: tq.size, tgt: tq.tgt, tu: tq.tu
         };
     }
@@ -1371,7 +1386,7 @@ window.processImport = () => {
             if (trimmed) {
                 let startX = 15 + ((cfg.questions.length) % 5) * 16;
                 let startY = 30 + Math.floor((cfg.questions.length) / 5) * 20;
-                cfg.questions.push({ ...baseQ, type: 'input', text: trimmed, opts: [], acc: ['Ответ'], x: startX, y: startY });
+                cfg.questions.push({ ...baseQ, type: 'input', text: trimmed, opts: [{t:"", c:true},{t:"", c:false}], acc: ['Ответ'], x: startX, y: startY });
             }
         });
     } else {
@@ -1418,9 +1433,21 @@ window.processImport = () => {
                 }
                 
                 opts = opts.map(o => ({ c: o.c, t: o.t }));
-                cfg.questions.push({ ...baseQ, type: 'choice', text: qText.join('\n'), opts: opts, acc: [''], x: startX, y: startY });
+                // Если шаблон предписывает инпут, пытаемся перенести правильный ответ
+                if(baseQ.type === 'input') {
+                   let cOpt = opts.find(o => o.c);
+                   cfg.questions.push({ ...baseQ, type: 'input', text: qText.join('\n'), opts: [], acc: cOpt ? [cOpt.t] : ['Ответ'], x: startX, y: startY });
+                } else {
+                   cfg.questions.push({ ...baseQ, type: 'choice', text: qText.join('\n'), opts: opts, acc: [''], x: startX, y: startY });
+                }
+                
             } else if (qText.length > 0) {
-                cfg.questions.push({ ...baseQ, type: 'input', text: qText.join('\n'), opts: [], acc: autoAnswer ? [autoAnswer] : ['Ответ'], x: startX, y: startY });
+                // Если вариантов нет, но шаблон требует "выбор", создаем пустые варианты
+                if(baseQ.type === 'choice') {
+                   cfg.questions.push({ ...baseQ, type: 'choice', text: qText.join('\n'), opts: [{t: autoAnswer || 'Ответ', c:true}, {t: '', c:false}], acc: [''], x: startX, y: startY });
+                } else {
+                   cfg.questions.push({ ...baseQ, type: 'input', text: qText.join('\n'), opts: [], acc: autoAnswer ? [autoAnswer] : ['Ответ'], x: startX, y: startY });
+                }
             }
         });
     }
@@ -1439,6 +1466,7 @@ function openMod(idx = null) {
       const tplIdx = parseInt(document.getElementById('newQTemplate').value);
       if (tplIdx >= 0 && cfg.questions[tplIdx]) {
           const tq = cfg.questions[tplIdx];
+          defQ.type = tq.type || "choice";
           defQ.pts = tq.pts; defQ.font = tq.font; defQ.size = tq.size; defQ.timer = tq.timer; defQ.sec = tq.sec; defQ.tgt = tq.tgt; defQ.tu = tq.tu;
       }
       defQ.x = 15 + ((cfg.questions.length) % 5) * 16;
@@ -1639,6 +1667,21 @@ function bootGame() {
       setTimeout(() => p.remove(), 600);
     }
   }
+
+  arenaEl.onclick = (e) => {
+    if(isEdit || !arenaEl.classList.contains('aiming')) return;
+    if(e.target.closest('.target') || e.target.closest('.hud') || e.target.closest('.teams') || e.target.closest('.game-modal') || e.target.closest('.screen')) return;
+    
+    try { AudioSys.play(gCfg.sound, gCfg.vol); } catch(err){}
+    
+    if(gCfg.penalty && gCfg.penalty.enabled) {
+      const p = Number(gCfg.penalty.points || 0);
+      scores[curTeam] -= p;
+      drawTeams();
+      const r = arenaEl.getBoundingClientRect();
+      popFloatText(e.clientX - r.left, e.clientY - r.top, `-${p}`, '#ff5b6b');
+    }
+  };
 
   const tgtDiv = document.getElementById('gTargets');
   tgtDiv.className = isEdit ? "targets edit-mode" : "targets";
