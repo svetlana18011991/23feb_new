@@ -57,7 +57,6 @@
     }
 
     /* --- EDITOR UI --- */
-    /* Заменено 100vh на 100% */
     .app { display: grid; grid-template-columns: 480px 1fr; gap: 14px; padding: 14px; height: 100%; max-width: 1600px; margin: 0 auto; }
     @media (max-width: 1020px) { .app { grid-template-columns: 1fr; } }
     
@@ -97,7 +96,6 @@
     
     .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 9999; }
     .modal-backdrop.show { display: flex; }
-    /* Заменено 90vh на 95% */
     .modal { width: min(800px, 95%); background: #16110c; border: 1px solid var(--neon-orange-base); border-radius: 20px; box-shadow: var(--neon-box-shadow); max-height: 95%; display: flex; flex-direction: column; }
     .modal-head { padding: 14px 20px; border-bottom: 1px solid rgba(217, 154, 41, 0.3); display: flex; justify-content: space-between; align-items: center; font-weight: 900; font-size: 18px; }
     .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
@@ -207,7 +205,6 @@
       width: min(850px, 100%);
       box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 50px var(--team-color-alpha, rgba(217, 154, 41, 0.15));
       position: relative;
-      /* Заменено 90vh на 95% */
       max-height: 95%;
       overflow-y: auto;
       animation: modalPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
@@ -286,7 +283,6 @@
 
     #gQText { color: #fff; margin-top: 10px; margin-bottom: 30px; text-align: center; line-height: 1.4; text-shadow: 0 4px 15px rgba(0,0,0,0.8); word-wrap: break-word; position: relative; z-index: 10; }
     #gQImgWrap { text-align: center; margin-bottom: 30px; position: relative; z-index: 10; }
-    /* Заменено 40vh на 250px */
     #gQImgWrap img { max-width: 100%; max-height: 250px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.1); }
 
     #gAnswers { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; position: relative; z-index: 10; }
@@ -333,7 +329,6 @@
       flex-grow: 1;
       width: auto;
       margin-top: 0;
-      /* Заменено 60vh на 400px */
       min-height: 400px;
       animation: drawAreaFade 0.4s ease forwards;
     }
@@ -346,8 +341,9 @@
     }
 
     #gCanvas { 
-      width: 100%; height: 100%; touch-action: none; cursor: crosshair; 
-      transform: translateZ(0); 
+      width: 100%; height: 100%; 
+      touch-action: none; /* ОЧЕНЬ ВАЖНО: блокирует скролл при рисовании */
+      cursor: crosshair; 
     }
 
     /* ПАНЕЛЬ ИНСТРУМЕНТОВ ЧЕРНОВИКА */
@@ -1567,7 +1563,6 @@ window.processImport = () => {
 function openMod(idx = null) {
   editIdx = idx;
   
-  // Если создаем новый вопрос, берем настройки из шаблона
   let defQ = { type: "choice", text: "", pts: 10, font: "Roboto", size: 20, timer: false, sec: 30, img: "", opts: [{t:"", c:true}, {t:"", c:false}], acc: ["Ответ"], tgt: "default", tu: "" };
   if (idx === null) {
       const tplIdx = parseInt(document.getElementById('newQTemplate').value);
@@ -1886,11 +1881,11 @@ function bootGame() {
     tgtDiv.appendChild(el);
   });
 
-  // Логика холста (СУПЕР-ПЛАВНЫЙ ЧЕРНОВИК)
+  // Логика холста (ИДЕАЛЬНО ПЛАВНЫЙ И БЫСТРЫЙ ЧЕРНОВИК)
   const drawArea = document.getElementById('gDrawArea');
   const canvas = document.getElementById('gCanvas');
   
-  const ctxCanvas = canvas.getContext('2d', { desynchronized: true });
+  const ctxCanvas = canvas.getContext('2d');
   
   const btnPen = document.getElementById('gDrawPen');
   const btnEraser = document.getElementById('gDrawEraser');
@@ -1903,12 +1898,11 @@ function bootGame() {
   let currentSize = 4; 
   let lastPos = {x: 0, y: 0};
   let canvasRect = null; 
-  let dpr = 1;
 
   function resizeCanvas() {
       if (!drawArea.offsetWidth) return;
       const rect = drawArea.getBoundingClientRect();
-      dpr = window.devicePixelRatio || 1;
+      const dpr = window.devicePixelRatio || 1;
       
       const newW = Math.round(rect.width * dpr);
       const newH = Math.round(rect.height * dpr);
@@ -1936,7 +1930,7 @@ function bootGame() {
       
       canvas.style.width = rect.width + 'px';
       canvas.style.height = rect.height + 'px';
-      canvasRect = rect; 
+      canvasRect = canvas.getBoundingClientRect(); 
   }
 
   const drawResizeObs = new ResizeObserver(() => {
@@ -1984,6 +1978,8 @@ function bootGame() {
       ctxCanvas.lineCap = 'round';
       ctxCanvas.lineJoin = 'round';
       ctxCanvas.lineWidth = currentTool === 'eraser' ? currentSize * 4 : currentSize;
+      
+      // Ластик стирает пиксели, открывая фоновую сетку тетради
       ctxCanvas.strokeStyle = currentTool === 'eraser' ? 'rgba(0,0,0,1)' : currentColor;
       ctxCanvas.globalCompositeOperation = currentTool === 'eraser' ? 'destination-out' : 'source-over';
       
@@ -2189,8 +2185,19 @@ function bootGame() {
   document.getElementById('btnReset').onclick = () => location.reload();
 }
 
-if(getParamSafe('game') && getParamSafe('edit') !== '1') bootGame();
-else { bootEditor(); if(getParamSafe('edit') === '1') bootGame(); }
+/* --- Запуск с правильным декодированием Хеша --- */
+const getParamMain = (k) => {
+    let p = new URLSearchParams(location.search).get(k);
+    if(!p && location.hash) {
+      let hashStr = location.hash.substring(1); 
+      try { hashStr = decodeURIComponent(hashStr); } catch(e){}
+      p = new URLSearchParams(hashStr).get(k);
+    }
+    return p;
+};
+
+if(getParamMain('game') && getParamMain('edit') !== '1') bootGame();
+else { bootEditor(); if(getParamMain('edit') === '1') bootGame(); }
 </script>
 </body>
 </html>
