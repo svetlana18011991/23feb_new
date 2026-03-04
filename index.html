@@ -14,17 +14,6 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 
   <style>
-    /* ЖЕСТКАЯ ФИКСАЦИЯ РАЗМЕРОВ ДЛЯ ЗАЩИТЫ ОТ БАГОВ GENIALLY */
-    html, body { 
-      height: 100%; 
-      width: 100%;
-      margin: 0; 
-      background: #0a0f15; 
-      color: var(--text); 
-      overflow: hidden; 
-      position: relative; 
-    }
-
     :root {
       --text: #eaf0ff; --muted: #a9b6e6;
       --neon-orange-base: #d99a29; 
@@ -34,6 +23,23 @@
     }
     
     * { box-sizing: border-box; font-family: 'Roboto', system-ui, sans-serif; }
+    
+    /* ЖЕСТКАЯ ФИКСАЦИЯ РАЗМЕРОВ ДЛЯ ЗАЩИТЫ ОТ БАГОВ GENIALLY */
+    html, body { 
+      width: 100%; 
+      height: 100%; 
+      margin: 0; 
+      padding: 0;
+      background: #0a0f15; 
+      color: var(--text); 
+      overflow: hidden; 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      right: 0; 
+      bottom: 0;
+      touch-action: none;
+    }
     
     body.editor-mode { background: radial-gradient(1100px 700px at 12% 18%, rgba(217, 154, 41, 0.12) 0%, rgba(5,8,22,0) 58%), #050816; }
     body.game-mode { background: #000; }
@@ -51,6 +57,7 @@
     }
 
     /* --- EDITOR UI --- */
+    /* Заменено 100vh на 100% */
     .app { display: grid; grid-template-columns: 480px 1fr; gap: 14px; padding: 14px; height: 100%; max-width: 1600px; margin: 0 auto; }
     @media (max-width: 1020px) { .app { grid-template-columns: 1fr; } }
     
@@ -90,6 +97,7 @@
     
     .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 9999; }
     .modal-backdrop.show { display: flex; }
+    /* Заменено 90vh на 95% */
     .modal { width: min(800px, 95%); background: #16110c; border: 1px solid var(--neon-orange-base); border-radius: 20px; box-shadow: var(--neon-box-shadow); max-height: 95%; display: flex; flex-direction: column; }
     .modal-head { padding: 14px 20px; border-bottom: 1px solid rgba(217, 154, 41, 0.3); display: flex; justify-content: space-between; align-items: center; font-weight: 900; font-size: 18px; }
     .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
@@ -199,6 +207,7 @@
       width: min(850px, 100%);
       box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 50px var(--team-color-alpha, rgba(217, 154, 41, 0.15));
       position: relative;
+      /* Заменено 90vh на 95% */
       max-height: 95%;
       overflow-y: auto;
       animation: modalPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
@@ -277,6 +286,7 @@
 
     #gQText { color: #fff; margin-top: 10px; margin-bottom: 30px; text-align: center; line-height: 1.4; text-shadow: 0 4px 15px rgba(0,0,0,0.8); word-wrap: break-word; position: relative; z-index: 10; }
     #gQImgWrap { text-align: center; margin-bottom: 30px; position: relative; z-index: 10; }
+    /* Заменено 40vh на 250px */
     #gQImgWrap img { max-width: 100%; max-height: 250px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.1); }
 
     #gAnswers { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; position: relative; z-index: 10; }
@@ -323,6 +333,7 @@
       flex-grow: 1;
       width: auto;
       margin-top: 0;
+      /* Заменено 60vh на 400px */
       min-height: 400px;
       animation: drawAreaFade 0.4s ease forwards;
     }
@@ -1333,6 +1344,7 @@ function updateEditor() {
   }, 400);
 }
 
+// КНОПКА ПРИМЕНИТЬ КО ВСЕМ СУЩЕСТВУЮЩИМ (с учетом типа вопроса)
 window.applyTemplateToAll = () => {
     if(cfg.questions.length === 0) return;
     const tplIdx = parseInt(document.getElementById('newQTemplate').value);
@@ -1359,6 +1371,7 @@ window.applyTemplateToAll = () => {
         q.tgt = baseQ.tgt;
         q.tu = baseQ.tu;
         
+        // Умная смена типа с сохранением ответа
         if (q.type !== baseQ.type) {
             q.type = baseQ.type;
             if (q.type === 'input') {
