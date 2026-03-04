@@ -14,6 +14,17 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 
   <style>
+    /* ЖЕСТКАЯ ФИКСАЦИЯ РАЗМЕРОВ ДЛЯ ЗАЩИТЫ ОТ БАГОВ GENIALLY */
+    html, body { 
+      height: 100%; 
+      width: 100%;
+      margin: 0; 
+      background: #0a0f15; 
+      color: var(--text); 
+      overflow: hidden; 
+      position: relative; 
+    }
+
     :root {
       --text: #eaf0ff; --muted: #a9b6e6;
       --neon-orange-base: #d99a29; 
@@ -23,7 +34,6 @@
     }
     
     * { box-sizing: border-box; font-family: 'Roboto', system-ui, sans-serif; }
-    html, body { height: 100%; margin: 0; background: #0a0f15; color: var(--text); overflow: hidden; }
     
     body.editor-mode { background: radial-gradient(1100px 700px at 12% 18%, rgba(217, 154, 41, 0.12) 0%, rgba(5,8,22,0) 58%), #050816; }
     body.game-mode { background: #000; }
@@ -41,7 +51,7 @@
     }
 
     /* --- EDITOR UI --- */
-    .app { display: grid; grid-template-columns: 480px 1fr; gap: 14px; padding: 14px; height: 100vh; max-width: 1600px; margin: 0 auto; }
+    .app { display: grid; grid-template-columns: 480px 1fr; gap: 14px; padding: 14px; height: 100%; max-width: 1600px; margin: 0 auto; }
     @media (max-width: 1020px) { .app { grid-template-columns: 1fr; } }
     
     .panel { background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); border: 1px solid rgba(217, 154, 41, 0.6); border-radius: 22px; box-shadow: var(--neon-box-shadow); backdrop-filter: blur(10px); display: flex; flex-direction: column; overflow: hidden; }
@@ -80,7 +90,7 @@
     
     .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 9999; }
     .modal-backdrop.show { display: flex; }
-    .modal { width: min(800px, 95%); background: #16110c; border: 1px solid var(--neon-orange-base); border-radius: 20px; box-shadow: var(--neon-box-shadow); max-height: 90vh; display: flex; flex-direction: column; }
+    .modal { width: min(800px, 95%); background: #16110c; border: 1px solid var(--neon-orange-base); border-radius: 20px; box-shadow: var(--neon-box-shadow); max-height: 95%; display: flex; flex-direction: column; }
     .modal-head { padding: 14px 20px; border-bottom: 1px solid rgba(217, 154, 41, 0.3); display: flex; justify-content: space-between; align-items: center; font-weight: 900; font-size: 18px; }
     .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
     .modal-foot { padding: 14px 20px; border-top: 1px solid rgba(217, 154, 41, 0.3); display: flex; justify-content: flex-end; gap: 10px; }
@@ -104,9 +114,19 @@
     
     .hud { position: absolute; top: 14px; left: 14px; right: 14px; pointer-events: none; z-index: 10; display:flex; justify-content:space-between; align-items:center; }
     .gameTitle { font-weight: 900; text-shadow: 0 4px 15px #000; color: #fff; }
+    
     .hud-right { display:flex; align-items:center; gap:15px; pointer-events:auto; }
 
-    /* БРЕНДИНГ ВНИЗУ ПО ЦЕНТРУ С ПУЛЬСАЦИЕЙ */
+    /* БРЕНДИНГ НА ЭКРАНАХ */
+    .screen-brand { 
+        display:flex; flex-direction:column; align-items:center; margin-bottom:20px; 
+        text-decoration:none; transition:0.3s; animation: pulseSimple 3s infinite ease-in-out;
+    }
+    .screen-brand:hover { animation:none; transform:scale(1.05); filter: drop-shadow(0 0 15px rgba(217, 154, 41, 0.8)); }
+    .screen-brand img { width:80px; height:80px; border-radius:50%; object-fit:cover; box-shadow: 0 0 25px rgba(217,154,41,0.5); border: 2px solid rgba(217,154,41,0.3); }
+    .screen-brand .brand-name { color:var(--neon-orange-base); font-size:15px; font-weight:900; margin-top:12px; letter-spacing:1px; text-transform:uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif;}
+
+    /* АНИМАЦИЯ И СТИЛИ ДЛЯ ЛОГОТИПА ВНИЗУ */
     .bottom-brand-link {
         position: absolute; 
         bottom: 12px; 
@@ -127,15 +147,6 @@
         opacity: 1;
         filter: drop-shadow(0 0 15px rgba(217, 154, 41, 0.9));
     }
-
-    /* БРЕНДИНГ НА ЭКРАНАХ */
-    .screen-brand { 
-        display:flex; flex-direction:column; align-items:center; margin-bottom:20px; 
-        text-decoration:none; transition:0.3s; animation: pulseSimple 3s infinite ease-in-out;
-    }
-    .screen-brand:hover { animation:none; transform:scale(1.05); filter: drop-shadow(0 0 15px rgba(217, 154, 41, 0.8)); }
-    .screen-brand img { width:80px; height:80px; border-radius:50%; object-fit:cover; box-shadow: 0 0 25px rgba(217,154,41,0.5); border: 2px solid rgba(217,154,41,0.3); }
-    .screen-brand .brand-name { color:var(--neon-orange-base); font-size:15px; font-weight:900; margin-top:12px; letter-spacing:1px; text-transform:uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif;}
 
     .teams { display: grid; gap: 10px; margin-top: 54px; padding:0 14px; pointer-events: auto; position:relative; z-index:10; cursor: default; }
     .teamCard { background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 10px; backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
@@ -188,7 +199,7 @@
       width: min(850px, 100%);
       box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 50px var(--team-color-alpha, rgba(217, 154, 41, 0.15));
       position: relative;
-      max-height: 90vh;
+      max-height: 95%;
       overflow-y: auto;
       animation: modalPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
       --team-color: var(--neon-orange-base); 
@@ -266,7 +277,7 @@
 
     #gQText { color: #fff; margin-top: 10px; margin-bottom: 30px; text-align: center; line-height: 1.4; text-shadow: 0 4px 15px rgba(0,0,0,0.8); word-wrap: break-word; position: relative; z-index: 10; }
     #gQImgWrap { text-align: center; margin-bottom: 30px; position: relative; z-index: 10; }
-    #gQImgWrap img { max-width: 100%; max-height: 40vh; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.1); }
+    #gQImgWrap img { max-width: 100%; max-height: 250px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.1); }
 
     #gAnswers { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; position: relative; z-index: 10; }
     
@@ -298,7 +309,7 @@
 
     /* Область черновика */
     #gDrawArea {
-      display: none; width: 100%; height: 50vh; min-height: 300px; margin-top: 10px;
+      display: none; width: 100%; height: 100%; min-height: 300px;
       border-radius: 16px; border: 3px solid var(--team-color);
       background-color: #fdfdfc;
       background-image: linear-gradient(#b0d4e3 1px, transparent 1px), linear-gradient(90deg, #b0d4e3 1px, transparent 1px);
@@ -312,7 +323,7 @@
       flex-grow: 1;
       width: auto;
       margin-top: 0;
-      min-height: 60vh;
+      min-height: 400px;
       animation: drawAreaFade 0.4s ease forwards;
     }
     @keyframes drawAreaFade { 0% {opacity:0; transform:scale(0.95);} 100% {opacity:1; transform:scale(1);} }
@@ -320,7 +331,7 @@
     @media (max-width: 1000px) {
        .game-modal-content.draw-mode { flex-direction: column; width: 100% !important; }
        .game-modal-content.draw-mode #gQAWrapper { width: 100%; }
-       .game-modal-content.draw-mode #gDrawArea { min-height: 50vh; margin-top: 15px; }
+       .game-modal-content.draw-mode #gDrawArea { min-height: 300px; margin-top: 15px; }
     }
 
     #gCanvas { 
@@ -1322,7 +1333,6 @@ function updateEditor() {
   }, 400);
 }
 
-// КНОПКА ПРИМЕНИТЬ КО ВСЕМ СУЩЕСТВУЮЩИМ (с учетом типа вопроса)
 window.applyTemplateToAll = () => {
     if(cfg.questions.length === 0) return;
     const tplIdx = parseInt(document.getElementById('newQTemplate').value);
@@ -1349,7 +1359,6 @@ window.applyTemplateToAll = () => {
         q.tgt = baseQ.tgt;
         q.tu = baseQ.tu;
         
-        // Умная смена типа с сохранением ответа
         if (q.type !== baseQ.type) {
             q.type = baseQ.type;
             if (q.type === 'input') {
@@ -2025,10 +2034,7 @@ function bootGame() {
     const modalContent = modal.querySelector('.game-modal-content');
     modalContent.classList.remove('draw-mode');
     if(btnPen) btnPen.click(); 
-    
-    if(canvasRect) {
-        ctxCanvas.clearRect(0, 0, canvas.width, canvas.height);
-    }
+    clearCanvas();
 
     modalContent.style.setProperty('--team-color', tCol);
     
