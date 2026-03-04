@@ -1563,6 +1563,7 @@ window.processImport = () => {
 function openMod(idx = null) {
   editIdx = idx;
   
+  // Если создаем новый вопрос, берем настройки из шаблона
   let defQ = { type: "choice", text: "", pts: 10, font: "Roboto", size: 20, timer: false, sec: 30, img: "", opts: [{t:"", c:true}, {t:"", c:false}], acc: ["Ответ"], tgt: "default", tu: "" };
   if (idx === null) {
       const tplIdx = parseInt(document.getElementById('newQTemplate').value);
@@ -1881,10 +1882,11 @@ function bootGame() {
     tgtDiv.appendChild(el);
   });
 
-  // Логика холста (ИДЕАЛЬНО ПЛАВНЫЙ И БЫСТРЫЙ ЧЕРНОВИК)
+  // Логика холста (МАТЕМАТИЧЕСКИ ПЛАВНЫЙ ЧЕРНОВИК)
   const drawArea = document.getElementById('gDrawArea');
   const canvas = document.getElementById('gCanvas');
   
+  // Отключили desynchronized для предотвращения мерцания в iframe
   const ctxCanvas = canvas.getContext('2d');
   
   const btnPen = document.getElementById('gDrawPen');
@@ -1896,8 +1898,8 @@ function bootGame() {
   let currentTool = 'pen'; 
   let currentColor = '#0f4c81'; 
   let currentSize = 4; 
-  let lastPos = {x: 0, y: 0};
   let canvasRect = null; 
+  let pts = []; // Массив точек для кривых Безье
 
   function resizeCanvas() {
       if (!drawArea.offsetWidth) return;
@@ -1971,41 +1973,59 @@ function bootGame() {
       isDrawing = true;
       
       canvas.setPointerCapture(e.pointerId);
-      
       canvasRect = canvas.getBoundingClientRect();
-      lastPos = getPointerPos(e);
       
       ctxCanvas.lineCap = 'round';
       ctxCanvas.lineJoin = 'round';
       ctxCanvas.lineWidth = currentTool === 'eraser' ? currentSize * 4 : currentSize;
-      
-      // Ластик стирает пиксели, открывая фоновую сетку тетради
       ctxCanvas.strokeStyle = currentTool === 'eraser' ? 'rgba(0,0,0,1)' : currentColor;
+      ctxCanvas.fillStyle = ctxCanvas.strokeStyle;
       ctxCanvas.globalCompositeOperation = currentTool === 'eraser' ? 'destination-out' : 'source-over';
       
+      // Начинаем новый массив точек для сглаживания
+      pts = [getPointerPos(e)];
+      
+      // Рисуем точку при старте
       ctxCanvas.beginPath();
-      ctxCanvas.moveTo(lastPos.x, lastPos.y);
-      ctxCanvas.lineTo(lastPos.x, lastPos.y);
-      ctxCanvas.stroke();
+      ctxCanvas.arc(pts[0].x, pts[0].y, ctxCanvas.lineWidth / 2, 0, Math.PI * 2);
+      ctxCanvas.fill();
   };
 
   const draw = (e) => {
       if (!isDrawing) return;
       if(e.cancelable) e.preventDefault(); 
       
-      const pos = getPointerPos(e);
+      // Вытягиваем пропущенные события для идеальной плавности
+      const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
       
-      ctxCanvas.beginPath();
-      ctxCanvas.moveTo(lastPos.x, lastPos.y);
-      ctxCanvas.lineTo(pos.x, pos.y);
-      ctxCanvas.stroke();
-      
-      lastPos = pos;
+      for (let ev of events) {
+          pts.push(getPointerPos(ev));
+          
+          ctxCanvas.beginPath();
+          if (pts.length >= 3) {
+              let p0 = pts[pts.length - 3];
+              let p1 = pts[pts.length - 2];
+              let p2 = pts[pts.length - 1];
+              
+              // Вычисляем середины отрезков для кривой Безье
+              let mid1 = { x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2 };
+              let mid2 = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+              
+              ctxCanvas.moveTo(mid1.x, mid1.y);
+              ctxCanvas.quadraticCurveTo(p1.x, p1.y, mid2.x, mid2.y);
+              ctxCanvas.stroke();
+          } else if (pts.length === 2) {
+              ctxCanvas.moveTo(pts[0].x, pts[0].y);
+              ctxCanvas.lineTo(pts[1].x, pts[1].y);
+              ctxCanvas.stroke();
+          }
+      }
   };
 
   const stopDraw = (e) => {
       if (isDrawing) {
           isDrawing = false;
+          pts = []; // Очищаем массив точек
           try { canvas.releasePointerCapture(e.pointerId); } catch(err){}
       }
   };
@@ -2185,19 +2205,8 @@ function bootGame() {
   document.getElementById('btnReset').onclick = () => location.reload();
 }
 
-/* --- Запуск с правильным декодированием Хеша --- */
-const getParamMain = (k) => {
-    let p = new URLSearchParams(location.search).get(k);
-    if(!p && location.hash) {
-      let hashStr = location.hash.substring(1); 
-      try { hashStr = decodeURIComponent(hashStr); } catch(e){}
-      p = new URLSearchParams(hashStr).get(k);
-    }
-    return p;
-};
-
-if(getParamMain('game') && getParamMain('edit') !== '1') bootGame();
-else { bootEditor(); if(getParamMain('edit') === '1') bootGame(); }
+if(getParamSafe('game') && getParamSafe('edit') !== '1') bootGame();
+else { bootEditor(); if(getParamSafe('edit') === '1') bootGame(); }
 </script>
 </body>
 </html>
