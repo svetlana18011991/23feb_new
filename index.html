@@ -28,6 +28,18 @@
     body.editor-mode { background: radial-gradient(1100px 700px at 12% 18%, rgba(217, 154, 41, 0.12) 0%, rgba(5,8,22,0) 58%), #050816; }
     body.game-mode { background: #000; }
 
+    /* --- ПУЛЬСАЦИЯ ЛОГОТИПОВ --- */
+    @keyframes pulseSimple {
+        0% { transform: scale(1); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+        50% { transform: scale(1.03); filter: drop-shadow(0 0 10px rgba(217, 154, 41, 0.6)); }
+        100% { transform: scale(1); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+    }
+    @keyframes brandPulseBottom {
+        0% { transform: translateX(-50%) scale(1); opacity: 0.6; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8)); }
+        50% { transform: translateX(-50%) scale(1.05); opacity: 1; filter: drop-shadow(0 0 10px rgba(217, 154, 41, 0.6)); }
+        100% { transform: translateX(-50%) scale(1); opacity: 0.6; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8)); }
+    }
+
     /* --- EDITOR UI --- */
     .app { display: grid; grid-template-columns: 480px 1fr; gap: 14px; padding: 14px; height: 100vh; max-width: 1600px; margin: 0 auto; }
     @media (max-width: 1020px) { .app { grid-template-columns: 1fr; } }
@@ -73,8 +85,15 @@
     .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
     .modal-foot { padding: 14px 20px; border-top: 1px solid rgba(217, 154, 41, 0.3); display: flex; justify-content: flex-end; gap: 10px; }
     
-    .topBrand { display: flex; align-items: center; gap: 10px; }
-    .topBrand img { height: 42px; width: 42px; object-fit: cover; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); }
+    /* Ссылка-логотип в шапке редактора */
+    .top-brand-link { 
+      display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit;
+      animation: pulseSimple 3s infinite ease-in-out; transition: 0.3s; cursor: pointer;
+    }
+    .top-brand-link:hover {
+      animation: none; transform: scale(1.05); filter: drop-shadow(0 0 15px rgba(217, 154, 41, 0.8));
+    }
+    .top-brand-link img { height: 42px; width: 42px; object-fit: cover; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); }
     
     @keyframes toastFade { 0%{opacity:0; bottom:0;} 10%{opacity:1; bottom:20px;} 90%{opacity:1; bottom:20px;} 100%{opacity:0; bottom:0;} }
     .editor-toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--neon-orange-base); color:#000; padding:12px 24px; border-radius:14px; font-weight:bold; z-index:99999; box-shadow:0 5px 25px rgba(0,0,0,0.5); animation: toastFade 3.5s forwards; font-size:14px; pointer-events:none; }
@@ -85,11 +104,36 @@
     
     .hud { position: absolute; top: 14px; left: 14px; right: 14px; pointer-events: none; z-index: 10; display:flex; justify-content:space-between; align-items:center; }
     .gameTitle { font-weight: 900; text-shadow: 0 4px 15px #000; color: #fff; }
-    
     .hud-right { display:flex; align-items:center; gap:15px; pointer-events:auto; }
 
+    /* БРЕНДИНГ ВНИЗУ ПО ЦЕНТРУ С ПУЛЬСАЦИЕЙ */
+    .bottom-brand-link {
+        position: absolute; 
+        bottom: 12px; 
+        left: 50%; 
+        display: flex; 
+        align-items: center; 
+        gap: 8px; 
+        z-index: 100; 
+        text-decoration: none; 
+        cursor: pointer;
+        animation: brandPulseBottom 3s infinite ease-in-out;
+        pointer-events: auto; 
+        user-select: none;
+    }
+    .bottom-brand-link:hover {
+        animation: none; 
+        transform: translateX(-50%) scale(1.05); 
+        opacity: 1;
+        filter: drop-shadow(0 0 15px rgba(217, 154, 41, 0.9));
+    }
+
     /* БРЕНДИНГ НА ЭКРАНАХ */
-    .screen-brand { display:flex; flex-direction:column; align-items:center; margin-bottom:20px; }
+    .screen-brand { 
+        display:flex; flex-direction:column; align-items:center; margin-bottom:20px; 
+        text-decoration:none; transition:0.3s; animation: pulseSimple 3s infinite ease-in-out;
+    }
+    .screen-brand:hover { animation:none; transform:scale(1.05); filter: drop-shadow(0 0 15px rgba(217, 154, 41, 0.8)); }
     .screen-brand img { width:80px; height:80px; border-radius:50%; object-fit:cover; box-shadow: 0 0 25px rgba(217,154,41,0.5); border: 2px solid rgba(217,154,41,0.3); }
     .screen-brand .brand-name { color:var(--neon-orange-base); font-size:15px; font-weight:900; margin-top:12px; letter-spacing:1px; text-transform:uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif;}
 
@@ -109,6 +153,7 @@
         100% { transform: translate(-50%, -50%) translate(var(--orbit-x, 0px), var(--orbit-y, 0px)) scale(0); opacity: 0; filter: brightness(1); }
     }
     
+    /* Подсветка мишеней в режиме Редактора */
     .edit-mode .target { cursor: move !important; }
     .edit-mode .target::after { content: ''; position:absolute; inset:-4px; border: 2px dashed rgba(217, 154, 41, 0.9); border-radius: 50%; pointer-events:none; }
     .edit-mode .target:hover { transform: translate(-50%, -50%) translate(var(--orbit-x, 0px), var(--orbit-y, 0px)); }
@@ -246,10 +291,14 @@
     #gSubmitBtn { border-radius: 20px; padding: 0 40px; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; background: var(--team-color); color: #000; border: none; font-weight: 900; box-shadow: 0 4px 15px var(--team-color); cursor:pointer;}
     #gSubmitBtn:hover:not(:disabled) { filter: brightness(1.2); transform: translateY(-2px); }
 
-    /* Область черновика (ОГРОМНАЯ) */
-    @keyframes drawAreaFade { 0% {opacity:0; transform:scale(0.95);} 100% {opacity:1; transform:scale(1);} }
+    /* Прячем ответы, когда открыт черновик */
+    .game-modal-content.draw-mode #gAnswers,
+    .game-modal-content.draw-mode #gInputWrap { display: none !important; }
+    .game-modal-content.draw-mode #gDrawArea { display: block; }
+
+    /* Область черновика */
     #gDrawArea {
-      display: none; 
+      display: none; width: 100%; height: 50vh; min-height: 300px; margin-top: 10px;
       border-radius: 16px; border: 3px solid var(--team-color);
       background-color: #fdfdfc;
       background-image: linear-gradient(#b0d4e3 1px, transparent 1px), linear-gradient(90deg, #b0d4e3 1px, transparent 1px);
@@ -260,12 +309,13 @@
     
     .game-modal-content.draw-mode #gDrawArea { 
       display: block; 
-      flex-grow: 1; /* Занимает всю правую часть */
+      flex-grow: 1;
       width: auto;
       margin-top: 0;
       min-height: 60vh;
       animation: drawAreaFade 0.4s ease forwards;
     }
+    @keyframes drawAreaFade { 0% {opacity:0; transform:scale(0.95);} 100% {opacity:1; transform:scale(1);} }
     
     @media (max-width: 1000px) {
        .game-modal-content.draw-mode { flex-direction: column; width: 100% !important; }
@@ -275,7 +325,7 @@
 
     #gCanvas { 
       width: 100%; height: 100%; touch-action: none; cursor: crosshair; 
-      transform: translateZ(0); /* Аппаратное ускорение */
+      transform: translateZ(0); 
     }
 
     /* ПАНЕЛЬ ИНСТРУМЕНТОВ ЧЕРНОВИКА */
@@ -315,13 +365,14 @@
 <div class="app" id="editorApp" style="display:none;">
   <div class="panel">
     <div class="panel-header">
-      <div class="topBrand">
+      <a href="https://t.me/interactiv_matematika" target="_blank" class="top-brand-link" title="Перейти в Telegram">
         <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
         <div style="display:flex; flex-direction:column;">
           <div style="font-weight:900; font-size:16px;">Шкатулка интерактивов</div>
           <div style="font-size:11px; opacity:0.8;">Светлана Быкова</div>
         </div>
-      </div>
+      </a>
+      
       <div style="display:flex; gap:10px; align-items:center;">
         <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; margin-right:5px;">
            <span id="lblSizeText" style="font-size:11px; font-weight:900; color:#33d17a;" data-i18n="lSizeOk">🟢 Код в норме</span>
@@ -505,7 +556,7 @@
         </div>
         
         <div style="background: rgba(217, 154, 41, 0.1); padding: 10px; border-radius: 12px; border: 1px solid var(--neon-orange-base); margin-bottom: 12px;">
-          <div style="font-size: 12px; color: var(--neon-orange-base); font-weight: bold; margin-bottom: 8px;">🎨 Управление настройками вопросов (Шрифт, Таймер, Мишень):</div>
+          <div style="font-size: 12px; color: var(--neon-orange-base); font-weight: bold; margin-bottom: 8px;">🎨 Управление настройками вопросов (Тип, Шрифт, Таймер, Мишень):</div>
           <div style="display:flex; align-items:center; gap:8px; flex-wrap: wrap;">
             <select id="newQTemplate" style="flex:1; min-width: 160px; border-color:var(--neon-orange-base); padding: 6px; font-size: 13px; background: rgba(0,0,0,0.5);">
               <option value="-1" data-i18n="oDefaultSettings">Стандартные (по умолчанию)</option>
@@ -514,7 +565,7 @@
           </div>
           <div style="font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 8px; line-height: 1.3;">
             * Выбранный шаблон автоматически применяется ко всем <b>новым</b> и импортируемым вопросам.<br>
-            * Кнопка «Применить ко всем» обновляет настройки у <b>уже существующих</b> вопросов (ваши тексты и ответы не изменятся!).
+            * Кнопка «Применить ко всем» обновляет настройки у <b>уже существующих</b> вопросов (ваши тексты не изменятся!).
           </div>
         </div>
 
@@ -660,10 +711,10 @@
       </div>
     </div>
     
-    <div style="position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; opacity: 0.5; pointer-events: none; z-index: 2; user-select: none;">
+    <a href="https://t.me/interactiv_matematika" target="_blank" class="bottom-brand-link" title="Перейти в Telegram">
       <img src="logo.png" alt="Логотип" style="height: 24px; width: 24px; border-radius: 50%; object-fit: cover; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));" onerror="this.style.display='none'">
       <span style="font-family: 'Caveat', cursive; font-size: 20px; color: rgba(255,255,255,0.85); text-shadow: 0 2px 4px rgba(0,0,0,0.9); white-space: nowrap; letter-spacing: 0.5px;">Шкатулка математических интерактивов</span>
-    </div>
+    </a>
     
     <div class="teams" id="gTeams"></div>
     <div class="targets" id="gTargets"></div>
@@ -722,10 +773,10 @@
 
     <div class="screen" id="gStartScreen">
       <div class="screenCard" id="gStartCard">
-        <div class="screen-brand">
+        <a href="https://t.me/interactiv_matematika" target="_blank" class="screen-brand">
            <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
            <div class="brand-name">Шкатулка интерактивов</div>
-        </div>
+        </a>
         
         <h1 id="gStartTitle" style="color:#fff; margin-top:0;"></h1>
         <p id="gStartText" style="color:#ccc; font-size:18px; white-space:pre-wrap;"></p>
@@ -735,10 +786,10 @@
 
     <div class="screen" id="gEndScreen">
       <div class="screenCard" id="gEndCard">
-        <div class="screen-brand" style="margin-bottom:10px;">
+        <a href="https://t.me/interactiv_matematika" target="_blank" class="screen-brand" style="margin-bottom:10px;">
            <img src="logo.png" style="width:60px; height:60px;" alt="Logo" onerror="this.style.display='none'">
            <div class="brand-name" style="font-size:12px;">Шкатулка интерактивов</div>
-        </div>
+        </a>
         
         <h1 id="gEndTitle" style="color:var(--neon-orange-base); margin-top:0;" data-i18n="lGameOver">Результаты игры</h1>
         <div id="gEndStats" style="width:100%; margin:20px 0;"></div>
@@ -750,7 +801,7 @@
 </div>
 
 <script>
-/* БЕЗОПАСНОЕ ДЕКОДИРОВАНИЕ ССЫЛКИ И ХЕША (Критически важно для LZString) */
+/* БЕЗОПАСНОЕ ДЕКОДИРОВАНИЕ ССЫЛКИ И ХЕША */
 function getParamSafe(k) {
     let p = new URLSearchParams(location.search).get(k);
     if (p !== null) return p;
@@ -1494,6 +1545,7 @@ window.processImport = () => {
 function openMod(idx = null) {
   editIdx = idx;
   
+  // Если создаем новый вопрос, берем настройки из шаблона
   let defQ = { type: "choice", text: "", pts: 10, font: "Roboto", size: 20, timer: false, sec: 30, img: "", opts: [{t:"", c:true}, {t:"", c:false}], acc: ["Ответ"], tgt: "default", tu: "" };
   if (idx === null) {
       const tplIdx = parseInt(document.getElementById('newQTemplate').value);
@@ -1865,7 +1917,6 @@ function bootGame() {
       canvasRect = rect; 
   }
 
-  // Автоматический ресайз при анимации
   const drawResizeObs = new ResizeObserver(() => {
       if(drawArea.offsetWidth > 0) resizeCanvas();
   });
@@ -1959,6 +2010,10 @@ function bootGame() {
   document.getElementById('gDrawToggle').onclick = () => {
       const modalContent = document.querySelector('.game-modal-content');
       modalContent.classList.toggle('draw-mode');
+      
+      if(modalContent.classList.contains('draw-mode')) {
+          setTimeout(resizeCanvas, 10); 
+      }
   };
 
   let timerId = null;
@@ -1970,7 +2025,10 @@ function bootGame() {
     const modalContent = modal.querySelector('.game-modal-content');
     modalContent.classList.remove('draw-mode');
     if(btnPen) btnPen.click(); 
-    clearCanvas();
+    
+    if(canvasRect) {
+        ctxCanvas.clearRect(0, 0, canvas.width, canvas.height);
+    }
 
     modalContent.style.setProperty('--team-color', tCol);
     
@@ -2112,19 +2170,8 @@ function bootGame() {
   document.getElementById('btnReset').onclick = () => location.reload();
 }
 
-/* --- Запуск с правильным декодированием Хеша --- */
-const getParamMain = (k) => {
-    let p = new URLSearchParams(location.search).get(k);
-    if(!p && location.hash) {
-      let hashStr = location.hash.substring(1); 
-      try { hashStr = decodeURIComponent(hashStr); } catch(e){}
-      p = new URLSearchParams(hashStr).get(k);
-    }
-    return p;
-};
-
-if(getParamMain('game') && getParamMain('edit') !== '1') bootGame();
-else { bootEditor(); if(getParamMain('edit') === '1') bootGame(); }
+if(getParamSafe('game') && getParamSafe('edit') !== '1') bootGame();
+else { bootEditor(); if(getParamSafe('edit') === '1') bootGame(); }
 </script>
 </body>
 </html>
