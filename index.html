@@ -344,6 +344,7 @@
       width: 100%; height: 100%; 
       touch-action: none; /* ОЧЕНЬ ВАЖНО: блокирует скролл при рисовании */
       cursor: crosshair; 
+      transform: translateZ(0); 
     }
 
     /* ПАНЕЛЬ ИНСТРУМЕНТОВ ЧЕРНОВИКА */
@@ -1725,16 +1726,30 @@ function bootGame() {
   let scores = Array(teamsCount).fill(0);
   let curTeam = 0;
   
+  // НАДЕЖНОЕ СОХРАНЕНИЕ ИМЕН КОМАНД
+  let teamNamesSaved = Array(teamsCount).fill(null);
+
   function drawTeams() {
+    // 1. Перед перерисовкой сохраняем то, что ввел пользователь
+    const currentInputs = tDiv.querySelectorAll('.teamInput');
+    if (currentInputs.length > 0) {
+      currentInputs.forEach((inp, i) => {
+        teamNamesSaved[i] = inp.value;
+      });
+    }
+
+    // 2. Рисуем карточки команд
     tDiv.innerHTML = scores.map((s, i) => {
       const col = gCfg.teamCols[i] || '#ffffff';
+      const nameToUse = teamNamesSaved[i] !== null ? teamNamesSaved[i] : `${t('lTeam')} ${i+1}`;
+      
       return `<div class="teamCard" style="${i===curTeam ? `border-color:${col}; box-shadow: 0 0 15px ${col}66;` : ''}">
-        <input type="text" class="teamInput" value="${t('lTeam')} ${i+1}">
+        <input type="text" class="teamInput" value="${nameToUse}">
         <b style="color:#fff; font-size:20px;">${s}</b>
       </div>`;
     }).join('');
   }
-  drawTeams();
+  drawTeams(); // Первичная отрисовка
 
   function popFloatText(x, y, text, col) {
     const el = document.createElement('div');
@@ -1882,11 +1897,10 @@ function bootGame() {
     tgtDiv.appendChild(el);
   });
 
-  // Логика холста (МАТЕМАТИЧЕСКИ ПЛАВНЫЙ ЧЕРНОВИК)
+  // Логика холста (СУПЕР-ПЛАВНЫЙ ЧЕРНОВИК)
   const drawArea = document.getElementById('gDrawArea');
   const canvas = document.getElementById('gCanvas');
   
-  // Отключили desynchronized для предотвращения мерцания в iframe
   const ctxCanvas = canvas.getContext('2d');
   
   const btnPen = document.getElementById('gDrawPen');
@@ -1898,13 +1912,14 @@ function bootGame() {
   let currentTool = 'pen'; 
   let currentColor = '#0f4c81'; 
   let currentSize = 4; 
+  let lastPos = {x: 0, y: 0};
   let canvasRect = null; 
-  let pts = []; // Массив точек для кривых Безье
+  let dpr = 1;
 
   function resizeCanvas() {
       if (!drawArea.offsetWidth) return;
       const rect = drawArea.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
+      dpr = window.devicePixelRatio || 1;
       
       const newW = Math.round(rect.width * dpr);
       const newH = Math.round(rect.height * dpr);
@@ -1973,7 +1988,9 @@ function bootGame() {
       isDrawing = true;
       
       canvas.setPointerCapture(e.pointerId);
+      
       canvasRect = canvas.getBoundingClientRect();
+      lastPos = getPointerPos(e);
       
       ctxCanvas.lineCap = 'round';
       ctxCanvas.lineJoin = 'round';
@@ -1985,7 +2002,6 @@ function bootGame() {
       // Начинаем новый массив точек для сглаживания
       pts = [getPointerPos(e)];
       
-      // Рисуем точку при старте
       ctxCanvas.beginPath();
       ctxCanvas.arc(pts[0].x, pts[0].y, ctxCanvas.lineWidth / 2, 0, Math.PI * 2);
       ctxCanvas.fill();
@@ -1995,7 +2011,6 @@ function bootGame() {
       if (!isDrawing) return;
       if(e.cancelable) e.preventDefault(); 
       
-      // Вытягиваем пропущенные события для идеальной плавности
       const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
       
       for (let ev of events) {
@@ -2007,7 +2022,6 @@ function bootGame() {
               let p1 = pts[pts.length - 2];
               let p2 = pts[pts.length - 1];
               
-              // Вычисляем середины отрезков для кривой Безье
               let mid1 = { x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2 };
               let mid2 = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
               
@@ -2025,7 +2039,7 @@ function bootGame() {
   const stopDraw = (e) => {
       if (isDrawing) {
           isDrawing = false;
-          pts = []; // Очищаем массив точек
+          pts = []; 
           try { canvas.releasePointerCapture(e.pointerId); } catch(err){}
       }
   };
@@ -2189,7 +2203,10 @@ function bootGame() {
     document.getElementById('gEndTitle').style.fontSize = (gCfg.titleSize || 24) + 'px';
     document.getElementById('gEndTitle').style.color = gCfg.titleColor || '#ffffff';
     document.getElementById('gEndText').innerText = gCfg.end.text;
+    
+    // Получаем текущие имена команд перед финальным выводом
     const tNames = Array.from(document.querySelectorAll('.teamInput')).map(i => i.value);
+    
     document.getElementById('gEndStats').innerHTML = scores.map((s,i) => `
       <div class="resultRow">
         <span>${tNames[i] || 'Команда '+(i+1)}</span>
