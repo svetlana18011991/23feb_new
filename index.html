@@ -14,6 +14,16 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 
   <style>
+    :root {
+      --text: #eaf0ff; --muted: #a9b6e6;
+      --neon-orange-base: #d99a29; 
+      --neon-orange-glow: rgba(217, 154, 41, 0.35);
+      --neon-box-shadow: 0 0 4px var(--neon-orange-glow), 0 0 12px var(--neon-orange-glow), inset 0 0 4px rgba(217, 154, 41, 0.15);
+      --shadow: 0 14px 40px rgba(0,0,0,0.5);
+    }
+    
+    * { box-sizing: border-box; font-family: 'Roboto', system-ui, sans-serif; }
+    
     /* ЖЕСТКАЯ ФИКСАЦИЯ РАЗМЕРОВ ДЛЯ ЗАЩИТЫ ОТ БАГОВ GENIALLY */
     html, body { 
       width: 100%; 
@@ -30,16 +40,6 @@
       bottom: 0;
       touch-action: none;
     }
-
-    :root {
-      --text: #eaf0ff; --muted: #a9b6e6;
-      --neon-orange-base: #d99a29; 
-      --neon-orange-glow: rgba(217, 154, 41, 0.35);
-      --neon-box-shadow: 0 0 4px var(--neon-orange-glow), 0 0 12px var(--neon-orange-glow), inset 0 0 4px rgba(217, 154, 41, 0.15);
-      --shadow: 0 14px 40px rgba(0,0,0,0.5);
-    }
-    
-    * { box-sizing: border-box; font-family: 'Roboto', system-ui, sans-serif; }
     
     body.editor-mode { background: radial-gradient(1100px 700px at 12% 18%, rgba(217, 154, 41, 0.12) 0%, rgba(5,8,22,0) 58%), #050816; }
     body.game-mode { background: #000; }
@@ -51,9 +51,9 @@
         100% { transform: scale(1); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
     }
     @keyframes brandPulseBottom {
-        0% { transform: translateX(-50%) scale(1); opacity: 0.5; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8)); }
+        0% { transform: translateX(-50%) scale(1); opacity: 0.6; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8)); }
         50% { transform: translateX(-50%) scale(1.05); opacity: 1; filter: drop-shadow(0 0 10px rgba(217, 154, 41, 0.6)); }
-        100% { transform: translateX(-50%) scale(1); opacity: 0.5; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8)); }
+        100% { transform: translateX(-50%) scale(1); opacity: 0.6; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8)); }
     }
 
     /* --- EDITOR UI --- */
@@ -111,15 +111,28 @@
     }
     .top-brand-link img { height: 42px; width: 42px; object-fit: cover; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); }
     
+    @keyframes toastFade { 0%{opacity:0; bottom:0;} 10%{opacity:1; bottom:20px;} 90%{opacity:1; bottom:20px;} 100%{opacity:0; bottom:0;} }
+    .editor-toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--neon-orange-base); color:#000; padding:12px 24px; border-radius:14px; font-weight:bold; z-index:99999; box-shadow:0 5px 25px rgba(0,0,0,0.5); animation: toastFade 3.5s forwards; font-size:14px; pointer-events:none; }
+
     /* --- GAME UI --- */
     .gameRoot { position: absolute; inset: 0; overflow: hidden; background: #000; font-family: 'Roboto', sans-serif; cursor: var(--game-cursor, default); perspective: 1000px; }
     .arenaBg { position: absolute; inset: -25px; background-size: cover; background-position: center; transition: transform 0.15s ease-out; will-change: transform; cursor: var(--game-cursor, default); }
     
     .hud { position: absolute; top: 14px; left: 14px; right: 14px; pointer-events: none; z-index: 10; display:flex; justify-content:space-between; align-items:center; }
     .gameTitle { font-weight: 900; text-shadow: 0 4px 15px #000; color: #fff; }
+    
     .hud-right { display:flex; align-items:center; gap:15px; pointer-events:auto; }
 
-    /* БРЕНДИНГ ВНИЗУ ПО ЦЕНТРУ С ПУЛЬСАЦИЕЙ */
+    /* БРЕНДИНГ НА ЭКРАНАХ */
+    .screen-brand { 
+        display:flex; flex-direction:column; align-items:center; margin-bottom:20px; 
+        text-decoration:none; transition:0.3s; animation: pulseSimple 3s infinite ease-in-out;
+    }
+    .screen-brand:hover { animation:none; transform:scale(1.05); filter: drop-shadow(0 0 15px rgba(217, 154, 41, 0.8)); }
+    .screen-brand img { width:80px; height:80px; border-radius:50%; object-fit:cover; box-shadow: 0 0 25px rgba(217,154,41,0.5); border: 2px solid rgba(217,154,41,0.3); }
+    .screen-brand .brand-name { color:var(--neon-orange-base); font-size:15px; font-weight:900; margin-top:12px; letter-spacing:1px; text-transform:uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif;}
+
+    /* АНИМАЦИЯ И СТИЛИ ДЛЯ ЛОГОТИПА ВНИЗУ */
     .bottom-brand-link {
         position: absolute; 
         bottom: 12px; 
@@ -141,15 +154,6 @@
         filter: drop-shadow(0 0 15px rgba(217, 154, 41, 0.9));
     }
 
-    /* БРЕНДИНГ НА ЭКРАНАХ */
-    .screen-brand { 
-        display:flex; flex-direction:column; align-items:center; margin-bottom:20px; 
-        text-decoration:none; transition:0.3s; animation: pulseSimple 3s infinite ease-in-out;
-    }
-    .screen-brand:hover { animation:none; transform:scale(1.05); filter: drop-shadow(0 0 15px rgba(217, 154, 41, 0.8)); }
-    .screen-brand img { width:80px; height:80px; border-radius:50%; object-fit:cover; box-shadow: 0 0 25px rgba(217,154,41,0.5); border: 2px solid rgba(217,154,41,0.3); }
-    .screen-brand .brand-name { color:var(--neon-orange-base); font-size:15px; font-weight:900; margin-top:12px; letter-spacing:1px; text-transform:uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif;}
-
     .teams { display: grid; gap: 10px; margin-top: 54px; padding:0 14px; pointer-events: auto; position:relative; z-index:10; cursor: default; }
     .teamCard { background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 10px; backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
     .teamInput { background: transparent; border: none; outline: none; color: #fff; font-weight: 900; font-size: 16px; width: 100%; max-width: 150px; }
@@ -167,7 +171,8 @@
     }
     
     /* Подсветка мишеней в режиме Редактора */
-    .edit-mode .target { cursor: move !important; border: 2px dashed rgba(217, 154, 41, 0.8); border-radius: 50%; }
+    .edit-mode .target { cursor: move !important; }
+    .edit-mode .target::after { content: ''; position:absolute; inset:-4px; border: 2px dashed rgba(217, 154, 41, 0.9); border-radius: 50%; pointer-events:none; }
     .edit-mode .target:hover { transform: translate(-50%, -50%) translate(var(--orbit-x, 0px), var(--orbit-y, 0px)); }
 
     /* Crosshair */
@@ -190,8 +195,7 @@
       100% { opacity: 1; transform: scale(1) translateY(0) rotateX(0); }
     }
 
-    /* ИСПРАВЛЕНИЕ: Убрали backdrop-filter отсюда, чтобы не было квадратов размытия в Genially */
-    .game-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 50; cursor: default; perspective: 1000px; padding: 20px; }
+    .game-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); display: none; align-items: center; justify-content: center; z-index: 50; cursor: default; perspective: 1000px; padding: 20px; }
     .game-modal.on { display: flex; }
     
     .game-modal-content {
@@ -232,10 +236,10 @@
     .game-modal-content::before {
       content: ''; position: absolute; inset: -4px; border-radius: 34px;
       background: linear-gradient(45deg, var(--team-color), transparent 40%, transparent 60%, var(--team-color));
-      z-index: -1; opacity: 0.6;
+      z-index: -1; filter: blur(15px); opacity: 0.6;
       animation: borderPulse 3s ease-in-out infinite alternate;
     }
-    @keyframes borderPulse { 0% { opacity: 0.4; } 100% { opacity: 0.8; } }
+    @keyframes borderPulse { 0% { opacity: 0.4; filter: blur(12px); } 100% { opacity: 0.8; filter: blur(20px); } }
 
     .modal-sparkle {
       position: absolute; border-radius: 50%; background: var(--team-color);
@@ -369,8 +373,7 @@
     @keyframes shakeErr { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
     .shake-err { animation: shakeErr 0.25s ease-in-out 2; }
 
-    /* ИСПРАВЛЕНИЕ: Убрали backdrop-filter отсюда, чтобы не было квадратов размытия в Genially */
-    .screen { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; text-align: center; cursor: default; }
+    .screen { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(15px); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; text-align: center; cursor: default; }
     .screen.on { display: flex; }
     .screenCard { background: linear-gradient(135deg, rgba(30, 35, 45, 0.95), rgba(15, 20, 25, 0.98)); border-radius: 30px; padding: 40px; border: 1px solid var(--neon-orange-base); max-width: 600px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(217, 154, 41, 0.2); animation: modalPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;}
     .resultRow { display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:16px 24px; border-radius:16px; margin-bottom:12px; font-size:22px; font-weight:bold; border: 1px solid rgba(255,255,255,0.1); }
@@ -1075,7 +1078,7 @@ window.forceCheckSize = () => { try { checkLinkSize(b64e(cfg)); } catch(e){} };
 window.checkImgLink = (inp) => { document.getElementById('modImgWarn').style.display = inp.value.length > 500 ? "block" : "none"; };
 
 /* ========================
-   Звуковой движок
+   Звуковой движок (Глобальный + Надежный)
    ======================== */
 const AudioSys = (() => {
   let ctx, master;
@@ -1152,10 +1155,12 @@ function bootEditor() {
   document.body.classList.add('editor-mode');
   document.getElementById('editorApp').style.display = 'grid';
 
+  // Устанавливаем язык при загрузке
   document.getElementById('selLang').value = lang;
 
   const upd = () => updateEditor();
   
+  // Кнопка полного сброса проекта
   document.getElementById('btnResetProject').onclick = () => {
     if(confirm(t('confirmReset'))) { 
       localStorage.removeItem(LS_KEY); 
@@ -1181,6 +1186,7 @@ function bootEditor() {
   document.getElementById('inpCursorSize').value = cfg.cursorSize;
   document.getElementById('inpRadius').value = cfg.radius; document.getElementById('inpSpeed').value = cfg.speed;
   
+  // Строго проставляем количество команд
   document.getElementById('inpTeams').value = cfg.teams; 
   
   document.getElementById('inpSound').value = cfg.sound; 
@@ -1197,6 +1203,7 @@ function bootEditor() {
   
   document.getElementById('inpLatex').checked = cfg.latex;
 
+  // Обработчики полей ввода
   document.querySelectorAll('#editorApp input:not([id^="mod"]):not(#inpTeams):not(#importText), #editorApp textarea:not([id^="mod"]):not(#importText), #editorApp select:not([id^="mod"]):not(#inpTeams):not(#importMode):not(#newQTemplate)').forEach(el => {
     el.addEventListener('input', upd); 
     el.addEventListener('change', upd);
@@ -1213,6 +1220,7 @@ function bootEditor() {
   document.getElementById('selTarget').addEventListener('change', (e) => { document.getElementById('inpTargetCustom').style.display = e.target.value === 'custom' ? 'block' : 'none'; });
   document.getElementById('selCursor').addEventListener('change', (e) => { document.getElementById('inpCursorCustom').style.display = e.target.value === 'custom' ? 'block' : 'none'; });
   
+  // НАДЁЖНАЯ ПРИВЯЗКА КОМАНД
   document.getElementById('inpTeams').addEventListener('change', () => { renderTeamColsUI(); updateEditor(); });
   document.getElementById('inpTeams').addEventListener('input', () => { renderTeamColsUI(); updateEditor(); });
   
@@ -1360,16 +1368,17 @@ window.applyTemplateToAll = () => {
         q.tgt = baseQ.tgt;
         q.tu = baseQ.tu;
         
+        // Умная смена типа с сохранением ответа
         if (q.type !== baseQ.type) {
             q.type = baseQ.type;
             if (q.type === 'input') {
                 if (!q.acc || q.acc.length === 0 || q.acc[0] === "Ответ" || q.acc[0] === "") {
-                    let correctOpt = q.opts && q.opts.length ? q.opts.find(o => o.c) : null;
+                    let correctOpt = q.opts ? q.opts.find(o => o.c) : null;
                     q.acc = correctOpt && correctOpt.t ? [correctOpt.t] : ["Ответ"];
                 }
             } else {
                 if (!q.opts || q.opts.length === 0 || (q.opts.length === 2 && q.opts[0].t === "" && q.opts[1].t === "")) {
-                    let mainAcc = q.acc && q.acc.length && q.acc[0] !== "Ответ" && q.acc[0] !== "" ? q.acc[0] : "";
+                    let mainAcc = q.acc && q.acc[0] && q.acc[0] !== "Ответ" ? q.acc[0] : "";
                     q.opts = [{t: mainAcc, c: true}, {t: "", c: false}];
                 }
             }
@@ -1527,6 +1536,7 @@ window.processImport = () => {
                 }
                 
                 opts = opts.map(o => ({ c: o.c, t: o.t }));
+                // Если шаблон предписывает инпут, пытаемся перенести правильный ответ
                 if(baseQ.type === 'input') {
                    let cOpt = opts.find(o => o.c);
                    cfg.questions.push({ ...baseQ, type: 'input', text: qText.join('\n'), opts: [], acc: cOpt ? [cOpt.t] : ['Ответ'], x: startX, y: startY });
@@ -1535,6 +1545,7 @@ window.processImport = () => {
                 }
                 
             } else if (qText.length > 0) {
+                // Если вариантов нет, но шаблон требует "выбор", создаем пустые варианты
                 if(baseQ.type === 'choice') {
                    cfg.questions.push({ ...baseQ, type: 'choice', text: qText.join('\n'), opts: [{t: autoAnswer || 'Ответ', c:true}, {t: '', c:false}], acc: [''], x: startX, y: startY });
                 } else {
@@ -1553,6 +1564,7 @@ window.processImport = () => {
 function openMod(idx = null) {
   editIdx = idx;
   
+  // Если создаем новый вопрос, берем настройки из шаблона
   let defQ = { type: "choice", text: "", pts: 10, font: "Roboto", size: 20, timer: false, sec: 30, img: "", opts: [{t:"", c:true}, {t:"", c:false}], acc: ["Ответ"], tgt: "default", tu: "" };
   if (idx === null) {
       const tplIdx = parseInt(document.getElementById('newQTemplate').value);
@@ -1718,21 +1730,26 @@ function bootGame() {
   let teamNamesSaved = Array(teamsCount).fill(null);
 
   function drawTeams() {
+    // 1. Перед перерисовкой сохраняем то, что ввел пользователь
     const currentInputs = tDiv.querySelectorAll('.teamInput');
     if (currentInputs.length > 0) {
-      currentInputs.forEach((inp, i) => { teamNamesSaved[i] = inp.value; });
+      currentInputs.forEach((inp, i) => {
+        teamNamesSaved[i] = inp.value;
+      });
     }
 
+    // 2. Рисуем карточки команд
     tDiv.innerHTML = scores.map((s, i) => {
       const col = gCfg.teamCols[i] || '#ffffff';
       const nameToUse = teamNamesSaved[i] !== null ? teamNamesSaved[i] : `${t('lTeam')} ${i+1}`;
+      
       return `<div class="teamCard" style="${i===curTeam ? `border-color:${col}; box-shadow: 0 0 15px ${col}66;` : ''}">
         <input type="text" class="teamInput" value="${nameToUse}">
         <b style="color:#fff; font-size:20px;">${s}</b>
       </div>`;
     }).join('');
   }
-  drawTeams();
+  drawTeams(); // Первичная отрисовка
 
   function popFloatText(x, y, text, col) {
     const el = document.createElement('div');
@@ -1880,9 +1897,10 @@ function bootGame() {
     tgtDiv.appendChild(el);
   });
 
-  // Логика холста (ИДЕАЛЬНО ПЛАВНЫЙ ЧЕРНОВИК)
+  // Логика холста (СУПЕР-ПЛАВНЫЙ ЧЕРНОВИК)
   const drawArea = document.getElementById('gDrawArea');
   const canvas = document.getElementById('gCanvas');
+  
   const ctxCanvas = canvas.getContext('2d');
   
   const btnPen = document.getElementById('gDrawPen');
@@ -1894,9 +1912,9 @@ function bootGame() {
   let currentTool = 'pen'; 
   let currentColor = '#0f4c81'; 
   let currentSize = 4; 
+  let lastPos = {x: 0, y: 0};
   let canvasRect = null; 
   let dpr = 1;
-  let pts = [];
 
   function resizeCanvas() {
       if (!drawArea.offsetWidth) return;
@@ -1929,7 +1947,7 @@ function bootGame() {
       
       canvas.style.width = rect.width + 'px';
       canvas.style.height = rect.height + 'px';
-      canvasRect = rect; 
+      canvasRect = canvas.getBoundingClientRect(); 
   }
 
   const drawResizeObs = new ResizeObserver(() => {
@@ -1970,7 +1988,9 @@ function bootGame() {
       isDrawing = true;
       
       canvas.setPointerCapture(e.pointerId);
+      
       canvasRect = canvas.getBoundingClientRect();
+      lastPos = getPointerPos(e);
       
       ctxCanvas.lineCap = 'round';
       ctxCanvas.lineJoin = 'round';
@@ -1979,7 +1999,9 @@ function bootGame() {
       ctxCanvas.fillStyle = ctxCanvas.strokeStyle;
       ctxCanvas.globalCompositeOperation = currentTool === 'eraser' ? 'destination-out' : 'source-over';
       
+      // Начинаем новый массив точек для сглаживания
       pts = [getPointerPos(e)];
+      
       ctxCanvas.beginPath();
       ctxCanvas.arc(pts[0].x, pts[0].y, ctxCanvas.lineWidth / 2, 0, Math.PI * 2);
       ctxCanvas.fill();
@@ -1993,16 +2015,23 @@ function bootGame() {
       
       for (let ev of events) {
           pts.push(getPointerPos(ev));
+          
           ctxCanvas.beginPath();
           if (pts.length >= 3) {
-              let p0 = pts[pts.length - 3]; let p1 = pts[pts.length - 2]; let p2 = pts[pts.length - 1];
+              let p0 = pts[pts.length - 3];
+              let p1 = pts[pts.length - 2];
+              let p2 = pts[pts.length - 1];
+              
               let mid1 = { x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2 };
               let mid2 = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+              
               ctxCanvas.moveTo(mid1.x, mid1.y);
               ctxCanvas.quadraticCurveTo(p1.x, p1.y, mid2.x, mid2.y);
               ctxCanvas.stroke();
           } else if (pts.length === 2) {
-              ctxCanvas.moveTo(pts[0].x, pts[0].y); ctxCanvas.lineTo(pts[1].x, pts[1].y); ctxCanvas.stroke();
+              ctxCanvas.moveTo(pts[0].x, pts[0].y);
+              ctxCanvas.lineTo(pts[1].x, pts[1].y);
+              ctxCanvas.stroke();
           }
       }
   };
@@ -2043,6 +2072,7 @@ function bootGame() {
   function openGameQuestion(q, tCol, onDone) {
     arenaEl.classList.remove('aiming'); aimCursor.style.display = 'none';
     
+    // Сбрасываем режим черновика и очищаем его
     const modal = document.getElementById('gModal');
     const modalContent = modal.querySelector('.game-modal-content');
     modalContent.classList.remove('draw-mode');
@@ -2116,6 +2146,7 @@ function bootGame() {
       btns.forEach(b => b.style.pointerEvents = 'none');
       inp.disabled = true; subBtn.disabled = true;
 
+      // Если черновик открыт, закрываем его, чтобы показать результат
       modalContent.classList.remove('draw-mode');
 
       if(isCorrect) {
@@ -2172,7 +2203,10 @@ function bootGame() {
     document.getElementById('gEndTitle').style.fontSize = (gCfg.titleSize || 24) + 'px';
     document.getElementById('gEndTitle').style.color = gCfg.titleColor || '#ffffff';
     document.getElementById('gEndText').innerText = gCfg.end.text;
+    
+    // Получаем текущие имена команд перед финальным выводом
     const tNames = Array.from(document.querySelectorAll('.teamInput')).map(i => i.value);
+    
     document.getElementById('gEndStats').innerHTML = scores.map((s,i) => `
       <div class="resultRow">
         <span>${tNames[i] || 'Команда '+(i+1)}</span>
